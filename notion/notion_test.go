@@ -34,6 +34,9 @@ func TestNotionClient_ChildPagesQueriesPreparedWiki(t *testing.T) {
 
 	client := newNotionClient("token")
 	client.baseURL = server.URL
+	client.sourceServer = "https://github.com"
+	client.sourceRepo = "unkeyed/unkey"
+	client.sourceRef = "main"
 	require.NoError(t, client.prepareRoot(context.Background(), "wiki"))
 
 	got, err := client.childPages(context.Background(), "wiki")
