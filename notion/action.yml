@@ -1,0 +1,19 @@
+name: Sync Markdown to Notion
+description: Synchronize marked Markdown and MDX files into Notion wikis.
+author: Unkey
+
+inputs:
+  config:
+    description: Repository-relative path to the Notion root registry.
+    required: false
+    default: .github/notion.yaml
+
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.config }}
+
+branding:
+  icon: upload-cloud
+  color: blue
