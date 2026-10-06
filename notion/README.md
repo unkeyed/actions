@@ -12,11 +12,13 @@ and marked with a neutral reminder that edits must be made on GitHub.
    email local-parts to resolve owners without storing full addresses in a public
    repository.
 3. Create a root page and turn it into a wiki.
-4. Share the wiki with the integration.
-5. Open the wiki's `Owner` property settings and set `Notifications` to `None`.
+4. Enable subpages on the wiki. The action uses the generated `Parent page`
+   relation to match the repository directory hierarchy.
+5. Share the wiki with the integration.
+6. Open the wiki's `Owner` property settings and set `Notifications` to `None`.
    Notion otherwise notifies a person when the action first assigns ownership.
    The API cannot suppress this notification.
-6. Add the integration token to the calling repository as a secret named
+7. Add the integration token to the calling repository as a secret named
    `NOTION_TOKEN`.
 
 The action requires the wiki database ID. In a shared Notion URL, this is the
@@ -29,12 +31,15 @@ Create `.github/notion.yaml` in the repository that contains the documents:
 ```yaml
 roots:
   - pageID: 3ee512d643f38063b525d6c3619c1f69
+    sourceDirectory: contributing
 ```
 
 `pageID` identifies the wiki database. IDs can contain UUID dashes or omit them.
 Every `rootPageID` used in document frontmatter must exist in this registry. The
 registry also lets the action clean a wiki after its last marked source file is
-removed.
+removed. `sourceDirectory` is the repository directory represented by the wiki
+root. The action infers subpages from every marked file's path relative to this
+directory. It defaults to the repository root.
 
 Mark each document that must be synchronized:
 
@@ -60,10 +65,14 @@ owner are required. Owner aliases are lowercase email local-parts. For example,
 Matching is exact and case-insensitive. The action fails if an alias is missing
 or ambiguous.
 
-The optional ordered `tags` list populates the wiki's `Tags` property and its
-generated `Path` property. For example, `Architecture`, `Services`, and
-`Frontline` produce `Architecture / Services / Frontline`. Configure grouping,
-sorting, filtering, and other presentation directly in Notion.
+The optional ordered `tags` list populates the wiki's `Tags` property. Configure
+grouping, sorting, filtering, and other presentation directly in Notion.
+
+Repository directories become generated wiki pages. A marked `index.md` or
+`index.mdx` becomes its directory page instead, so the wiki does not contain a
+generated folder and a document with the same name. Generated folder pages use
+the combined owners of the documents below them. Their `Source` property links
+to the corresponding GitHub directory.
 
 The first level-one heading outside a code fence becomes the Notion page title
 and is removed from the uploaded body. Existing `title` frontmatter is the
@@ -112,9 +121,9 @@ removing pages because Notion does not provide a transactional sync operation.
 
 The action scans tracked `*.md` and `*.mdx` files with `git ls-files`. It logs
 each document immediately after it is fully synchronized. The first run adds
-`Source`, `Synced at`, `Tags`, and `Path` properties when they do not exist. It
-fails if a managed property exists with an incompatible type. It does not modify
-wiki views.
+`Source`, `Synced at`, and `Tags` properties when they do not exist. It fails if
+a managed property exists with an incompatible type or subpages are disabled. It
+does not modify wiki views.
 
 `Source` links to the source file in the calling GitHub repository and provides
 stable page identity when a title changes. The action does not replace an
@@ -139,14 +148,19 @@ removes pages without a managed `Source` URL or a legacy source marker.
 
 ## Local development
 
-Run tests from this action directory:
+Install dependencies and run all checks from this action directory:
 
 ```bash
-go test ./...
+npm ci
+npm run check
 ```
 
-Run the command against the current repository:
+The build commits `dist/index.cjs` because GitHub runs JavaScript actions without
+installing their dependencies. Node 24 executes the bundle directly.
+
+Run the action against the current repository:
 
 ```bash
-NOTION_TOKEN=ntn_... go run .
+NOTION_TOKEN=ntn_... INPUT_CONFIG=.github/notion.yaml npm run build
+node dist/index.cjs
 ```

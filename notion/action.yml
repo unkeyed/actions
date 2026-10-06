@@ -9,10 +9,8 @@ inputs:
     default: .github/notion.yaml
 
 runs:
-  using: docker
-  image: Dockerfile
-  args:
-    - ${{ inputs.config }}
+  using: node24
+  main: dist/index.cjs
 
 branding:
   icon: upload-cloud
