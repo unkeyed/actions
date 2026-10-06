@@ -19,19 +19,8 @@ and marked with a neutral reminder that edits must be made on GitHub.
 6. Add the integration token to the calling repository as a secret named
    `NOTION_TOKEN`.
 
-The action requires the wiki database ID and its All pages table view ID. List
-the API-visible views instead of copying the `v` query parameter from a shared
-Notion URL because that value is not always an API view ID:
-
-```bash
-curl --fail --silent --show-error \
-  --get "https://api.notion.com/v1/views" \
-  --data-urlencode "database_id=$ROOT_PAGE_ID" \
-  --header "Authorization: Bearer $NOTION_TOKEN" \
-  --header "Notion-Version: 2026-03-11" | jq '.results[] | {id, name, type}'
-```
-
-Keep `NOTION_TOKEN` out of shell history and source control.
+The action requires the wiki database ID. In a shared Notion URL, this is the
+32-character identifier before the `?`. The action does not modify wiki views.
 
 ## Repository setup
 
@@ -40,13 +29,12 @@ Create `.github/notion.yaml` in the repository that contains the documents:
 ```yaml
 roots:
   - pageID: 3ee512d643f38063b525d6c3619c1f69
-    viewID: 3ee512d643f38064b247000cdfad1ffe
 ```
 
-`pageID` identifies the wiki database. `viewID` identifies its All pages table.
-IDs can contain UUID dashes or omit them. Every `rootPageID` used in document
-frontmatter must exist in this registry. The registry also lets the action clean
-a wiki after its last marked source file is removed.
+`pageID` identifies the wiki database. IDs can contain UUID dashes or omit them.
+Every `rootPageID` used in document frontmatter must exist in this registry. The
+registry also lets the action clean a wiki after its last marked source file is
+removed.
 
 Mark each document that must be synchronized:
 
@@ -74,8 +62,8 @@ or ambiguous.
 
 The optional ordered `tags` list populates the wiki's `Tags` property and its
 generated `Path` property. For example, `Architecture`, `Services`, and
-`Frontline` produce `Architecture / Services / Frontline`. The action groups the
-configured table view by `Path` and sorts page titles alphabetically.
+`Frontline` produce `Architecture / Services / Frontline`. Configure grouping,
+sorting, filtering, and other presentation directly in Notion.
 
 The first level-one heading outside a code fence becomes the Notion page title
 and is removed from the uploaded body. Existing `title` frontmatter is the
@@ -117,10 +105,6 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
 ```
 
-Because `unkeyed/actions` is private, configure its **Settings → Actions →
-General → Access** section to allow actions and workflows from other repositories
-in the organization.
-
 Run one sync for a wiki at a time. Concurrent runs can race while creating or
 removing pages because Notion does not provide a transactional sync operation.
 
@@ -129,7 +113,8 @@ removing pages because Notion does not provide a transactional sync operation.
 The action scans tracked `*.md` and `*.mdx` files with `git ls-files`. It logs
 each document immediately after it is fully synchronized. The first run adds
 `Source`, `Synced at`, `Tags`, and `Path` properties when they do not exist. It
-fails if a managed property exists with an incompatible type.
+fails if a managed property exists with an incompatible type. It does not modify
+wiki views.
 
 `Source` links to the source file in the calling GitHub repository and provides
 stable page identity when a title changes. The action does not replace an

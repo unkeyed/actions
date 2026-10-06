@@ -66,12 +66,6 @@ func run(ctx context.Context) error {
 	client := newNotionClient(config.Token)
 	rootIDs := make([]string, len(roots))
 	for i, root := range roots {
-		if err := client.prepareRoot(ctx, root.PageID); err != nil {
-			return fmt.Errorf("prepare Notion root %s: %w", root.PageID, err)
-		}
-		if err := client.organizeRoot(ctx, root.PageID, root.ViewID); err != nil {
-			return fmt.Errorf("organize Notion root %s: %w", root.PageID, err)
-		}
 		rootIDs[i] = root.PageID
 	}
 	if err := syncDocumentsForRoots(ctx, client, documents, rootIDs, onSynced); err != nil {

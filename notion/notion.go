@@ -55,13 +55,6 @@ type wikiRoot struct {
 	SyncedAtProperty     string
 	TagsProperty         string
 	PathProperty         string
-	PathPropertyID       string
-}
-
-// notionProperty contains the stable identifier and schema type returned by Notion.
-type notionProperty struct {
-	ID   string `json:"id"`
-	Type string `json:"type"`
 }
 
 // newNotionClient creates a client with bounded HTTP and retry timeouts.
@@ -135,10 +128,11 @@ func (c *notionClient) prepareRoot(ctx context.Context, rootID string) error {
 		SyncedAtProperty:     "",
 		TagsProperty:         "",
 		PathProperty:         "",
-		PathPropertyID:       "",
 	}
 	var dataSource struct {
-		Properties map[string]notionProperty `json:"properties"`
+		Properties map[string]struct {
+			Type string `json:"type"`
+		} `json:"properties"`
 	}
 	if err := c.request(ctx, http.MethodGet, "/v1/data_sources/"+url.PathEscape(root.DataSourceID), nil, &dataSource); err != nil {
 		return fmt.Errorf("retrieve wiki data source: %w", err)
@@ -166,7 +160,9 @@ func (c *notionClient) prepareRoot(ctx context.Context, rootID string) error {
 }
 
 // prepareMetadataProperties validates or creates the schema owned by the sync.
-func (c *notionClient) prepareMetadataProperties(ctx context.Context, rootID string, root *wikiRoot, properties map[string]notionProperty) error {
+func (c *notionClient) prepareMetadataProperties(ctx context.Context, rootID string, root *wikiRoot, properties map[string]struct {
+	Type string `json:"type"`
+}) error {
 	required := map[string]string{
 		sourcePropertyName:   "url",
 		syncedAtPropertyName: "date",
@@ -186,68 +182,15 @@ func (c *notionClient) prepareMetadataProperties(ctx context.Context, rootID str
 	if len(missing) > 0 {
 		payload := map[string]any{"properties": missing}
 		path := "/v1/data_sources/" + url.PathEscape(root.DataSourceID)
-		var updated struct {
-			Properties map[string]notionProperty `json:"properties"`
-		}
-		if err := c.request(ctx, http.MethodPatch, path, payload, &updated); err != nil {
+		if err := c.request(ctx, http.MethodPatch, path, payload, nil); err != nil {
 			return fmt.Errorf("add sync properties to Notion wiki %s: %w", rootID, err)
 		}
-		properties = updated.Properties
-	}
-	pathProperty, ok := properties[pathPropertyName]
-	if !ok || pathProperty.ID == "" {
-		return fmt.Errorf("Notion wiki %s Path property has no ID", rootID)
 	}
 	root.SourceProperty = sourcePropertyName
 	root.SyncedAtProperty = syncedAtPropertyName
 	root.TagsProperty = tagsPropertyName
 	root.PathProperty = pathPropertyName
-	root.PathPropertyID = pathProperty.ID
 	return nil
-}
-
-// organizeRoot groups the registered table view by the generated document path.
-func (c *notionClient) organizeRoot(ctx context.Context, rootID, viewID string) error {
-	root, ok := c.roots[rootID]
-	if !ok {
-		return fmt.Errorf("Notion root %s was not prepared", rootID)
-	}
-	var view struct {
-		Parent struct {
-			DatabaseID string `json:"database_id"`
-		} `json:"parent"`
-		DataSourceID string `json:"data_source_id"`
-		Type         string `json:"type"`
-	}
-	viewPath := "/v1/views/" + url.PathEscape(viewID)
-	if err := c.request(ctx, http.MethodGet, viewPath, nil, &view); err != nil {
-		return fmt.Errorf("retrieve Notion view %s: %w", viewID, err)
-	}
-	if canonicalNotionID(view.Parent.DatabaseID) != canonicalNotionID(rootID) {
-		return fmt.Errorf("Notion view %s belongs to database %s, not %s", viewID, view.Parent.DatabaseID, rootID)
-	}
-	if view.Type != "table" {
-		return fmt.Errorf("Notion view %s has type %s, expected table", viewID, view.Type)
-	}
-	if canonicalNotionID(view.DataSourceID) != canonicalNotionID(root.DataSourceID) {
-		return fmt.Errorf("Notion view %s uses data source %s, not %s", viewID, view.DataSourceID, root.DataSourceID)
-	}
-	payload := map[string]any{
-		"sorts": []any{
-			map[string]string{"property": root.TitleProperty, "direction": "ascending"},
-		},
-		"configuration": map[string]any{
-			"type": "table",
-			"group_by": map[string]any{
-				"type":              "text",
-				"property_id":       root.PathPropertyID,
-				"group_by":          "exact",
-				"sort":              map[string]string{"type": "ascending"},
-				"hide_empty_groups": true,
-			},
-		},
-	}
-	return c.request(ctx, http.MethodPatch, viewPath, payload, nil)
 }
 
 // canonicalNotionID removes UUID formatting before IDs from API responses and

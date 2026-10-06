@@ -7,10 +7,9 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-// rootConfig identifies one managed wiki and the root view the sync organizes.
+// rootConfig identifies one managed wiki.
 type rootConfig struct {
 	PageID string `yaml:"pageID"`
-	ViewID string `yaml:"viewID"`
 }
 
 // rootRegistry is the on-disk list of wikis managed during cleanup.
@@ -27,7 +26,7 @@ func loadRootRegistry(path string) ([]rootConfig, error) {
 	return parseRootRegistry(source)
 }
 
-// parseRootRegistry normalizes page and view UUIDs for API requests.
+// parseRootRegistry normalizes page UUIDs for API requests.
 func parseRootRegistry(source []byte) ([]rootConfig, error) {
 	var registry rootRegistry
 	if err := yaml.Unmarshal(source, &registry); err != nil {
@@ -43,15 +42,11 @@ func parseRootRegistry(source []byte) ([]rootConfig, error) {
 		if err != nil {
 			return nil, fmt.Errorf("invalid Notion root %q: %w", configured.PageID, err)
 		}
-		viewID, err := parseRootPageID(configured.ViewID)
-		if err != nil {
-			return nil, fmt.Errorf("invalid Notion view %q: %w", configured.ViewID, err)
-		}
 		if _, ok := seen[rootID]; ok {
 			return nil, fmt.Errorf("Notion root %s is configured more than once", rootID)
 		}
 		seen[rootID] = struct{}{}
-		roots[i] = rootConfig{PageID: rootID, ViewID: viewID}
+		roots[i] = rootConfig{PageID: rootID}
 	}
 	return roots, nil
 }
