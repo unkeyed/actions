@@ -6,7 +6,6 @@ import {
   type NotionAPI,
   type Page,
   syncDocuments,
-  syncDocumentsForRoots,
 } from "./sync.js";
 
 interface MemoryPage extends Page {
@@ -89,8 +88,7 @@ test("syncDocuments infers subpages and uses index documents as folders", async 
   const documents: Document[] = [
     {
       sourcePath: "contributing/quality/testing/index.md",
-      sourceDirectory: "contributing",
-      rootPageID: "root",
+      repositoryBasePath: "contributing",
       owners: ["andreas"],
       tags: [],
       title: "Testing",
@@ -98,8 +96,7 @@ test("syncDocuments infers subpages and uses index documents as folders", async 
     },
     {
       sourcePath: "contributing/quality/testing/unit-tests.md",
-      sourceDirectory: "contributing",
-      rootPageID: "root",
+      repositoryBasePath: "contributing",
       owners: ["andreas"],
       tags: [],
       title: "Unit tests",
@@ -107,8 +104,7 @@ test("syncDocuments infers subpages and uses index documents as folders", async 
     },
     {
       sourcePath: "contributing/tooling/builds.md",
-      sourceDirectory: "contributing",
-      rootPageID: "root",
+      repositoryBasePath: "contributing",
       owners: ["andreas"],
       tags: [],
       title: "Builds",
@@ -116,7 +112,7 @@ test("syncDocuments infers subpages and uses index documents as folders", async 
     },
   ];
 
-  await syncDocuments(notion, documents);
+  await syncDocuments(notion, documents, "root");
 
   assert.deepEqual(
     notion.pages.map(({ id, parentID, title, sourcePath, ownerIDs }) => ({
@@ -184,14 +180,13 @@ test("syncDocuments reparents an existing flat page without creating a duplicate
   await syncDocuments(notion, [
     {
       sourcePath: "contributing/quality/unit-tests.md",
-      sourceDirectory: "contributing",
-      rootPageID: "root",
+      repositoryBasePath: "contributing",
       owners: ["andreas"],
       tags: ["Quality"],
       title: "Unit tests",
       body: "New body.\n",
     },
-  ]);
+  ], "root");
 
   assert.equal(notion.pages.length, 2);
   const folder = notion.pages.find((page) => page.sourcePath === "contributing/quality/");
@@ -202,7 +197,7 @@ test("syncDocuments reparents an existing flat page without creating a duplicate
   assert.match(document.body, /New body\./);
 });
 
-test("syncDocumentsForRoots trashes removed managed pages but retains unmanaged pages", async () => {
+test("syncDocuments trashes removed managed pages but retains unmanaged pages", async () => {
   const notion = new MemoryNotion();
   notion.pages.push(
     {
@@ -243,7 +238,7 @@ test("syncDocumentsForRoots trashes removed managed pages but retains unmanaged 
     },
   );
 
-  await syncDocumentsForRoots(notion, [], ["root"]);
+  await syncDocuments(notion, [], "root");
 
   assert.equal(notion.pages.find((page) => page.id === "folder")?.inTrash, true);
   assert.equal(notion.pages.find((page) => page.id === "document")?.inTrash, true);

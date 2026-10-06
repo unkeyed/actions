@@ -26288,7 +26288,7 @@ var require_public_api = __commonJS({
       }
       return doc;
     }
-    function parse3(src, reviver, options) {
+    function parse2(src, reviver, options) {
       let _reviver = void 0;
       if (typeof reviver === "function") {
         _reviver = reviver;
@@ -26329,7 +26329,7 @@ var require_public_api = __commonJS({
         return value.toString(options);
       return new Document.Document(value, _replacer, options).toString(options);
     }
-    exports2.parse = parse3;
+    exports2.parse = parse2;
     exports2.parseAllDocuments = parseAllDocuments;
     exports2.parseDocument = parseDocument2;
     exports2.stringify = stringify;
@@ -29698,41 +29698,23 @@ var import_node_util = require("node:util");
 
 // src/config.ts
 var import_node_path = __toESM(require("node:path"), 1);
-var import_yaml = __toESM(require_dist(), 1);
-function parseRootRegistry(source) {
-  const value = (0, import_yaml.parse)(source);
-  if (!isRecord(value) || !Array.isArray(value.roots) || value.roots.length === 0) {
-    throw new Error("Notion root registry has no roots");
-  }
-  const roots = value.roots.map(parseRoot);
-  if (new Set(roots.map((root) => root.pageID)).size !== roots.length) {
-    throw new Error("a Notion root is configured more than once");
-  }
-  return roots;
-}
-function parseRoot(value) {
-  if (!isRecord(value)) {
-    throw new Error("Notion root must be a mapping");
-  }
-  const configuredID = typeof value.pageID === "string" ? value.pageID : "";
+function parseActionConfig(configuredID, configuredBasePath) {
   const pageID = configuredID.trim().replaceAll("-", "").toLowerCase();
   if (!/^[0-9a-f]{32}$/.test(pageID)) {
-    throw new Error(`invalid Notion root ${JSON.stringify(configuredID)}`);
+    throw new Error("root-page-id must contain 32 hexadecimal characters");
   }
-  const configuredDirectory = typeof value.sourceDirectory === "string" ? value.sourceDirectory.trim() : ".";
-  const normalizedDirectory = import_node_path.default.posix.normalize(configuredDirectory || ".");
-  const sourceDirectory = normalizedDirectory === "." ? normalizedDirectory : normalizedDirectory.replace(/\/$/, "");
-  if (import_node_path.default.posix.isAbsolute(sourceDirectory) || sourceDirectory.startsWith("../")) {
-    throw new Error(`Notion source directory ${JSON.stringify(configuredDirectory)} must be repository-relative`);
+  const normalizedPath = import_node_path.default.posix.normalize(configuredBasePath.trim() || ".");
+  const repositoryBasePath = normalizedPath === "." ? normalizedPath : normalizedPath.replace(/\/$/, "");
+  if (import_node_path.default.posix.isAbsolute(repositoryBasePath) || repositoryBasePath.startsWith("../")) {
+    throw new Error(
+      `repository-base-path ${JSON.stringify(configuredBasePath)} must be repository-relative`
+    );
   }
-  return { pageID, sourceDirectory };
-}
-function isRecord(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  return { rootPageID: pageID, repositoryBasePath };
 }
 
 // src/document.ts
-var import_yaml2 = __toESM(require_dist(), 1);
+var import_yaml = __toESM(require_dist(), 1);
 function parseDocument(sourcePath, source) {
   const content = source.replaceAll("\r\n", "\n");
   if (!content.startsWith("---\n")) {
@@ -29742,12 +29724,11 @@ function parseDocument(sourcePath, source) {
   if (frontmatterEnd < 0) {
     return void 0;
   }
-  const metadata = record((0, import_yaml2.parse)(content.slice(4, frontmatterEnd)), `frontmatter in ${sourcePath}`);
+  const metadata = record((0, import_yaml.parse)(content.slice(4, frontmatterEnd)), `frontmatter in ${sourcePath}`);
   if (!Object.hasOwn(metadata, "notion")) {
     return void 0;
   }
   const notion = optionalRecord(metadata.notion);
-  const rootPageID = canonicalRootID(stringValue(notion.rootPageID), sourcePath);
   if (stringValue(notion.relativePath).trim() !== "") {
     throw new Error(
       `marked document ${sourcePath} has a relativePath, which Notion wiki pages do not support`
@@ -29773,38 +29754,25 @@ function parseDocument(sourcePath, source) {
     if (heading.title === "") {
       throw new Error(`marked document ${sourcePath} has an empty level-one heading`);
     }
-    return document(sourcePath, rootPageID, owners, tags, heading.title, removeLine(body, heading.line));
+    return document(sourcePath, owners, tags, heading.title, removeLine(body, heading.line));
   }
   const title = stringValue(metadata.title).trim();
   if (title === "") {
     throw new Error(`marked document ${sourcePath} has no level-one heading`);
   }
-  return document(sourcePath, rootPageID, owners, tags, title, body);
+  return document(sourcePath, owners, tags, title, body);
 }
-function document(sourcePath, rootPageID, owners, tags, title, body) {
+function document(sourcePath, owners, tags, title, body) {
   const normalizedBody = body.trim();
   return {
     sourcePath,
-    sourceDirectory: "",
-    rootPageID,
+    repositoryBasePath: "",
     owners,
     tags,
     title,
     body: normalizedBody === "" ? "" : `${normalizedBody}
 `
   };
-}
-function canonicalRootID(value, sourcePath) {
-  const id = value.trim().replaceAll("-", "").toLowerCase();
-  if (id === "") {
-    throw new Error(`marked document ${sourcePath} has no Notion root page ID`);
-  }
-  if (!/^[0-9a-f]{32}$/.test(id)) {
-    throw new Error(
-      `marked document ${sourcePath} has invalid Notion root page ID: must contain 32 hexadecimal characters`
-    );
-  }
-  return id;
 }
 function firstHeading(body) {
   let fence = "";
@@ -30165,58 +30133,41 @@ var generatedHeader = `<callout icon="\u270F\uFE0F" color="gray_bg">
 </callout>`;
 var legacyGeneratedHeaderPrefix = `<callout icon="\u26A0\uFE0F" color="yellow_bg">
 	Generated from \``;
-async function syncDocumentsForRoots(api, documents, rootIDs, onSynced) {
-  const state = await prepareSync(api, documents, rootIDs, onSynced);
+async function syncDocuments(api, documents, rootID, onSynced) {
+  const state = await prepareSync(api, documents, rootID, onSynced);
   for (const document2 of documents) {
-    const sourceKey = pageKey(document2.rootPageID, document2.sourcePath);
-    if (state.syncedSources.has(sourceKey)) {
+    if (state.syncedSources.has(document2.sourcePath)) {
       continue;
     }
     const directory = documentDirectory(document2);
     const parent = await ensureDirectory(state, document2, directory);
-    if (state.syncedSources.has(sourceKey)) {
+    if (state.syncedSources.has(document2.sourcePath)) {
       continue;
     }
-    const ownerIDs = state.ownerIDsBySource.get(sourceKey);
+    const ownerIDs = state.ownerIDsBySource.get(document2.sourcePath);
     if (!ownerIDs) {
       throw new Error(`owners for ${document2.sourcePath} were not resolved`);
     }
     await syncPage(state, document2, parent.id, ownerIDs);
-    state.syncedSources.add(sourceKey);
+    state.syncedSources.add(document2.sourcePath);
     await state.onSynced?.(document2);
   }
-  await cleanRemovedPages(state, rootIDs);
+  await cleanRemovedPages(state);
 }
-async function prepareSync(api, documents, rootIDs, onSynced) {
-  if (new Set(rootIDs).size !== rootIDs.length) {
-    throw new Error("a Notion root is configured more than once");
-  }
-  const activeSourcesByRoot = /* @__PURE__ */ new Map();
-  const pagesByRoot = /* @__PURE__ */ new Map();
-  for (const rootID of rootIDs) {
-    await api.prepareRoot(rootID);
-    activeSourcesByRoot.set(rootID, /* @__PURE__ */ new Set());
-    pagesByRoot.set(rootID, await api.wikiPages(rootID));
-  }
+async function prepareSync(api, documents, rootID, onSynced) {
+  await api.prepareRoot(rootID);
+  const pages = await api.wikiPages(rootID);
+  const activeSources = /* @__PURE__ */ new Set();
   const ownerIDsBySource = /* @__PURE__ */ new Map();
   const indexByDirectory = /* @__PURE__ */ new Map();
   for (const document2 of documents) {
-    const activeSources = activeSourcesByRoot.get(document2.rootPageID);
-    if (!activeSources) {
-      throw new Error(
-        `${document2.sourcePath} references unconfigured Notion root ${document2.rootPageID}`
-      );
-    }
     if (activeSources.has(document2.sourcePath)) {
       throw new Error(`Notion source ${document2.sourcePath} is configured more than once`);
     }
     activeSources.add(document2.sourcePath);
-    ownerIDsBySource.set(
-      pageKey(document2.rootPageID, document2.sourcePath),
-      await api.ownerIDs(document2.owners)
-    );
+    ownerIDsBySource.set(document2.sourcePath, await api.ownerIDs(document2.owners));
     if (isIndexDocument(document2.sourcePath)) {
-      const key = directoryKey(document2.rootPageID, documentDirectory(document2));
+      const key = documentDirectory(document2);
       if (indexByDirectory.has(key)) {
         throw new Error(`Notion directory ${key} has more than one index document`);
       }
@@ -30225,11 +30176,12 @@ async function prepareSync(api, documents, rootIDs, onSynced) {
   }
   return {
     api,
+    rootID,
     documents,
-    pagesByRoot,
+    pages,
     markdownByPage: /* @__PURE__ */ new Map(),
     ownerIDsBySource,
-    activeSourcesByRoot,
+    activeSources,
     directoryPages: /* @__PURE__ */ new Map(),
     indexByDirectory,
     syncedSources: /* @__PURE__ */ new Set(),
@@ -30238,9 +30190,9 @@ async function prepareSync(api, documents, rootIDs, onSynced) {
 }
 async function ensureDirectory(state, document2, directory) {
   if (directory === ".") {
-    return rootPage(document2.rootPageID);
+    return rootPage(state.rootID);
   }
-  const key = directoryKey(document2.rootPageID, directory);
+  const key = directory;
   const existing = state.directoryPages.get(key);
   if (existing) {
     return existing;
@@ -30250,10 +30202,10 @@ async function ensureDirectory(state, document2, directory) {
   const folder = index ?? folderDocument(document2, directory);
   const ownerIDs = ownersForDirectory(state, document2, directory);
   const page = await syncPage(state, folder, parent.id, ownerIDs);
-  state.activeSourcesByRoot.get(document2.rootPageID)?.add(folder.sourcePath);
+  state.activeSources.add(folder.sourcePath);
   state.directoryPages.set(key, page);
   if (index) {
-    state.syncedSources.add(pageKey(index.rootPageID, index.sourcePath));
+    state.syncedSources.add(index.sourcePath);
     await state.onSynced?.(index);
   }
   return page;
@@ -30268,8 +30220,8 @@ async function syncPage(state, document2, parentID, ownerIDs) {
     }
     await state.api.replacePage(page.id, body);
   } else {
-    page = await state.api.createPage(document2.rootPageID, document2.title, body);
-    state.pagesByRoot.get(document2.rootPageID)?.push(page);
+    page = await state.api.createPage(state.rootID, document2.title, body);
+    state.pages.push(page);
   }
   await state.api.publishPage(
     page,
@@ -30286,8 +30238,7 @@ async function syncPage(state, document2, parentID, ownerIDs) {
   return page;
 }
 async function findPage(state, document2) {
-  const pages = state.pagesByRoot.get(document2.rootPageID) ?? [];
-  const sourceMatches = pages.filter((page) => page.sourcePath === document2.sourcePath);
+  const sourceMatches = state.pages.filter((page) => page.sourcePath === document2.sourcePath);
   if (sourceMatches.length > 1) {
     throw new Error(`multiple pages claim source ${document2.sourcePath}`);
   }
@@ -30297,7 +30248,7 @@ async function findPage(state, document2) {
   let migrationMatch;
   let unmanagedTitleMatch = false;
   const sourceMarker = `${legacyGeneratedHeaderPrefix}${document2.sourcePath}\`.`;
-  for (const page of pages.filter((candidate) => candidate.sourcePath === "")) {
+  for (const page of state.pages.filter((candidate) => candidate.sourcePath === "")) {
     const markdown = await pageMarkdown(state, page.id);
     if (markdown.startsWith(sourceMarker)) {
       if (migrationMatch) {
@@ -30321,31 +30272,25 @@ async function findPage(state, document2) {
   }
   return void 0;
 }
-async function cleanRemovedPages(state, rootIDs) {
-  for (const rootID of rootIDs) {
-    const activeSources = state.activeSourcesByRoot.get(rootID);
-    if (!activeSources) {
-      continue;
-    }
-    for (const page of state.pagesByRoot.get(rootID) ?? []) {
-      const sourcePath = page.sourcePath || generatedSourcePath(await pageMarkdown(state, page.id));
-      if (sourcePath && !activeSources.has(sourcePath)) {
-        await state.api.archivePage(page.id);
-      }
+async function cleanRemovedPages(state) {
+  for (const page of state.pages) {
+    const sourcePath = page.sourcePath || generatedSourcePath(await pageMarkdown(state, page.id));
+    if (sourcePath && !state.activeSources.has(sourcePath)) {
+      await state.api.archivePage(page.id);
     }
   }
 }
 function ownersForDirectory(state, folderDocument2, directory) {
   const ownerIDs = /* @__PURE__ */ new Set();
   for (const document2 of state.documents) {
-    if (document2.rootPageID !== folderDocument2.rootPageID || document2.sourceDirectory !== folderDocument2.sourceDirectory) {
+    if (document2.repositoryBasePath !== folderDocument2.repositoryBasePath) {
       continue;
     }
     const parent = documentDirectory(document2);
     if (parent !== directory && !parent.startsWith(`${directory}/`)) {
       continue;
     }
-    for (const ownerID of state.ownerIDsBySource.get(pageKey(document2.rootPageID, document2.sourcePath)) ?? []) {
+    for (const ownerID of state.ownerIDsBySource.get(document2.sourcePath) ?? []) {
       ownerIDs.add(ownerID);
     }
   }
@@ -30354,22 +30299,22 @@ function ownersForDirectory(state, folderDocument2, directory) {
 function folderDocument(document2, directory) {
   return {
     ...document2,
-    sourcePath: `${import_node_path2.default.posix.join(document2.sourceDirectory, directory)}/`,
+    sourcePath: `${import_node_path2.default.posix.join(document2.repositoryBasePath, directory)}/`,
     tags: [],
     title: directoryTitle(import_node_path2.default.posix.basename(directory)),
     body: ""
   };
 }
 function documentDirectory(document2) {
-  if (document2.sourceDirectory === "") {
+  if (document2.repositoryBasePath === "") {
     return ".";
   }
-  const sourceDirectory = import_node_path2.default.posix.normalize(document2.sourceDirectory);
+  const repositoryBasePath = import_node_path2.default.posix.normalize(document2.repositoryBasePath);
   const sourcePath = import_node_path2.default.posix.normalize(document2.sourcePath);
-  const relativePath = import_node_path2.default.posix.relative(sourceDirectory, sourcePath);
+  const relativePath = import_node_path2.default.posix.relative(repositoryBasePath, sourcePath);
   if (relativePath === "" || relativePath === ".." || relativePath.startsWith("../")) {
     throw new Error(
-      `${document2.sourcePath} is outside its Notion source directory ${document2.sourceDirectory}`
+      `${document2.sourcePath} is outside its repository base path ${document2.repositoryBasePath}`
     );
   }
   return import_node_path2.default.posix.dirname(relativePath);
@@ -30413,12 +30358,6 @@ async function pageMarkdown(state, pageID) {
   state.markdownByPage.set(pageID, markdown);
   return markdown;
 }
-function pageKey(rootID, sourcePath) {
-  return `${rootID}\0${sourcePath}`;
-}
-function directoryKey(rootID, directory) {
-  return `${rootID}\0${directory}`;
-}
 
 // src/main.ts
 var execFileAsync = (0, import_node_util.promisify)(import_node_child_process.execFile);
@@ -30427,13 +30366,16 @@ async function run() {
   if (!token) {
     throw new Error("Notion token is required");
   }
+  const config = parseActionConfig(
+    getInput("root-page-id"),
+    getInput("repository-base-path")
+  );
   const repositoryRoot = await findRepositoryRoot();
-  const configuredPath = getInput("config").trim() || ".github/notion.yaml";
-  const registryPath = import_node_path3.default.isAbsolute(configuredPath) ? configuredPath : import_node_path3.default.join(repositoryRoot, configuredPath);
-  const roots = parseRootRegistry(await (0, import_promises.readFile)(registryPath, "utf8"));
-  const rootByID = new Map(roots.map((root) => [root.pageID, root]));
   const documents = [];
-  for (const sourcePath of await trackedMarkdownFiles(repositoryRoot)) {
+  for (const sourcePath of await trackedMarkdownFiles(
+    repositoryRoot,
+    config.repositoryBasePath
+  )) {
     const document2 = parseDocument(
       sourcePath,
       await (0, import_promises.readFile)(import_node_path3.default.join(repositoryRoot, sourcePath), "utf8")
@@ -30441,17 +30383,14 @@ async function run() {
     if (!document2) {
       continue;
     }
-    const root = rootByID.get(document2.rootPageID);
-    if (root) {
-      document2.sourceDirectory = root.sourceDirectory;
-    }
+    document2.repositoryBasePath = config.repositoryBasePath;
     documents.push(document2);
   }
   const notion = new WikiClient(token);
-  await syncDocumentsForRoots(
+  await syncDocuments(
     notion,
     documents,
-    roots.map((root) => root.pageID),
+    config.rootPageID,
     (document2) => info(`Synced ${document2.sourcePath} as ${JSON.stringify(document2.title)}.`)
   );
   info(`Synced ${documents.length} Notion documents.`);
@@ -30464,7 +30403,7 @@ async function findRepositoryRoot() {
   );
   return stdout.trim();
 }
-async function trackedMarkdownFiles(repositoryRoot) {
+async function trackedMarkdownFiles(repositoryRoot, repositoryBasePath) {
   const { stdout } = await execFileAsync(
     "git",
     [
@@ -30480,7 +30419,9 @@ async function trackedMarkdownFiles(repositoryRoot) {
     ],
     { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 }
   );
-  return stdout.split("\0").filter((sourcePath) => sourcePath !== "");
+  return stdout.split("\0").filter(
+    (sourcePath) => sourcePath !== "" && (repositoryBasePath === "." || sourcePath.startsWith(`${repositoryBasePath}/`))
+  );
 }
 
 // src/index.ts

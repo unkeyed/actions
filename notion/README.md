@@ -26,27 +26,11 @@ The action requires the wiki database ID. In a shared Notion URL, this is the
 
 ## Repository setup
 
-Create `.github/notion.yaml` in the repository that contains the documents:
-
-```yaml
-roots:
-  - pageID: 3ee512d643f38063b525d6c3619c1f69
-    sourceDirectory: contributing
-```
-
-`pageID` identifies the wiki database. IDs can contain UUID dashes or omit them.
-Every `rootPageID` used in document frontmatter must exist in this registry. The
-registry also lets the action clean a wiki after its last marked source file is
-removed. `sourceDirectory` is the repository directory represented by the wiki
-root. The action infers subpages from every marked file's path relative to this
-directory. It defaults to the repository root.
-
 Mark each document that must be synchronized:
 
 ```mdx
 ---
 notion:
-  rootPageID: 3ee512d643f38063b525d6c3619c1f69
   owners:
     - andreas
   tags:
@@ -59,11 +43,10 @@ notion:
 This document explains authentication.
 ```
 
-Files without `notion` frontmatter are ignored. `rootPageID` and at least one
-owner are required. Owner aliases are lowercase email local-parts. For example,
-`andreas` matches the workspace member whose email starts with `andreas@`.
-Matching is exact and case-insensitive. The action fails if an alias is missing
-or ambiguous.
+Files without `notion` frontmatter are ignored. At least one owner is required.
+Owner aliases are lowercase email local-parts. For example, `andreas` matches the
+workspace member whose email starts with `andreas@`. Matching is exact and
+case-insensitive. The action fails if an alias is missing or ambiguous.
 
 The optional ordered `tags` list populates the wiki's `Tags` property. Configure
 grouping, sorting, filtering, and other presentation directly in Notion.
@@ -93,7 +76,6 @@ on:
     paths:
       - "**/*.md"
       - "**/*.mdx"
-      - ".github/notion.yaml"
       - ".github/workflows/sync-notion.yaml"
   workflow_dispatch:
 
@@ -110,9 +92,17 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: unkeyed/actions/notion@v1
+        with:
+          root-page-id: 3ee512d643f38063b525d6c3619c1f69
+          repository-base-path: contributing
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
 ```
+
+One action invocation manages one wiki. `root-page-id` identifies that wiki.
+`repository-base-path` is the repository path represented by the wiki root. The
+action omits this prefix when it infers subpages. It defaults to the repository
+root.
 
 Run one sync for a wiki at a time. Concurrent runs can race while creating or
 removing pages because Notion does not provide a transactional sync operation.
@@ -144,7 +134,8 @@ removes pages without a managed `Source` URL or a legacy source marker.
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
-| `config` | No | `.github/notion.yaml` | Repository-relative root registry path. |
+| `root-page-id` | Yes | | ID of the Notion wiki managed by this invocation. |
+| `repository-base-path` | No | `.` | Repository path represented by the wiki root. |
 
 ## Local development
 
@@ -161,6 +152,9 @@ installing their dependencies. Node 24 executes the bundle directly.
 Run the action against the current repository:
 
 ```bash
-NOTION_TOKEN=ntn_... INPUT_CONFIG=.github/notion.yaml npm run build
-node dist/index.cjs
+npm run build
+env NOTION_TOKEN=ntn_... \
+  'INPUT_ROOT-PAGE-ID=3ee512d643f38063b525d6c3619c1f69' \
+  'INPUT_REPOSITORY-BASE-PATH=contributing' \
+  node dist/index.cjs
 ```

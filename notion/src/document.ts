@@ -18,7 +18,6 @@ export function parseDocument(sourcePath: string, source: string): Document | un
     return undefined;
   }
   const notion = optionalRecord(metadata.notion);
-  const rootPageID = canonicalRootID(stringValue(notion.rootPageID), sourcePath);
   if (stringValue(notion.relativePath).trim() !== "") {
     throw new Error(
       `marked document ${sourcePath} has a relativePath, which Notion wiki pages do not support`,
@@ -45,18 +44,17 @@ export function parseDocument(sourcePath: string, source: string): Document | un
     if (heading.title === "") {
       throw new Error(`marked document ${sourcePath} has an empty level-one heading`);
     }
-    return document(sourcePath, rootPageID, owners, tags, heading.title, removeLine(body, heading.line));
+    return document(sourcePath, owners, tags, heading.title, removeLine(body, heading.line));
   }
   const title = stringValue(metadata.title).trim();
   if (title === "") {
     throw new Error(`marked document ${sourcePath} has no level-one heading`);
   }
-  return document(sourcePath, rootPageID, owners, tags, title, body);
+  return document(sourcePath, owners, tags, title, body);
 }
 
 function document(
   sourcePath: string,
-  rootPageID: string,
   owners: string[],
   tags: string[],
   title: string,
@@ -65,26 +63,12 @@ function document(
   const normalizedBody = body.trim();
   return {
     sourcePath,
-    sourceDirectory: "",
-    rootPageID,
+    repositoryBasePath: "",
     owners,
     tags,
     title,
     body: normalizedBody === "" ? "" : `${normalizedBody}\n`,
   };
-}
-
-function canonicalRootID(value: string, sourcePath: string): string {
-  const id = value.trim().replaceAll("-", "").toLowerCase();
-  if (id === "") {
-    throw new Error(`marked document ${sourcePath} has no Notion root page ID`);
-  }
-  if (!/^[0-9a-f]{32}$/.test(id)) {
-    throw new Error(
-      `marked document ${sourcePath} has invalid Notion root page ID: must contain 32 hexadecimal characters`,
-    );
-  }
-  return id;
 }
 
 function firstHeading(body: string): { level: number; title: string; line: number } | undefined {

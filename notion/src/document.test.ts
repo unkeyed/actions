@@ -6,7 +6,6 @@ import { parseDocument } from "./document.js";
 test("parseDocument selects marked Markdown and removes its first H1", () => {
   const source = `---
 notion:
-  rootPageID: 195de922-1179-449f-ab80-75a27c979105
   owners: [Andreas]
   tags:
     - " Architecture "
@@ -24,8 +23,7 @@ This document explains authentication.
 
   assert.deepEqual(parseDocument("svc/api/authentication.mdx", source), {
     sourcePath: "svc/api/authentication.mdx",
-    sourceDirectory: "",
-    rootPageID: "195de9221179449fab8075a27c979105",
+    repositoryBasePath: "",
     owners: ["andreas"],
     tags: ["Architecture", "API"],
     title: "Authentication",

@@ -9,8 +9,7 @@ const legacyGeneratedHeaderPrefix = `<callout icon="⚠️" color="yellow_bg">
 /** Document is one validated repository source selected for publication. */
 export interface Document {
   sourcePath: string;
-  sourceDirectory: string;
-  rootPageID: string;
+  repositoryBasePath: string;
   owners: string[];
   tags: string[];
   title: string;
@@ -49,98 +48,68 @@ export interface NotionAPI {
 
 interface SyncState {
   api: NotionAPI;
+  rootID: string;
   documents: Document[];
-  pagesByRoot: Map<string, Page[]>;
+  pages: Page[];
   markdownByPage: Map<string, string>;
   ownerIDsBySource: Map<string, string[]>;
-  activeSourcesByRoot: Map<string, Set<string>>;
+  activeSources: Set<string>;
   directoryPages: Map<string, Page>;
   indexByDirectory: Map<string, Document>;
   syncedSources: Set<string>;
   onSynced?: (document: Document) => Promise<void> | void;
 }
 
-/** syncDocuments publishes all documents and derives the managed roots. */
+/** syncDocuments publishes documents and removes stale pages from one wiki. */
 export async function syncDocuments(
   api: NotionAPI,
   documents: Document[],
+  rootID: string,
   onSynced?: (document: Document) => Promise<void> | void,
 ): Promise<void> {
-  await syncDocumentsForRoots(
-    api,
-    documents,
-    [...new Set(documents.map((document) => document.rootPageID))],
-    onSynced,
-  );
-}
-
-/** syncDocumentsForRoots also cleans roots whose final source was removed. */
-export async function syncDocumentsForRoots(
-  api: NotionAPI,
-  documents: Document[],
-  rootIDs: string[],
-  onSynced?: (document: Document) => Promise<void> | void,
-): Promise<void> {
-  const state = await prepareSync(api, documents, rootIDs, onSynced);
+  const state = await prepareSync(api, documents, rootID, onSynced);
 
   for (const document of documents) {
-    const sourceKey = pageKey(document.rootPageID, document.sourcePath);
-    if (state.syncedSources.has(sourceKey)) {
+    if (state.syncedSources.has(document.sourcePath)) {
       continue;
     }
     const directory = documentDirectory(document);
     const parent = await ensureDirectory(state, document, directory);
-    if (state.syncedSources.has(sourceKey)) {
+    if (state.syncedSources.has(document.sourcePath)) {
       continue;
     }
-    const ownerIDs = state.ownerIDsBySource.get(sourceKey);
+    const ownerIDs = state.ownerIDsBySource.get(document.sourcePath);
     if (!ownerIDs) {
       throw new Error(`owners for ${document.sourcePath} were not resolved`);
     }
     await syncPage(state, document, parent.id, ownerIDs);
-    state.syncedSources.add(sourceKey);
+    state.syncedSources.add(document.sourcePath);
     await state.onSynced?.(document);
   }
 
-  await cleanRemovedPages(state, rootIDs);
+  await cleanRemovedPages(state);
 }
 
 async function prepareSync(
   api: NotionAPI,
   documents: Document[],
-  rootIDs: string[],
+  rootID: string,
   onSynced?: (document: Document) => Promise<void> | void,
 ): Promise<SyncState> {
-  if (new Set(rootIDs).size !== rootIDs.length) {
-    throw new Error("a Notion root is configured more than once");
-  }
-  const activeSourcesByRoot = new Map<string, Set<string>>();
-  const pagesByRoot = new Map<string, Page[]>();
-  for (const rootID of rootIDs) {
-    await api.prepareRoot(rootID);
-    activeSourcesByRoot.set(rootID, new Set());
-    pagesByRoot.set(rootID, await api.wikiPages(rootID));
-  }
+  await api.prepareRoot(rootID);
+  const pages = await api.wikiPages(rootID);
 
+  const activeSources = new Set<string>();
   const ownerIDsBySource = new Map<string, string[]>();
   const indexByDirectory = new Map<string, Document>();
   for (const document of documents) {
-    const activeSources = activeSourcesByRoot.get(document.rootPageID);
-    if (!activeSources) {
-      throw new Error(
-        `${document.sourcePath} references unconfigured Notion root ${document.rootPageID}`,
-      );
-    }
     if (activeSources.has(document.sourcePath)) {
       throw new Error(`Notion source ${document.sourcePath} is configured more than once`);
     }
     activeSources.add(document.sourcePath);
-    ownerIDsBySource.set(
-      pageKey(document.rootPageID, document.sourcePath),
-      await api.ownerIDs(document.owners),
-    );
+    ownerIDsBySource.set(document.sourcePath, await api.ownerIDs(document.owners));
     if (isIndexDocument(document.sourcePath)) {
-      const key = directoryKey(document.rootPageID, documentDirectory(document));
+      const key = documentDirectory(document);
       if (indexByDirectory.has(key)) {
         throw new Error(`Notion directory ${key} has more than one index document`);
       }
@@ -150,11 +119,12 @@ async function prepareSync(
 
   return {
     api,
+    rootID,
     documents,
-    pagesByRoot,
+    pages,
     markdownByPage: new Map(),
     ownerIDsBySource,
-    activeSourcesByRoot,
+    activeSources,
     directoryPages: new Map(),
     indexByDirectory,
     syncedSources: new Set(),
@@ -168,9 +138,9 @@ async function ensureDirectory(
   directory: string,
 ): Promise<Page> {
   if (directory === ".") {
-    return rootPage(document.rootPageID);
+    return rootPage(state.rootID);
   }
-  const key = directoryKey(document.rootPageID, directory);
+  const key = directory;
   const existing = state.directoryPages.get(key);
   if (existing) {
     return existing;
@@ -181,11 +151,11 @@ async function ensureDirectory(
   const folder = index ?? folderDocument(document, directory);
   const ownerIDs = ownersForDirectory(state, document, directory);
   const page = await syncPage(state, folder, parent.id, ownerIDs);
-  state.activeSourcesByRoot.get(document.rootPageID)?.add(folder.sourcePath);
+  state.activeSources.add(folder.sourcePath);
   state.directoryPages.set(key, page);
 
   if (index) {
-    state.syncedSources.add(pageKey(index.rootPageID, index.sourcePath));
+    state.syncedSources.add(index.sourcePath);
     await state.onSynced?.(index);
   }
   return page;
@@ -206,8 +176,8 @@ async function syncPage(
     }
     await state.api.replacePage(page.id, body);
   } else {
-    page = await state.api.createPage(document.rootPageID, document.title, body);
-    state.pagesByRoot.get(document.rootPageID)?.push(page);
+    page = await state.api.createPage(state.rootID, document.title, body);
+    state.pages.push(page);
   }
   await state.api.publishPage(
     page,
@@ -225,8 +195,7 @@ async function syncPage(
 }
 
 async function findPage(state: SyncState, document: Document): Promise<Page | undefined> {
-  const pages = state.pagesByRoot.get(document.rootPageID) ?? [];
-  const sourceMatches = pages.filter((page) => page.sourcePath === document.sourcePath);
+  const sourceMatches = state.pages.filter((page) => page.sourcePath === document.sourcePath);
   if (sourceMatches.length > 1) {
     throw new Error(`multiple pages claim source ${document.sourcePath}`);
   }
@@ -237,7 +206,7 @@ async function findPage(state: SyncState, document: Document): Promise<Page | un
   let migrationMatch: Page | undefined;
   let unmanagedTitleMatch = false;
   const sourceMarker = `${legacyGeneratedHeaderPrefix}${document.sourcePath}\`.`;
-  for (const page of pages.filter((candidate) => candidate.sourcePath === "")) {
+  for (const page of state.pages.filter((candidate) => candidate.sourcePath === "")) {
     const markdown = await pageMarkdown(state, page.id);
     if (markdown.startsWith(sourceMarker)) {
       if (migrationMatch) {
@@ -262,17 +231,11 @@ async function findPage(state: SyncState, document: Document): Promise<Page | un
   return undefined;
 }
 
-async function cleanRemovedPages(state: SyncState, rootIDs: string[]): Promise<void> {
-  for (const rootID of rootIDs) {
-    const activeSources = state.activeSourcesByRoot.get(rootID);
-    if (!activeSources) {
-      continue;
-    }
-    for (const page of state.pagesByRoot.get(rootID) ?? []) {
-      const sourcePath = page.sourcePath || generatedSourcePath(await pageMarkdown(state, page.id));
-      if (sourcePath && !activeSources.has(sourcePath)) {
-        await state.api.archivePage(page.id);
-      }
+async function cleanRemovedPages(state: SyncState): Promise<void> {
+  for (const page of state.pages) {
+    const sourcePath = page.sourcePath || generatedSourcePath(await pageMarkdown(state, page.id));
+    if (sourcePath && !state.activeSources.has(sourcePath)) {
+      await state.api.archivePage(page.id);
     }
   }
 }
@@ -284,10 +247,7 @@ function ownersForDirectory(
 ): string[] {
   const ownerIDs = new Set<string>();
   for (const document of state.documents) {
-    if (
-      document.rootPageID !== folderDocument.rootPageID ||
-      document.sourceDirectory !== folderDocument.sourceDirectory
-    ) {
+    if (document.repositoryBasePath !== folderDocument.repositoryBasePath) {
       continue;
     }
     const parent = documentDirectory(document);
@@ -295,7 +255,7 @@ function ownersForDirectory(
       continue;
     }
     for (const ownerID of
-      state.ownerIDsBySource.get(pageKey(document.rootPageID, document.sourcePath)) ?? []) {
+      state.ownerIDsBySource.get(document.sourcePath) ?? []) {
       ownerIDs.add(ownerID);
     }
   }
@@ -305,7 +265,7 @@ function ownersForDirectory(
 function folderDocument(document: Document, directory: string): Document {
   return {
     ...document,
-    sourcePath: `${path.posix.join(document.sourceDirectory, directory)}/`,
+    sourcePath: `${path.posix.join(document.repositoryBasePath, directory)}/`,
     tags: [],
     title: directoryTitle(path.posix.basename(directory)),
     body: "",
@@ -313,15 +273,15 @@ function folderDocument(document: Document, directory: string): Document {
 }
 
 function documentDirectory(document: Document): string {
-  if (document.sourceDirectory === "") {
+  if (document.repositoryBasePath === "") {
     return ".";
   }
-  const sourceDirectory = path.posix.normalize(document.sourceDirectory);
+  const repositoryBasePath = path.posix.normalize(document.repositoryBasePath);
   const sourcePath = path.posix.normalize(document.sourcePath);
-  const relativePath = path.posix.relative(sourceDirectory, sourcePath);
+  const relativePath = path.posix.relative(repositoryBasePath, sourcePath);
   if (relativePath === "" || relativePath === ".." || relativePath.startsWith("../")) {
     throw new Error(
-      `${document.sourcePath} is outside its Notion source directory ${document.sourceDirectory}`,
+      `${document.sourcePath} is outside its repository base path ${document.repositoryBasePath}`,
     );
   }
   return path.posix.dirname(relativePath);
@@ -368,12 +328,4 @@ async function pageMarkdown(state: SyncState, pageID: string): Promise<string> {
   const markdown = await state.api.pageMarkdown(pageID);
   state.markdownByPage.set(pageID, markdown);
   return markdown;
-}
-
-function pageKey(rootID: string, sourcePath: string): string {
-  return `${rootID}\0${sourcePath}`;
-}
-
-function directoryKey(rootID: string, directory: string): string {
-  return `${rootID}\0${directory}`;
 }

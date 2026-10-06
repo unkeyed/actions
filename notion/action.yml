@@ -3,10 +3,13 @@ description: Synchronize marked Markdown and MDX files into Notion wikis.
 author: Unkey
 
 inputs:
-  config:
-    description: Repository-relative path to the Notion root registry.
+  root-page-id:
+    description: ID of the Notion wiki managed by this action invocation.
+    required: true
+  repository-base-path:
+    description: Repository path represented by the Notion wiki root.
     required: false
-    default: .github/notion.yaml
+    default: .
 
 runs:
   using: node24
