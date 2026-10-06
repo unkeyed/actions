@@ -103,6 +103,14 @@ test("syncDocuments infers subpages and uses index documents as folders", async 
       body: "",
     },
     {
+      sourcePath: "contributing/tooling/README.md",
+      repositoryBasePath: "contributing",
+      owners: ["andreas"],
+      tags: [],
+      title: "Tooling",
+      body: "",
+    },
+    {
       sourcePath: "contributing/tooling/builds.md",
       repositoryBasePath: "contributing",
       owners: ["andreas"],
@@ -148,7 +156,7 @@ test("syncDocuments infers subpages and uses index documents as folders", async 
         id: "4",
         parentID: "root",
         title: "Tooling",
-        sourcePath: "contributing/tooling/",
+        sourcePath: "contributing/tooling/README.md",
         ownerIDs: ["user-andreas"],
       },
       {

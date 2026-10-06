@@ -30321,7 +30321,8 @@ function documentDirectory(document2) {
 }
 function isIndexDocument(sourcePath) {
   const extension = import_node_path2.default.posix.extname(sourcePath);
-  return import_node_path2.default.posix.basename(sourcePath, extension) === "index";
+  const basename = import_node_path2.default.posix.basename(sourcePath, extension).toLowerCase();
+  return basename === "index" || basename === "readme";
 }
 function directoryTitle(directory) {
   const title = directory.replaceAll(/[-_]/g, " ");

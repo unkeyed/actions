@@ -51,11 +51,11 @@ case-insensitive. The action fails if an alias is missing or ambiguous.
 The optional ordered `tags` list populates the wiki's `Tags` property. Configure
 grouping, sorting, filtering, and other presentation directly in Notion.
 
-Repository directories become generated wiki pages. A marked `index.md` or
-`index.mdx` becomes its directory page instead, so the wiki does not contain a
-generated folder and a document with the same name. Generated folder pages use
-the combined owners of the documents below them. Their `Source` property links
-to the corresponding GitHub directory.
+Repository directories become generated wiki pages. A marked `index.md`,
+`index.mdx`, `README.md`, or `README.mdx` becomes its directory page instead, so
+the wiki does not contain a generated folder and a document with the same name.
+Generated folder pages use the combined owners of the documents below them.
+Their `Source` property links to the corresponding GitHub directory.
 
 The first level-one heading outside a code fence becomes the Notion page title
 and is removed from the uploaded body. Existing `title` frontmatter is the

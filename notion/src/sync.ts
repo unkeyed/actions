@@ -289,7 +289,8 @@ function documentDirectory(document: Document): string {
 
 function isIndexDocument(sourcePath: string): boolean {
   const extension = path.posix.extname(sourcePath);
-  return path.posix.basename(sourcePath, extension) === "index";
+  const basename = path.posix.basename(sourcePath, extension).toLowerCase();
+  return basename === "index" || basename === "readme";
 }
 
 function directoryTitle(directory: string): string {
