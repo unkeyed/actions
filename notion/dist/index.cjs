@@ -29735,9 +29735,6 @@ function parseDocument(sourcePath, source) {
     );
   }
   const owners = stringList(notion.owners).map((owner) => owner.trim().toLowerCase());
-  if (owners.length === 0) {
-    throw new Error(`marked document ${sourcePath} has no Notion owner`);
-  }
   if (owners.some((owner) => owner === "")) {
     throw new Error(`marked document ${sourcePath} has an empty Notion owner`);
   }

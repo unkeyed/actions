@@ -30,3 +30,21 @@ This document explains authentication.
     body: "```markdown\n# Example\n```\n\n\nThis document explains authentication.\n",
   });
 });
+
+test("parseDocument accepts a marked document without owners", () => {
+  const source = `---
+notion:
+---
+
+# Infrastructure
+`;
+
+  assert.deepEqual(parseDocument("docs/README.md", source), {
+    sourcePath: "docs/README.md",
+    repositoryBasePath: "",
+    owners: [],
+    tags: [],
+    title: "Infrastructure",
+    body: "",
+  });
+});

@@ -43,10 +43,11 @@ notion:
 This document explains authentication.
 ```
 
-Files without `notion` frontmatter are ignored. At least one owner is required.
-Owner aliases are lowercase email local-parts. For example, `andreas` matches the
-workspace member whose email starts with `andreas@`. Matching is exact and
-case-insensitive. The action fails if an alias is missing or ambiguous.
+Files without `notion` frontmatter are ignored. The optional `owners` list can
+contain zero or more lowercase email local-parts. For example, `andreas` matches
+the workspace member whose email starts with `andreas@`. Matching is exact and
+case-insensitive. The action fails if a configured alias is missing or
+ambiguous. Omit `owners` to leave the Notion Owner property blank.
 
 The optional ordered `tags` list populates the wiki's `Tags` property. Configure
 grouping, sorting, filtering, and other presentation directly in Notion.
