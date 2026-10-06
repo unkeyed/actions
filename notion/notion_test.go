@@ -20,7 +20,7 @@ func TestNotionClient_ChildPagesQueriesPreparedWiki(t *testing.T) {
 			_, err := w.Write([]byte(`{"database_type":"wiki","data_sources":[{"id":"source"}]}`))
 			require.NoError(t, err)
 		case "/v1/data_sources/source":
-			_, err := w.Write([]byte(`{"properties":{"Page":{"type":"title"},"Owner":{"type":"people"},"Verification":{"type":"verification"},"Source":{"type":"url"},"Synced at":{"type":"date"}}}`))
+			_, err := w.Write([]byte(`{"properties":{"Page":{"id":"title-id","type":"title"},"Owner":{"id":"owner-id","type":"people"},"Verification":{"id":"verification-id","type":"verification"},"Source":{"id":"source-id","type":"url"},"Synced at":{"id":"synced-at-id","type":"date"},"Tags":{"id":"tags-id","type":"multi_select"},"Path":{"id":"path-id","type":"rich_text"}}}`))
 			require.NoError(t, err)
 		case "/v1/data_sources/source/query":
 			require.Equal(t, http.MethodPost, req.Method)
@@ -75,7 +75,7 @@ func TestNotionClient_PrepareRootAddsManagedProperties(t *testing.T) {
 				},
 			}, payload)
 			updated = true
-			_, err := w.Write([]byte(`{"id":"source"}`))
+			_, err := w.Write([]byte(`{"id":"source","properties":{"Page":{"id":"title-id","type":"title"},"Owner":{"id":"owner-id","type":"people"},"Verification":{"id":"verification-id","type":"verification"},"Source":{"id":"source-id","type":"url"},"Synced at":{"id":"synced-at-id","type":"date"},"Tags":{"id":"tags-id","type":"multi_select"},"Path":{"id":"path-id","type":"rich_text"}}}`))
 			require.NoError(t, err)
 		default:
 			http.NotFound(w, req)
@@ -88,6 +88,48 @@ func TestNotionClient_PrepareRootAddsManagedProperties(t *testing.T) {
 
 	require.NoError(t, client.prepareRoot(context.Background(), "wiki"))
 	require.True(t, updated)
+}
+
+func TestNotionClient_OrganizeRootUsesCreatedPathPropertyID(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		switch {
+		case req.Method == http.MethodGet && req.URL.Path == "/v1/databases/wiki":
+			_, err := w.Write([]byte(`{"database_type":"wiki","data_sources":[{"id":"source"}]}`))
+			require.NoError(t, err)
+		case req.Method == http.MethodGet && req.URL.Path == "/v1/data_sources/source":
+			_, err := w.Write([]byte(`{"properties":{"Page":{"id":"title-id","type":"title"},"Owner":{"id":"owner-id","type":"people"},"Verification":{"id":"verification-id","type":"verification"}}}`))
+			require.NoError(t, err)
+		case req.Method == http.MethodPatch && req.URL.Path == "/v1/data_sources/source":
+			_, err := w.Write([]byte(`{"properties":{"Page":{"id":"title-id","type":"title"},"Owner":{"id":"owner-id","type":"people"},"Verification":{"id":"verification-id","type":"verification"},"Source":{"id":"source-id","type":"url"},"Synced at":{"id":"synced-at-id","type":"date"},"Tags":{"id":"tags-id","type":"multi_select"},"Path":{"id":"path-id","type":"rich_text"}}}`))
+			require.NoError(t, err)
+		case req.Method == http.MethodGet && req.URL.Path == "/v1/views/view":
+			_, err := w.Write([]byte(`{"parent":{"database_id":"wiki"},"data_source_id":"source","type":"table"}`))
+			require.NoError(t, err)
+		case req.Method == http.MethodPatch && req.URL.Path == "/v1/views/view":
+			payload := struct {
+				Configuration struct {
+					GroupBy struct {
+						PropertyID string `json:"property_id"`
+					} `json:"group_by"`
+				} `json:"configuration"`
+			}{}
+			require.NoError(t, json.NewDecoder(req.Body).Decode(&payload))
+			require.Equal(t, "path-id", payload.Configuration.GroupBy.PropertyID)
+			_, err := w.Write([]byte(`{"id":"view"}`))
+			require.NoError(t, err)
+		default:
+			http.NotFound(w, req)
+		}
+	}))
+	t.Cleanup(server.Close)
+
+	client := newNotionClient("token")
+	client.baseURL = server.URL
+
+	require.NoError(t, client.prepareRoot(context.Background(), "wiki"))
+	require.NoError(t, client.organizeRoot(context.Background(), "wiki", "view"))
 }
 
 func TestNotionClient_OrganizeRootGroupsViewByPath(t *testing.T) {
@@ -112,7 +154,7 @@ func TestNotionClient_OrganizeRootGroupsViewByPath(t *testing.T) {
 				"type": "table",
 				"group_by": map[string]any{
 					"type":              "text",
-					"property_id":       "Path",
+					"property_id":       "path-id",
 					"group_by":          "exact",
 					"sort":              map[string]any{"type": "ascending"},
 					"hide_empty_groups": true,
@@ -127,7 +169,7 @@ func TestNotionClient_OrganizeRootGroupsViewByPath(t *testing.T) {
 
 	client := newNotionClient("token")
 	client.baseURL = server.URL
-	client.roots["wiki"] = wikiRoot{DataSourceID: "source", TitleProperty: "Page", PathProperty: "Path"}
+	client.roots["wiki"] = wikiRoot{DataSourceID: "source", TitleProperty: "Page", PathProperty: "Path", PathPropertyID: "path-id"}
 
 	require.NoError(t, client.organizeRoot(context.Background(), "wiki", "view"))
 	require.True(t, updated)
@@ -197,7 +239,7 @@ func TestNotionClient_CreatePageUsesWikiDataSourceSchema(t *testing.T) {
 			_, err := w.Write([]byte(`{"database_type":"wiki","data_sources":[{"id":"source"}]}`))
 			require.NoError(t, err)
 		case "/v1/data_sources/source":
-			_, err := w.Write([]byte(`{"properties":{"Page":{"type":"title"},"Owner":{"type":"people"},"Verification":{"type":"verification"},"Source":{"type":"url"},"Synced at":{"type":"date"}}}`))
+			_, err := w.Write([]byte(`{"properties":{"Page":{"id":"title-id","type":"title"},"Owner":{"id":"owner-id","type":"people"},"Verification":{"id":"verification-id","type":"verification"},"Source":{"id":"source-id","type":"url"},"Synced at":{"id":"synced-at-id","type":"date"},"Tags":{"id":"tags-id","type":"multi_select"},"Path":{"id":"path-id","type":"rich_text"}}}`))
 			require.NoError(t, err)
 		case "/v1/pages":
 			payload := map[string]any{}
