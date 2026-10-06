@@ -224,6 +224,14 @@ export class WikiClient implements NotionAPI {
     }
     const root = this.root(rootID);
     const ownerChanged = !sameIDs(page.ownerIDs, ownerIDs);
+    if (!page.verified && ownerChanged) {
+      await this.client.pages.update({
+        page_id: page.id,
+        properties: {
+          [root.verificationProperty]: { verification: { state: "verified" } },
+        },
+      });
+    }
 
     await this.client.pages.update({
       page_id: page.id,
@@ -235,7 +243,7 @@ export class WikiClient implements NotionAPI {
         [parentProperty]: {
           relation: parentID === rootID ? [] : [{ id: parentID }],
         },
-        ...(!page.verified
+        ...(!page.verified && !ownerChanged
           ? { [root.verificationProperty]: { verification: { state: "verified" as const } } }
           : {}),
         ...(ownerChanged

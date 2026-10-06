@@ -30033,6 +30033,14 @@ var WikiClient = class {
     }
     const root = this.root(rootID);
     const ownerChanged = !sameIDs(page.ownerIDs, ownerIDs);
+    if (!page.verified && ownerChanged) {
+      await this.client.pages.update({
+        page_id: page.id,
+        properties: {
+          [root.verificationProperty]: { verification: { state: "verified" } }
+        }
+      });
+    }
     await this.client.pages.update({
       page_id: page.id,
       ...!page.locked ? { is_locked: true } : {},
@@ -30043,7 +30051,7 @@ var WikiClient = class {
         [parentProperty]: {
           relation: parentID === rootID ? [] : [{ id: parentID }]
         },
-        ...!page.verified ? { [root.verificationProperty]: { verification: { state: "verified" } } } : {},
+        ...!page.verified && !ownerChanged ? { [root.verificationProperty]: { verification: { state: "verified" } } } : {},
         ...ownerChanged ? { [root.ownerProperty]: { people: ownerIDs.map((id) => ({ id })) } } : {}
       }
     });

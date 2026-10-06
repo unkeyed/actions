@@ -52,9 +52,22 @@ test("WikiClient publishes parent relations without Path metadata", async (t) =>
     "contributing/quality/unit-tests.md",
   );
 
-  const metadata = requests.at(-1)?.body;
+  const updates = requests.filter(
+    (request) => request.method === "PATCH" && request.path === "/v1/pages/page",
+  );
+  assert.equal(updates.length, 2);
+  const verification = updates[0]?.body;
+  assert.ok(isRecord(verification) && isRecord(verification.properties));
+  assert.deepEqual(verification.properties.Verification, {
+    verification: { state: "verified" },
+  });
+  assert.equal(Object.hasOwn(verification.properties, "Owner"), false);
+
+  const metadata = updates[1]?.body;
   assert.ok(isRecord(metadata) && isRecord(metadata.properties));
   const properties = metadata.properties;
+  assert.equal(Object.hasOwn(properties, "Verification"), false);
+  assert.deepEqual(properties.Owner, { people: [{ id: "user-andreas" }] });
   assert.deepEqual(properties["Parent page"], {
     relation: [{ id: "folder" }],
   });
