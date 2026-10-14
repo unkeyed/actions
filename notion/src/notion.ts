@@ -211,13 +211,47 @@ export class WikiClient implements NotionAPI {
     });
   }
 
-  async replacePage(pageID: string, body: string): Promise<void> {
+  async replacePage(pageID: string, body: string, pageLinks = new Map<string, string>()): Promise<void> {
     this.blocksByPage.delete(pageID);
     await this.client.pages.updateMarkdown({
       page_id: pageID,
       type: "replace_content",
       replace_content: { new_str: body, allow_deleting_content: true },
     });
+    if (pageLinks.size === 0) {
+      return;
+    }
+    for (const block of await this.pageBlocks(pageID)) {
+      if (block.has_children) {
+        continue;
+      }
+      let richText: RichTextItemResponse[];
+      switch (block.type) {
+        case "paragraph": richText = block.paragraph.rich_text; break;
+        case "bulleted_list_item": richText = block.bulleted_list_item.rich_text; break;
+        case "numbered_list_item": richText = block.numbered_list_item.rich_text; break;
+        default: continue;
+      }
+      const first = richText[0];
+      const url = first?.type === "text" ? first.text.link?.url : undefined;
+      const targetID = url ? pageLinks.get(url) : undefined;
+      if (!targetID || !richText.every((item) => item.type === "text" && item.text.link?.url === url)) {
+        continue;
+      }
+      const parentID = block.parent.type === "block_id" ? block.parent.block_id
+        : block.parent.type === "page_id" ? block.parent.page_id : undefined;
+      if (!parentID) {
+        throw new Error(`Notion link block ${block.id} has no page or block parent`);
+      }
+      await this.client.blocks.children.append({
+        block_id: parentID,
+        position: { type: "after_block", after_block: { id: block.id } },
+        children: [{ object: "block", type: "link_to_page",
+          link_to_page: { type: "page_id", page_id: targetID } }],
+      });
+      await this.client.blocks.delete({ block_id: block.id });
+    }
+    this.blocksByPage.delete(pageID);
   }
 
   async pageHeadings(pageID: string): Promise<Array<{ id: string; text: string }>> {

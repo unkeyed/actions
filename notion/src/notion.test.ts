@@ -4,6 +4,70 @@ import test from "node:test";
 
 import { WikiClient } from "./notion.js";
 
+test("WikiClient makes standalone document links native without changing prose or section links", async (t) => {
+  const pageURL = "https://www.notion.so/target";
+  const text = (content: string, url: string) => ({
+    type: "text", text: { content, link: { url } }, plain_text: content, href: url,
+  });
+  const block = (id: string, type: string, rich_text: object[]) => ({
+    object: "block", id, type, has_children: false,
+    parent: { type: "page_id", page_id: "page" },
+    [type]: { rich_text },
+  });
+  let blocks: Array<Record<string, unknown>> = [
+    block("standalone", "paragraph", [text("Guide", pageURL)]),
+    block("bullet", "bulleted_list_item", [text("guide", pageURL), text(".md", pageURL)]),
+    block("prose", "paragraph", [text("See ", ""), text("Guide", pageURL)]),
+    block("description", "bulleted_list_item", [text("Guide", pageURL), text(": procedure", "")]),
+    block("section", "paragraph", [text("Draining", `${pageURL}#heading`)]),
+    block("external", "paragraph", [text("External", "https://example.com")]),
+    block("code", "code", [text("Guide", pageURL)]),
+    { ...block("children", "bulleted_list_item", [text("Guide", pageURL)]), has_children: true },
+    { object: "block", id: "row", type: "table_row", has_children: false,
+      table_row: { cells: [[text("Guide", pageURL)]] } },
+  ];
+  const unchanged = structuredClone(blocks.slice(2));
+  const server = createServer(async (request, response) => {
+    const url = new URL(request.url ?? "", "http://localhost");
+    response.setHeader("content-type", "application/json");
+    if (request.method === "GET") {
+      response.end(JSON.stringify({ object: "list",
+        results: url.pathname === "/v1/blocks/page/children" ? blocks : [],
+        has_more: false, next_cursor: null }));
+    } else if (request.method === "PATCH" && url.pathname === "/v1/pages/page/markdown") {
+      response.end(JSON.stringify({ object: "page", id: "page" }));
+    } else if (request.method === "PATCH" && url.pathname === "/v1/blocks/page/children") {
+      const body = await readJSON(request);
+      assert.ok(isRecord(body) && Array.isArray(body.children) && isRecord(body.position));
+      assert.ok(isRecord(body.position.after_block));
+      const afterID = body.position.after_block.id;
+      const index = blocks.findIndex((candidate) => candidate.id === afterID);
+      assert.ok(index >= 0);
+      blocks.splice(index + 1, 0, ...body.children);
+      response.end(JSON.stringify({ object: "list", results: [], has_more: false, next_cursor: null }));
+    } else if (request.method === "DELETE") {
+      blocks = blocks.filter((candidate) => url.pathname !== `/v1/blocks/${candidate.id}`);
+      response.end(JSON.stringify({ object: "block", id: "deleted" }));
+    } else {
+      response.statusCode = 404;
+      response.end(JSON.stringify({ object: "error", code: "object_not_found", message: "not found" }));
+    }
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => server.close());
+  const address = server.address();
+  assert.ok(address && typeof address === "object");
+  const notion = new WikiClient("token", { baseURL: `http://127.0.0.1:${address.port}` });
+
+  await notion.replacePage("page", "Body", new Map([[pageURL, "target"]]));
+
+  assert.deepEqual(blocks, [
+    { object: "block", type: "link_to_page", link_to_page: { type: "page_id", page_id: "target" } },
+    { object: "block", type: "link_to_page", link_to_page: { type: "page_id", page_id: "target" } },
+    ...unchanged,
+  ]);
+});
+
 test("WikiClient publishes parent relations without Path metadata", async (t) => {
   const requests: Array<{ method: string; path: string; body: unknown }> = [];
   const server = createServer(async (request, response) => {

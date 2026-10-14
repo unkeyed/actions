@@ -39,7 +39,7 @@ export interface NotionAPI {
   pageMarkdown(pageID: string): Promise<string>;
   createPage(rootID: string, title: string, body: string): Promise<Page>;
   renamePage(pageID: string, title: string): Promise<void>;
-  replacePage(pageID: string, body: string): Promise<void>;
+  replacePage(pageID: string, body: string, pageLinks?: Map<string, string>): Promise<void>;
   pageHeadings(pageID: string): Promise<Array<{ id: string; text: string }>>;
   rewritePageLinks(pageID: string, links: Map<string, string>): Promise<void>;
   publishPage(
@@ -97,7 +97,8 @@ export async function syncDocuments(
       continue;
     }
     const document = documents.find((candidate) => candidate.sourcePath === page.sourcePath);
-    await api.replacePage(page.id, document ? renderDocument(document, state) : generatedHeader);
+    const rendered = document ? renderDocument(document, state) : undefined;
+    await api.replacePage(page.id, rendered?.body ?? generatedHeader, rendered?.pageLinks);
   }
 
   await resolveSectionLinks(state);
@@ -330,8 +331,9 @@ function rootPage(rootID: string): Page {
   };
 }
 
-function renderDocument(document: Document, state: SyncState): string {
+function renderDocument(document: Document, state: SyncState): { body: string; pageLinks: Map<string, string> } {
   const edits: Array<{ start: number; end: number; text: string }> = [];
+  const pageLinks = new Map<string, string>();
   const nodes: Nodes[] = [];
   function visit(node: Nodes): void {
     nodes.push(node);
@@ -370,6 +372,9 @@ function renderDocument(document: Document, state: SyncState): string {
       const url = page
         ? `https://www.notion.so/${page.id.replaceAll("-", "")}${suffix}`
         : `${state.api.repositorySourceURL(sourcePath)}${suffix}`;
+      if (page && suffix === "") {
+        pageLinks.set(url, page.id);
+      }
       if (page && new URL(url).hash !== "") {
         const links = state.sectionLinksBySource.get(document.sourcePath) ?? new Map();
         const fragment = new URL(url).hash.slice(1);
@@ -401,7 +406,7 @@ function renderDocument(document: Document, state: SyncState): string {
   for (const edit of edits.sort((left, right) => right.start - left.start)) {
     body = body.slice(0, edit.start) + edit.text + body.slice(edit.end);
   }
-  return `${generatedHeader}\n\n${body}`;
+  return { body: `${generatedHeader}\n\n${body}`, pageLinks };
 }
 
 async function resolveSectionLinks(state: SyncState): Promise<void> {

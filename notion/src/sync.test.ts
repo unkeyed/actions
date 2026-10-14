@@ -17,6 +17,7 @@ interface MemoryPage extends Page {
 class MemoryNotion implements NotionAPI {
   readonly pages: MemoryPage[] = [];
   readonly headings = new Map<string, Array<{ id: string; text: string }>>();
+  readonly pageLinks = new Map<string, Map<string, string>>();
   private bodyVersion = 0;
 
   repositorySourceURL(sourcePath: string): string {
@@ -58,8 +59,9 @@ class MemoryNotion implements NotionAPI {
     this.page(pageID).title = title;
   }
 
-  async replacePage(pageID: string, body: string): Promise<void> {
+  async replacePage(pageID: string, body: string, pageLinks = new Map<string, string>()): Promise<void> {
     this.page(pageID).body = body;
+    this.pageLinks.set(pageID, pageLinks);
     const version = ++this.bodyVersion;
     this.headings.set(pageID, [...body.matchAll(/^#{1,6} (.+)$/gm)].map((match, index) => ({
       id: `${pageID}-version-${version}-heading-${index}`,
@@ -315,6 +317,8 @@ test("syncDocuments resolves forward and circular document links on the first sy
   assert.ok(index && nodegroups);
   assert.ok(index.body.includes(`(https://www.notion.so/${nodegroups.id})`));
   assert.ok(nodegroups.body.includes(`(https://www.notion.so/${index.id})`));
+  assert.equal(notion.pageLinks.get(index.id)?.get(`https://www.notion.so/${nodegroups.id}`), nodegroups.id);
+  assert.equal(notion.pageLinks.get(nodegroups.id)?.get(`https://www.notion.so/${index.id}`), index.id);
 });
 
 test("syncDocuments resolves section links to current Notion heading blocks", async () => {

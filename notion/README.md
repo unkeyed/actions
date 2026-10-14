@@ -127,6 +127,12 @@ forward links on the first run. Paths resolve relative to the source file;
 paths starting with `/` resolve from the repository root. Reference-style links
 are supported. Code examples, images, and external URLs are not rewritten.
 
+Standalone document links in paragraphs or leaf list items become native Notion
+`link_to_page` blocks. Notion displays the target page's title and includes the
+linked page under the linking page in the sidebar. Links with surrounding prose,
+descriptions, or child blocks, and links in tables, stay inline so their content
+is preserved. Links with query strings or section fragments also stay inline.
+
 Section links also point to Notion. After uploading every body, the action reads
 the heading block IDs and translates Markdown fragments using GitHub's heading
 slug rules. It updates link URLs in place without replacing heading blocks.

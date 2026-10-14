@@ -29989,13 +29989,56 @@ var WikiClient = class {
       }
     });
   }
-  async replacePage(pageID, body) {
+  async replacePage(pageID, body, pageLinks = /* @__PURE__ */ new Map()) {
     this.blocksByPage.delete(pageID);
     await this.client.pages.updateMarkdown({
       page_id: pageID,
       type: "replace_content",
       replace_content: { new_str: body, allow_deleting_content: true }
     });
+    if (pageLinks.size === 0) {
+      return;
+    }
+    for (const block of await this.pageBlocks(pageID)) {
+      if (block.has_children) {
+        continue;
+      }
+      let richText;
+      switch (block.type) {
+        case "paragraph":
+          richText = block.paragraph.rich_text;
+          break;
+        case "bulleted_list_item":
+          richText = block.bulleted_list_item.rich_text;
+          break;
+        case "numbered_list_item":
+          richText = block.numbered_list_item.rich_text;
+          break;
+        default:
+          continue;
+      }
+      const first = richText[0];
+      const url = first?.type === "text" ? first.text.link?.url : void 0;
+      const targetID = url ? pageLinks.get(url) : void 0;
+      if (!targetID || !richText.every((item) => item.type === "text" && item.text.link?.url === url)) {
+        continue;
+      }
+      const parentID = block.parent.type === "block_id" ? block.parent.block_id : block.parent.type === "page_id" ? block.parent.page_id : void 0;
+      if (!parentID) {
+        throw new Error(`Notion link block ${block.id} has no page or block parent`);
+      }
+      await this.client.blocks.children.append({
+        block_id: parentID,
+        position: { type: "after_block", after_block: { id: block.id } },
+        children: [{
+          object: "block",
+          type: "link_to_page",
+          link_to_page: { type: "page_id", page_id: targetID }
+        }]
+      });
+      await this.client.blocks.delete({ block_id: block.id });
+    }
+    this.blocksByPage.delete(pageID);
   }
   async pageHeadings(pageID) {
     const headings = [];
@@ -37390,7 +37433,8 @@ async function syncDocuments(api, documents, rootID, onSynced) {
       continue;
     }
     const document4 = documents.find((candidate) => candidate.sourcePath === page.sourcePath);
-    await api.replacePage(page.id, document4 ? renderDocument(document4, state) : generatedHeader);
+    const rendered = document4 ? renderDocument(document4, state) : void 0;
+    await api.replacePage(page.id, rendered?.body ?? generatedHeader, rendered?.pageLinks);
   }
   await resolveSectionLinks(state);
   for (const page of state.pages) {
@@ -37587,6 +37631,7 @@ function rootPage(rootID) {
 }
 function renderDocument(document4, state) {
   const edits = [];
+  const pageLinks = /* @__PURE__ */ new Map();
   const nodes = [];
   function visit(node2) {
     nodes.push(node2);
@@ -37621,6 +37666,9 @@ function renderDocument(document4, state) {
         (candidate) => candidate.sourcePath === sourcePath && state.activeSources.has(sourcePath)
       );
       const url = page ? `https://www.notion.so/${page.id.replaceAll("-", "")}${suffix}` : `${state.api.repositorySourceURL(sourcePath)}${suffix}`;
+      if (page && suffix === "") {
+        pageLinks.set(url, page.id);
+      }
       if (page && new URL(url).hash !== "") {
         const links = state.sectionLinksBySource.get(document4.sourcePath) ?? /* @__PURE__ */ new Map();
         const fragment = new URL(url).hash.slice(1);
@@ -37652,9 +37700,9 @@ function renderDocument(document4, state) {
   for (const edit of edits.sort((left, right) => right.start - left.start)) {
     body = body.slice(0, edit.start) + edit.text + body.slice(edit.end);
   }
-  return `${generatedHeader}
+  return { body: `${generatedHeader}
 
-${body}`;
+${body}`, pageLinks };
 }
 async function resolveSectionLinks(state) {
   const headingURLsByPage = /* @__PURE__ */ new Map();
