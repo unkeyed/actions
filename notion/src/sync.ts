@@ -1,4 +1,7 @@
 import path from "node:path";
+import GithubSlugger from "github-slugger";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import type { Nodes } from "mdast";
 
 const generatedHeader = `<callout icon="✏️" color="gray_bg">
 	Edits must be made on GitHub.
@@ -29,6 +32,7 @@ export interface Page {
 
 /** NotionAPI isolates hierarchy and synchronization rules from the SDK. */
 export interface NotionAPI {
+  repositorySourceURL(sourcePath: string): string;
   prepareRoot(rootID: string): Promise<void>;
   ownerIDs(aliases: string[]): Promise<string[]>;
   wikiPages(rootID: string): Promise<Page[]>;
@@ -36,6 +40,8 @@ export interface NotionAPI {
   createPage(rootID: string, title: string, body: string): Promise<Page>;
   renamePage(pageID: string, title: string): Promise<void>;
   replacePage(pageID: string, body: string): Promise<void>;
+  pageHeadings(pageID: string): Promise<Array<{ id: string; text: string }>>;
+  rewritePageLinks(pageID: string, links: Map<string, string>): Promise<void>;
   publishPage(
     page: Page,
     parentID: string,
@@ -56,8 +62,8 @@ interface SyncState {
   activeSources: Set<string>;
   directoryPages: Map<string, Page>;
   indexByDirectory: Map<string, Document>;
-  syncedSources: Set<string>;
-  onSynced?: (document: Document) => Promise<void> | void;
+  preparedSources: Set<string>;
+  sectionLinksBySource: Map<string, Map<string, { pageID: string; fragment: string }>>;
 }
 
 /** syncDocuments publishes documents and removes stale pages from one wiki. */
@@ -67,24 +73,51 @@ export async function syncDocuments(
   rootID: string,
   onSynced?: (document: Document) => Promise<void> | void,
 ): Promise<void> {
-  const state = await prepareSync(api, documents, rootID, onSynced);
+  const state = await prepareSync(api, documents, rootID);
 
   for (const document of documents) {
-    if (state.syncedSources.has(document.sourcePath)) {
+    if (state.preparedSources.has(document.sourcePath)) {
       continue;
     }
     const directory = documentDirectory(document);
     const parent = await ensureDirectory(state, document, directory);
-    if (state.syncedSources.has(document.sourcePath)) {
+    if (state.preparedSources.has(document.sourcePath)) {
       continue;
     }
     const ownerIDs = state.ownerIDsBySource.get(document.sourcePath);
     if (!ownerIDs) {
       throw new Error(`owners for ${document.sourcePath} were not resolved`);
     }
-    await syncPage(state, document, parent.id, ownerIDs);
-    state.syncedSources.add(document.sourcePath);
-    await state.onSynced?.(document);
+    await preparePage(state, document, parent.id, ownerIDs);
+    state.preparedSources.add(document.sourcePath);
+  }
+
+  for (const page of state.pages) {
+    if (!state.activeSources.has(page.sourcePath)) {
+      continue;
+    }
+    const document = documents.find((candidate) => candidate.sourcePath === page.sourcePath);
+    await api.replacePage(page.id, document ? renderDocument(document, state) : generatedHeader);
+  }
+
+  await resolveSectionLinks(state);
+
+  for (const page of state.pages) {
+    if (!state.activeSources.has(page.sourcePath)) {
+      continue;
+    }
+    const document = documents.find((candidate) => candidate.sourcePath === page.sourcePath);
+    const ownerIDs = state.ownerIDsBySource.get(page.sourcePath);
+    if (!ownerIDs) {
+      throw new Error(`owners for ${page.sourcePath} were not resolved`);
+    }
+    await api.publishPage(page, page.parentID, ownerIDs, document?.tags ?? [], page.sourcePath);
+    page.ownerIDs = [...ownerIDs];
+    page.verified = true;
+    page.locked = true;
+    if (document) {
+      await onSynced?.(document);
+    }
   }
 
   await cleanRemovedPages(state);
@@ -94,7 +127,6 @@ async function prepareSync(
   api: NotionAPI,
   documents: Document[],
   rootID: string,
-  onSynced?: (document: Document) => Promise<void> | void,
 ): Promise<SyncState> {
   await api.prepareRoot(rootID);
   const pages = await api.wikiPages(rootID);
@@ -127,8 +159,8 @@ async function prepareSync(
     activeSources,
     directoryPages: new Map(),
     indexByDirectory,
-    syncedSources: new Set(),
-    ...(onSynced ? { onSynced } : {}),
+    preparedSources: new Set(),
+    sectionLinksBySource: new Map(),
   };
 }
 
@@ -150,47 +182,35 @@ async function ensureDirectory(
   const index = state.indexByDirectory.get(key);
   const folder = index ?? folderDocument(document, directory);
   const ownerIDs = ownersForDirectory(state, document, directory);
-  const page = await syncPage(state, folder, parent.id, ownerIDs);
+  const page = await preparePage(state, folder, parent.id, ownerIDs);
   state.activeSources.add(folder.sourcePath);
   state.directoryPages.set(key, page);
 
   if (index) {
-    state.syncedSources.add(index.sourcePath);
-    await state.onSynced?.(index);
+    state.preparedSources.add(index.sourcePath);
   }
   return page;
 }
 
-async function syncPage(
+async function preparePage(
   state: SyncState,
   document: Document,
   parentID: string,
   ownerIDs: string[],
 ): Promise<Page> {
   let page = await findPage(state, document);
-  const body = renderDocument(document);
   if (page) {
     if (page.title !== document.title) {
       await state.api.renamePage(page.id, document.title);
       page.title = document.title;
     }
-    await state.api.replacePage(page.id, body);
   } else {
-    page = await state.api.createPage(state.rootID, document.title, body);
+    page = await state.api.createPage(state.rootID, document.title, generatedHeader);
     state.pages.push(page);
   }
-  await state.api.publishPage(
-    page,
-    parentID,
-    ownerIDs,
-    document.tags,
-    document.sourcePath,
-  );
   page.parentID = parentID;
-  page.ownerIDs = [...ownerIDs];
   page.sourcePath = document.sourcePath;
-  page.verified = true;
-  page.locked = true;
+  state.ownerIDsBySource.set(document.sourcePath, ownerIDs);
   return page;
 }
 
@@ -310,8 +330,121 @@ function rootPage(rootID: string): Page {
   };
 }
 
-function renderDocument(document: Document): string {
-  return `${generatedHeader}\n\n${document.body}`;
+function renderDocument(document: Document, state: SyncState): string {
+  const edits: Array<{ start: number; end: number; text: string }> = [];
+  const nodes: Nodes[] = [];
+  function visit(node: Nodes): void {
+    nodes.push(node);
+    if ("children" in node) {
+      node.children.forEach(visit);
+    }
+  }
+  visit(fromMarkdown(document.body));
+  const definitions = new Map<string, Extract<Nodes, { type: "definition" }>>();
+  for (const node of nodes) {
+    if (node.type === "definition" && !definitions.has(node.identifier)) {
+      definitions.set(node.identifier, node);
+    }
+  }
+  for (const node of nodes) {
+    if (node.type !== "link" && node.type !== "linkReference") {
+      continue;
+    }
+    const destination = node.type === "link" ? node : definitions.get(node.identifier);
+    if (destination && !/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(destination.url)) {
+      const suffixStart = destination.url.search(/[?#]/);
+      const target = suffixStart < 0 ? destination.url : destination.url.slice(0, suffixStart);
+      const suffix = suffixStart < 0 ? "" : destination.url.slice(suffixStart);
+      let decodedTarget: string;
+      try {
+        decodedTarget = decodeURIComponent(target);
+      } catch {
+        decodedTarget = target;
+      }
+      const sourcePath = decodedTarget === "" ? document.sourcePath
+        : decodedTarget.startsWith("/") ? path.posix.normalize(decodedTarget.slice(1))
+        : path.posix.normalize(path.posix.join(path.posix.dirname(document.sourcePath), decodedTarget));
+      const page = state.pages.find((candidate) =>
+        candidate.sourcePath === sourcePath && state.activeSources.has(sourcePath)
+      );
+      const url = page
+        ? `https://www.notion.so/${page.id.replaceAll("-", "")}${suffix}`
+        : `${state.api.repositorySourceURL(sourcePath)}${suffix}`;
+      if (page && new URL(url).hash !== "") {
+        const links = state.sectionLinksBySource.get(document.sourcePath) ?? new Map();
+        const fragment = new URL(url).hash.slice(1);
+        let decodedFragment: string;
+        try {
+          decodedFragment = decodeURIComponent(fragment);
+        } catch {
+          decodedFragment = fragment;
+        }
+        links.set(url, { pageID: page.id, fragment: decodedFragment });
+        state.sectionLinksBySource.set(document.sourcePath, links);
+      }
+      const start = node.position?.start.offset;
+      const end = node.position?.end.offset;
+      const labelEnd = node.children.at(-1)?.position?.end.offset;
+      if (start !== undefined && end !== undefined) {
+        const closingBracket = document.body.indexOf("]", labelEnd ?? start + 1);
+        const label = document.body.slice(start, closingBracket + 1);
+        const title = destination.title ? ` ${JSON.stringify(destination.title)}` : "";
+        edits.push({
+          start,
+          end,
+          text: `${label}(${url}${title})`,
+        });
+      }
+    }
+  }
+  let body = document.body;
+  for (const edit of edits.sort((left, right) => right.start - left.start)) {
+    body = body.slice(0, edit.start) + edit.text + body.slice(edit.end);
+  }
+  return `${generatedHeader}\n\n${body}`;
+}
+
+async function resolveSectionLinks(state: SyncState): Promise<void> {
+  const headingURLsByPage = new Map<string, Map<string, string>>();
+  for (const links of state.sectionLinksBySource.values()) {
+    for (const { pageID } of links.values()) {
+      if (headingURLsByPage.has(pageID)) {
+        continue;
+      }
+      const page = state.pages.find((candidate) => candidate.id === pageID);
+      const document = state.documents.find((candidate) => candidate.sourcePath === page?.sourcePath);
+      const slugger = new GithubSlugger();
+      const pageURL = `https://www.notion.so/${pageID.replaceAll("-", "")}`;
+      const headings = new Map<string, string>();
+      if (document) {
+        headings.set(slugger.slug(document.title), pageURL);
+      }
+      for (const heading of await state.api.pageHeadings(pageID)) {
+        headings.set(slugger.slug(heading.text), `${pageURL}#${heading.id.replaceAll("-", "")}`);
+      }
+      headingURLsByPage.set(pageID, headings);
+    }
+  }
+  for (const page of state.pages) {
+    const sectionLinks = state.sectionLinksBySource.get(page.sourcePath);
+    if (!sectionLinks) {
+      continue;
+    }
+    const replacements = new Map<string, string>();
+    for (const [url, { pageID, fragment }] of sectionLinks) {
+      const resolved = headingURLsByPage.get(pageID)?.get(fragment);
+      if (!resolved) {
+        console.warn(`Notion heading ${JSON.stringify(fragment)} was not found for ${url}; linking to the page`);
+      }
+      const target = new URL(resolved ?? url);
+      if (!resolved) {
+        target.hash = "";
+      }
+      target.search = new URL(url).search;
+      replacements.set(url, target.toString());
+    }
+    await state.api.rewritePageLinks(page.id, replacements);
+  }
 }
 
 function generatedSourcePath(markdown: string): string {

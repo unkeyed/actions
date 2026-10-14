@@ -121,6 +121,22 @@ stable page identity when a title changes. The action does not replace an
 unmanaged Notion page with the same title. It can manage duplicate titles when
 their source paths differ.
 
+The action creates or finds all pages before uploading document bodies. Relative
+Markdown links to synchronized documents point to their Notion pages, including
+forward links on the first run. Paths resolve relative to the source file;
+paths starting with `/` resolve from the repository root. Reference-style links
+are supported. Code examples, images, and external URLs are not rewritten.
+
+Section links also point to Notion. After uploading every body, the action reads
+the heading block IDs and translates Markdown fragments using GitHub's heading
+slug rules. It updates link URLs in place without replacing heading blocks.
+Duplicate headings and encoded Unicode fragments are supported. A link to the
+removed page-title heading points to the page itself. If a heading does not
+exist, the action logs a warning and links to the page without a fragment.
+
+Links to files outside this sync point to the absolute GitHub source URL. The
+action does not check whether those source targets exist.
+
 Every run replaces the generated body, updates metadata, verifies the page, and
 locks it against accidental UI edits. A user with full access can still unlock a
 page. Give human users view-only access to the wiki if edits must be prohibited.

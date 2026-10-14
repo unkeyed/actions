@@ -171,6 +171,64 @@ test("WikiClient reads folder identity and does not rewrite unchanged owners", a
   assert.equal(Object.hasOwn(update.properties, "Owner"), false);
 });
 
+test("WikiClient updates nested section links without replacing heading blocks", async (t) => {
+  const oldURL = "https://www.notion.so/target#draining";
+  const newURL = "https://www.notion.so/target#heading";
+  const text = (content: string, url: string | null = null) => ({
+    type: "text", text: { content, link: url ? { url } : null },
+    plain_text: content, href: url,
+    annotations: { bold: true, italic: false, strikethrough: false, underline: false, code: false, color: "default" },
+  });
+  const heading = { object: "block", id: "heading", type: "heading_2", has_children: false,
+    heading_2: { rich_text: [text("Draining", oldURL)], color: "blue", is_toggleable: false } };
+  const paragraph = { object: "block", id: "paragraph", type: "paragraph", has_children: false,
+    paragraph: { rich_text: [text("See "), text("section", oldURL)], color: "default" } };
+  const table = { object: "block", id: "table", type: "table", has_children: true,
+    table: { table_width: 1, has_column_header: false, has_row_header: false } };
+  const row = { object: "block", id: "row", type: "table_row", has_children: false,
+    table_row: { cells: [[text("section", oldURL)]] } };
+  const code = { object: "block", id: "code", type: "code", has_children: false,
+    code: { rich_text: [text("example", oldURL)], caption: [], language: "markdown" } };
+  const server = createServer(async (request, response) => {
+    const url = new URL(request.url ?? "", "http://localhost");
+    response.setHeader("content-type", "application/json");
+    if (request.method === "GET" && url.pathname === "/v1/blocks/page/children") {
+      const second = url.searchParams.has("start_cursor");
+      response.end(JSON.stringify({ object: "list", results: second ? [table, code] : [heading, paragraph],
+        has_more: !second, next_cursor: second ? null : "second" }));
+    } else if (request.method === "GET" && url.pathname === "/v1/blocks/table/children") {
+      response.end(JSON.stringify({ object: "list", results: [row], has_more: false, next_cursor: null }));
+    } else if (request.method === "PATCH") {
+      const body = await readJSON(request);
+      assert.ok(isRecord(body));
+      if (url.pathname === "/v1/blocks/heading") Object.assign(heading.heading_2, body.heading_2);
+      else if (url.pathname === "/v1/blocks/paragraph") Object.assign(paragraph.paragraph, body.paragraph);
+      else if (url.pathname === "/v1/blocks/row") Object.assign(row.table_row, body.table_row);
+      else assert.fail(`unexpected block update: ${url.pathname}`);
+      response.end(JSON.stringify({ object: "block", id: url.pathname.split("/").at(-1) }));
+    } else {
+      response.statusCode = 404;
+      response.end(JSON.stringify({ object: "error", code: "object_not_found", message: "not found" }));
+    }
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => server.close());
+  const address = server.address();
+  assert.ok(address && typeof address === "object");
+  const notion = new WikiClient("token", { baseURL: `http://127.0.0.1:${address.port}` });
+
+  assert.deepEqual(await notion.pageHeadings("page"), [{ id: "heading", text: "Draining" }]);
+  await notion.rewritePageLinks("page", new Map([[oldURL, newURL]]));
+
+  assert.equal(heading.id, "heading");
+  assert.equal(heading.heading_2.rich_text[0]?.text.link?.url, newURL);
+  assert.equal(heading.heading_2.color, "blue");
+  assert.equal(paragraph.paragraph.rich_text[1]?.text.link?.url, newURL);
+  assert.equal(paragraph.paragraph.rich_text[1]?.annotations.bold, true);
+  assert.equal(row.table_row.cells[0]?.[0]?.text.link?.url, newURL);
+  assert.equal(code.code.rich_text[0]?.text.link?.url, oldURL);
+});
+
 function wikiDataSource(): object {
   return {
     object: "data_source",

@@ -16,6 +16,12 @@ interface MemoryPage extends Page {
 
 class MemoryNotion implements NotionAPI {
   readonly pages: MemoryPage[] = [];
+  readonly headings = new Map<string, Array<{ id: string; text: string }>>();
+  private bodyVersion = 0;
+
+  repositorySourceURL(sourcePath: string): string {
+    return `https://github.com/acme/infra/blob/main/${sourcePath}`;
+  }
 
   async prepareRoot(): Promise<void> {}
 
@@ -54,6 +60,21 @@ class MemoryNotion implements NotionAPI {
 
   async replacePage(pageID: string, body: string): Promise<void> {
     this.page(pageID).body = body;
+    const version = ++this.bodyVersion;
+    this.headings.set(pageID, [...body.matchAll(/^#{1,6} (.+)$/gm)].map((match, index) => ({
+      id: `${pageID}-version-${version}-heading-${index}`,
+      text: match[1] ?? "",
+    })));
+  }
+
+  async pageHeadings(pageID: string): Promise<Array<{ id: string; text: string }>> {
+    return this.headings.get(pageID) ?? [];
+  }
+
+  async rewritePageLinks(pageID: string, links: Map<string, string>): Promise<void> {
+    const page = this.page(pageID);
+    page.body = page.body.replace(/(\]\()([^\s)]+)(?=[\s)])/g,
+      (_match, prefix: string, url: string) => `${prefix}${links.get(url) ?? url}`);
   }
 
   async publishPage(
@@ -173,6 +194,18 @@ test("syncDocuments infers subpages and uses index documents as folders", async 
 test("syncDocuments reparents an existing flat page without creating a duplicate", async () => {
   const notion = new MemoryNotion();
   notion.pages.push({
+    id: "folder",
+    parentID: "root",
+    title: "Quality",
+    sourcePath: "contributing/quality/",
+    ownerIDs: [],
+    verified: true,
+    locked: true,
+    body: "Old folder body.\n",
+    tags: [],
+    inTrash: false,
+  });
+  notion.pages.push({
     id: "existing",
     parentID: "root",
     title: "Unit tests",
@@ -199,6 +232,7 @@ test("syncDocuments reparents an existing flat page without creating a duplicate
   assert.equal(notion.pages.length, 2);
   const folder = notion.pages.find((page) => page.sourcePath === "contributing/quality/");
   assert.ok(folder);
+  assert.ok(!folder.body.includes("Old folder body."));
   const document = notion.pages.find((page) => page.id === "existing");
   assert.ok(document);
   assert.equal(document.parentID, folder.id);
@@ -251,4 +285,148 @@ test("syncDocuments trashes removed managed pages but retains unmanaged pages", 
   assert.equal(notion.pages.find((page) => page.id === "folder")?.inTrash, true);
   assert.equal(notion.pages.find((page) => page.id === "document")?.inTrash, true);
   assert.equal(notion.pages.find((page) => page.id === "manual")?.inTrash, false);
+});
+
+test("syncDocuments resolves forward and circular document links on the first sync", async () => {
+  const notion = new MemoryNotion();
+  const documents: Document[] = [
+    {
+      sourcePath: "docs/runbooks/README.md",
+      repositoryBasePath: "docs",
+      owners: [],
+      tags: [],
+      title: "Runbooks",
+      body: "[`eks/0001-update-nodegroup.md`](eks/0001-update-nodegroup.md)\n",
+    },
+    {
+      sourcePath: "docs/runbooks/eks/0001-update-nodegroup.md",
+      repositoryBasePath: "docs",
+      owners: [],
+      tags: [],
+      title: "Nodegroups",
+      body: "[Runbooks](../README.md)\n",
+    },
+  ];
+
+  await syncDocuments(notion, documents, "root");
+
+  const index = notion.pages.find((page) => page.title === "Runbooks");
+  const nodegroups = notion.pages.find((page) => page.title === "Nodegroups");
+  assert.ok(index && nodegroups);
+  assert.ok(index.body.includes(`(https://www.notion.so/${nodegroups.id})`));
+  assert.ok(nodegroups.body.includes(`(https://www.notion.so/${index.id})`));
+});
+
+test("syncDocuments resolves section links to current Notion heading blocks", async () => {
+  const notion = new MemoryNotion();
+  const documents: Document[] = [{
+    sourcePath: "docs/runbooks/eks/guide.md",
+    repositoryBasePath: "docs",
+    owners: [],
+    tags: [],
+    title: "Guide",
+    body: [
+      "[This section](#draining)",
+      "[Other section](guide.md#draining)",
+      "[Forward section](other.md#draining)",
+      "[Duplicate section](#draining-1)",
+      "[Unicode section](#caf%C3%A9)",
+      "[Unsynced document](../../unmarked.md)",
+      "[External](https://example.com/guide.md#draining)",
+      "",
+      "## Draining",
+      "",
+      "## Draining",
+      "",
+      "## Café",
+    ].join("\n"),
+  }, {
+    sourcePath: "docs/runbooks/eks/other.md", repositoryBasePath: "docs",
+    owners: [], tags: [], title: "Other", body: "## Draining\n",
+  }];
+  for (let run = 0; run < 2; run++) {
+    await syncDocuments(notion, documents, "root");
+    const page = notion.pages.find((candidate) => candidate.title === "Guide");
+    const other = notion.pages.find((candidate) => candidate.title === "Other");
+    assert.ok(page && other);
+    const [heading, duplicate, unicode] = await notion.pageHeadings(page.id);
+    const [otherHeading] = await notion.pageHeadings(other.id);
+    assert.ok(heading && duplicate && unicode && otherHeading);
+    assert.ok(page.body.includes(`[This section](https://www.notion.so/${page.id}#${heading.id.replaceAll("-", "")})`));
+    assert.ok(page.body.includes(`[Other section](https://www.notion.so/${page.id}#${heading.id.replaceAll("-", "")})`));
+    assert.ok(page.body.includes(`[Forward section](https://www.notion.so/${other.id}#${otherHeading.id.replaceAll("-", "")})`));
+    assert.ok(page.body.includes(`[Duplicate section](https://www.notion.so/${page.id}#${duplicate.id.replaceAll("-", "")})`));
+    assert.ok(page.body.includes(`[Unicode section](https://www.notion.so/${page.id}#${unicode.id.replaceAll("-", "")})`));
+    assert.ok(page.body.includes("[Unsynced document](https://github.com/acme/infra/blob/main/docs/unmarked.md)"));
+    assert.ok(page.body.includes("[External](https://example.com/guide.md#draining)"));
+  }
+});
+
+test("syncDocuments resolves reference links and encoded paths without changing examples or images", async () => {
+  const notion = new MemoryNotion();
+  const body = [
+    "[Procedure][procedure]",
+    "",
+    "[procedure]: incident.io/guide.md \"Procedure\"",
+    "",
+    "[Encoded](incident.io/guide%20two.md)",
+    "[Root](/docs/incident.io/guide.md)",
+    "`[Example](incident.io/guide.md)`",
+    "```md",
+    "[Example](incident.io/guide.md)",
+    "```",
+    "![Image](incident.io/guide.md)",
+    "![Reference image][procedure]",
+    "[Email](mailto:ops@example.com)",
+    "[External](//example.com/guide.md)",
+  ].join("\n");
+  await syncDocuments(notion, [
+    { sourcePath: "docs/README.md", repositoryBasePath: "docs", owners: [], tags: [], title: "Index", body },
+    { sourcePath: "docs/incident.io/guide.md", repositoryBasePath: "docs", owners: [], tags: [], title: "Procedure", body: "" },
+    { sourcePath: "docs/incident.io/guide two.md", repositoryBasePath: "docs", owners: [], tags: [], title: "Second", body: "" },
+  ], "root");
+  const index = notion.pages.find((page) => page.title === "Index");
+  const procedure = notion.pages.find((page) => page.title === "Procedure");
+  const second = notion.pages.find((page) => page.title === "Second");
+  assert.ok(index && procedure && second);
+  assert.ok(index.body.includes(`[Procedure](https://www.notion.so/${procedure.id} "Procedure")`));
+  assert.ok(index.body.includes(`[Encoded](https://www.notion.so/${second.id})`));
+  assert.ok(index.body.includes(`[Root](https://www.notion.so/${procedure.id})`));
+  for (const unchanged of [
+    "[procedure]: incident.io/guide.md \"Procedure\"",
+    "`[Example](incident.io/guide.md)`",
+    "```md\n[Example](incident.io/guide.md)\n```",
+    "![Image](incident.io/guide.md)",
+    "![Reference image][procedure]",
+    "[Email](mailto:ops@example.com)",
+    "[External](//example.com/guide.md)",
+  ]) {
+    assert.ok(index.body.includes(unchanged), unchanged);
+  }
+});
+
+test("syncDocuments does not publish updated metadata when a body write fails", async () => {
+  class FailingNotion extends MemoryNotion {
+    failWrites = false;
+    override async replacePage(pageID: string, body: string): Promise<void> {
+      if (this.failWrites) {
+        throw new Error("Notion write failed");
+      }
+      await super.replacePage(pageID, body);
+    }
+  }
+  const notion = new FailingNotion();
+  const document: Document = {
+    sourcePath: "docs/guide.md", repositoryBasePath: "docs", owners: [],
+    tags: ["Original"], title: "Guide", body: "Original body.\n",
+  };
+  await syncDocuments(notion, [document], "root");
+  notion.failWrites = true;
+
+  await assert.rejects(syncDocuments(notion, [{
+    ...document, tags: ["Updated"], body: "Updated body.\n",
+  }], "root"), /Notion write failed/);
+
+  assert.deepEqual(notion.pages[0]?.tags, ["Original"]);
+  assert.ok(notion.pages[0]?.body.includes("Original body."));
 });

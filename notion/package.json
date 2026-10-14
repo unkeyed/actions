@@ -12,6 +12,8 @@
   "dependencies": {
     "@actions/core": "3.0.1",
     "@notionhq/client": "5.27.0",
+    "github-slugger": "2.0.0",
+    "mdast-util-from-markdown": "2.0.3",
     "yaml": "2.9.1"
   },
   "devDependencies": {

@@ -12,6 +12,10 @@ var __commonJS = (cb, mod) => function __require() {
     throw mod = 0, e;
   }
 };
+var __export = (target, all2) => {
+  for (var name in all2)
+    __defProp(target, name, { get: all2[name], enumerable: true });
+};
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
@@ -836,16 +840,16 @@ var require_tree = __commonJS({
        * @param {any} value
        * @param {number} index
        */
-      constructor(key, value, index) {
-        if (index === void 0 || index >= key.length) {
+      constructor(key, value, index2) {
+        if (index2 === void 0 || index2 >= key.length) {
           throw new TypeError("Unreachable");
         }
-        const code = this.code = key.charCodeAt(index);
+        const code = this.code = key.charCodeAt(index2);
         if (code > 127) {
           throw new TypeError("key must be ascii string");
         }
-        if (key.length !== ++index) {
-          this.middle = new _TstNode(key, value, index);
+        if (key.length !== ++index2) {
+          this.middle = new _TstNode(key, value, index2);
         } else {
           this.value = value;
         }
@@ -859,34 +863,34 @@ var require_tree = __commonJS({
         if (length === 0) {
           throw new TypeError("Unreachable");
         }
-        let index = 0;
-        let node = this;
+        let index2 = 0;
+        let node2 = this;
         while (true) {
-          const code = key.charCodeAt(index);
+          const code = key.charCodeAt(index2);
           if (code > 127) {
             throw new TypeError("key must be ascii string");
           }
-          if (node.code === code) {
-            if (length === ++index) {
-              node.value = value;
+          if (node2.code === code) {
+            if (length === ++index2) {
+              node2.value = value;
               break;
-            } else if (node.middle !== null) {
-              node = node.middle;
+            } else if (node2.middle !== null) {
+              node2 = node2.middle;
             } else {
-              node.middle = new _TstNode(key, value, index);
+              node2.middle = new _TstNode(key, value, index2);
               break;
             }
-          } else if (node.code < code) {
-            if (node.left !== null) {
-              node = node.left;
+          } else if (node2.code < code) {
+            if (node2.left !== null) {
+              node2 = node2.left;
             } else {
-              node.left = new _TstNode(key, value, index);
+              node2.left = new _TstNode(key, value, index2);
               break;
             }
-          } else if (node.right !== null) {
-            node = node.right;
+          } else if (node2.right !== null) {
+            node2 = node2.right;
           } else {
-            node.right = new _TstNode(key, value, index);
+            node2.right = new _TstNode(key, value, index2);
             break;
           }
         }
@@ -897,22 +901,22 @@ var require_tree = __commonJS({
        */
       search(key) {
         const keylength = key.length;
-        let index = 0;
-        let node = this;
-        while (node !== null && index < keylength) {
-          let code = key[index];
+        let index2 = 0;
+        let node2 = this;
+        while (node2 !== null && index2 < keylength) {
+          let code = key[index2];
           if (code <= 90 && code >= 65) {
             code |= 32;
           }
-          while (node !== null) {
-            if (code === node.code) {
-              if (keylength === ++index) {
-                return node;
+          while (node2 !== null) {
+            if (code === node2.code) {
+              if (keylength === ++index2) {
+                return node2;
               }
-              node = node.middle;
+              node2 = node2.middle;
               break;
             }
-            node = node.code < code ? node.left : node.right;
+            node2 = node2.code < code ? node2.left : node2.right;
           }
         }
         return null;
@@ -3301,18 +3305,18 @@ var require_data_url = __commonJS({
       assert(dataURL.protocol === "data:");
       let input = URLSerializer(dataURL, true);
       input = input.slice(5);
-      const position = { position: 0 };
+      const position2 = { position: 0 };
       let mimeType = collectASequenceOfCodePointsFast(
         ",",
         input,
-        position
+        position2
       );
       const mimeTypeLength = mimeType.length;
       mimeType = removeASCIIWhitespace(mimeType, true, true);
-      if (position.position >= input.length) {
+      if (position2.position >= input.length) {
         return "failure";
       }
-      position.position++;
+      position2.position++;
       const encodedBody = input.slice(mimeTypeLength + 1);
       let body = stringPercentDecode(encodedBody);
       if (/;(\u0020){0,}base64$/i.test(mimeType)) {
@@ -3346,23 +3350,23 @@ var require_data_url = __commonJS({
       }
       return serialized;
     }
-    function collectASequenceOfCodePoints(condition, input, position) {
+    function collectASequenceOfCodePoints(condition, input, position2) {
       let result = "";
-      while (position.position < input.length && condition(input[position.position])) {
-        result += input[position.position];
-        position.position++;
+      while (position2.position < input.length && condition(input[position2.position])) {
+        result += input[position2.position];
+        position2.position++;
       }
       return result;
     }
-    function collectASequenceOfCodePointsFast(char, input, position) {
-      const idx = input.indexOf(char, position.position);
-      const start = position.position;
+    function collectASequenceOfCodePointsFast(char, input, position2) {
+      const idx = input.indexOf(char, position2.position);
+      const start = position2.position;
       if (idx === -1) {
-        position.position = input.length;
+        position2.position = input.length;
         return input.slice(start);
       }
-      position.position = idx;
-      return input.slice(start, position.position);
+      position2.position = idx;
+      return input.slice(start, position2.position);
     }
     function stringPercentDecode(input) {
       const bytes = encoder.encode(input);
@@ -3396,23 +3400,23 @@ var require_data_url = __commonJS({
     }
     function parseMIMEType(input) {
       input = removeHTTPWhitespace(input, true, true);
-      const position = { position: 0 };
+      const position2 = { position: 0 };
       const type = collectASequenceOfCodePointsFast(
         "/",
         input,
-        position
+        position2
       );
       if (type.length === 0 || !HTTP_TOKEN_CODEPOINTS.test(type)) {
         return "failure";
       }
-      if (position.position > input.length) {
+      if (position2.position > input.length) {
         return "failure";
       }
-      position.position++;
+      position2.position++;
       let subtype = collectASequenceOfCodePointsFast(
         ";",
         input,
-        position
+        position2
       );
       subtype = removeHTTPWhitespace(subtype, false, true);
       if (subtype.length === 0 || !HTTP_TOKEN_CODEPOINTS.test(subtype)) {
@@ -3428,42 +3432,42 @@ var require_data_url = __commonJS({
         // https://mimesniff.spec.whatwg.org/#mime-type-essence
         essence: `${typeLowercase}/${subtypeLowercase}`
       };
-      while (position.position < input.length) {
-        position.position++;
+      while (position2.position < input.length) {
+        position2.position++;
         collectASequenceOfCodePoints(
           // https://fetch.spec.whatwg.org/#http-whitespace
           (char) => HTTP_WHITESPACE_REGEX.test(char),
           input,
-          position
+          position2
         );
         let parameterName = collectASequenceOfCodePoints(
           (char) => char !== ";" && char !== "=",
           input,
-          position
+          position2
         );
         parameterName = parameterName.toLowerCase();
-        if (position.position < input.length) {
-          if (input[position.position] === ";") {
+        if (position2.position < input.length) {
+          if (input[position2.position] === ";") {
             continue;
           }
-          position.position++;
+          position2.position++;
         }
-        if (position.position > input.length) {
+        if (position2.position > input.length) {
           break;
         }
         let parameterValue = null;
-        if (input[position.position] === '"') {
-          parameterValue = collectAnHTTPQuotedString(input, position, true);
+        if (input[position2.position] === '"') {
+          parameterValue = collectAnHTTPQuotedString(input, position2, true);
           collectASequenceOfCodePointsFast(
             ";",
             input,
-            position
+            position2
           );
         } else {
           parameterValue = collectASequenceOfCodePointsFast(
             ";",
             input,
-            position
+            position2
           );
           parameterValue = removeHTTPWhitespace(parameterValue, false, true);
           if (parameterValue.length === 0) {
@@ -3496,29 +3500,29 @@ var require_data_url = __commonJS({
       const buffer = Buffer.from(data, "base64");
       return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
     }
-    function collectAnHTTPQuotedString(input, position, extractValue) {
-      const positionStart = position.position;
+    function collectAnHTTPQuotedString(input, position2, extractValue) {
+      const positionStart = position2.position;
       let value = "";
-      assert(input[position.position] === '"');
-      position.position++;
+      assert(input[position2.position] === '"');
+      position2.position++;
       while (true) {
         value += collectASequenceOfCodePoints(
           (char) => char !== '"' && char !== "\\",
           input,
-          position
+          position2
         );
-        if (position.position >= input.length) {
+        if (position2.position >= input.length) {
           break;
         }
-        const quoteOrBackslash = input[position.position];
-        position.position++;
+        const quoteOrBackslash = input[position2.position];
+        position2.position++;
         if (quoteOrBackslash === "\\") {
-          if (position.position >= input.length) {
+          if (position2.position >= input.length) {
             value += "\\";
             break;
           }
-          value += input[position.position];
-          position.position++;
+          value += input[position2.position];
+          position2.position++;
         } else {
           assert(quoteOrBackslash === '"');
           break;
@@ -3527,7 +3531,7 @@ var require_data_url = __commonJS({
       if (extractValue) {
         return value;
       }
-      return input.slice(positionStart, position.position);
+      return input.slice(positionStart, position2.position);
     }
     function serializeAMimeType(mimeType) {
       assert(mimeType !== "failure");
@@ -3807,7 +3811,7 @@ var require_webidl = __commonJS({
         }
         const method = typeof Iterable === "function" ? Iterable() : V?.[Symbol.iterator]?.();
         const seq = [];
-        let index = 0;
+        let index2 = 0;
         if (method === void 0 || typeof method.next !== "function") {
           throw webidl.errors.exception({
             header: prefix,
@@ -3819,7 +3823,7 @@ var require_webidl = __commonJS({
           if (done) {
             break;
           }
-          seq.push(converter(value, prefix, `${argument}[${index++}]`));
+          seq.push(converter(value, prefix, `${argument}[${index2++}]`));
         }
         return seq;
       };
@@ -3928,10 +3932,10 @@ var require_webidl = __commonJS({
     };
     webidl.converters.ByteString = function(V, prefix, argument) {
       const x = webidl.converters.DOMString(V, prefix, argument);
-      for (let index = 0; index < x.length; index++) {
-        if (x.charCodeAt(index) > 255) {
+      for (let index2 = 0; index2 < x.length; index2++) {
+        if (x.charCodeAt(index2) > 255) {
           throw new TypeError(
-            `Cannot convert argument to a ByteString because the character at index ${index} has a value of ${x.charCodeAt(index)} which is greater than 255.`
+            `Cannot convert argument to a ByteString because the character at index ${index2} has a value of ${x.charCodeAt(index2)} which is greater than 255.`
           );
         }
       }
@@ -4506,17 +4510,17 @@ var require_util2 = __commonJS({
               `'next' called on an object that does not implement interface ${name} Iterator.`
             );
           }
-          const index = this.#index;
+          const index2 = this.#index;
           const values = this.#target[kInternalIterator];
           const len = values.length;
-          if (index >= len) {
+          if (index2 >= len) {
             return {
               value: void 0,
               done: true
             };
           }
-          const { [keyIndex]: key, [valueIndex]: value } = values[index];
-          this.#index = index + 1;
+          const { [keyIndex]: key, [valueIndex]: value } = values[index2];
+          this.#index = index2 + 1;
           let result;
           switch (this.#kind) {
             case "key":
@@ -4675,23 +4679,23 @@ var require_util2 = __commonJS({
       if (!data.startsWith("bytes")) {
         return "failure";
       }
-      const position = { position: 5 };
+      const position2 = { position: 5 };
       if (allowWhitespace) {
         collectASequenceOfCodePoints(
           (char) => char === "	" || char === " ",
           data,
-          position
+          position2
         );
       }
-      if (data.charCodeAt(position.position) !== 61) {
+      if (data.charCodeAt(position2.position) !== 61) {
         return "failure";
       }
-      position.position++;
+      position2.position++;
       if (allowWhitespace) {
         collectASequenceOfCodePoints(
           (char) => char === "	" || char === " ",
           data,
-          position
+          position2
         );
       }
       const rangeStart = collectASequenceOfCodePoints(
@@ -4700,25 +4704,25 @@ var require_util2 = __commonJS({
           return code >= 48 && code <= 57;
         },
         data,
-        position
+        position2
       );
       const rangeStartValue = rangeStart.length ? Number(rangeStart) : null;
       if (allowWhitespace) {
         collectASequenceOfCodePoints(
           (char) => char === "	" || char === " ",
           data,
-          position
+          position2
         );
       }
-      if (data.charCodeAt(position.position) !== 45) {
+      if (data.charCodeAt(position2.position) !== 45) {
         return "failure";
       }
-      position.position++;
+      position2.position++;
       if (allowWhitespace) {
         collectASequenceOfCodePoints(
           (char) => char === "	" || char === " ",
           data,
-          position
+          position2
         );
       }
       const rangeEnd = collectASequenceOfCodePoints(
@@ -4727,10 +4731,10 @@ var require_util2 = __commonJS({
           return code >= 48 && code <= 57;
         },
         data,
-        position
+        position2
       );
       const rangeEndValue = rangeEnd.length ? Number(rangeEnd) : null;
-      if (position.position < data.length) {
+      if (position2.position < data.length) {
         return "failure";
       }
       if (rangeEndValue === null && rangeStartValue === null) {
@@ -4812,27 +4816,27 @@ var require_util2 = __commonJS({
     }
     function gettingDecodingSplitting(value) {
       const input = value;
-      const position = { position: 0 };
+      const position2 = { position: 0 };
       const values = [];
       let temporaryValue = "";
-      while (position.position < input.length) {
+      while (position2.position < input.length) {
         temporaryValue += collectASequenceOfCodePoints(
           (char) => char !== '"' && char !== ",",
           input,
-          position
+          position2
         );
-        if (position.position < input.length) {
-          if (input.charCodeAt(position.position) === 34) {
+        if (position2.position < input.length) {
+          if (input.charCodeAt(position2.position) === 34) {
             temporaryValue += collectAnHTTPQuotedString(
               input,
-              position
+              position2
             );
-            if (position.position < input.length) {
+            if (position2.position < input.length) {
               continue;
             }
           } else {
-            assert(input.charCodeAt(position.position) === 44);
-            position.position++;
+            assert(input.charCodeAt(position2.position) === 44);
+            position2.position++;
           }
         }
         temporaryValue = removeChars(temporaryValue, true, true, (char) => char === 9 || char === 32);
@@ -4841,8 +4845,8 @@ var require_util2 = __commonJS({
       }
       return values;
     }
-    function getDecodeSplit(name, list) {
-      const value = list.get(name, true);
+    function getDecodeSplit(name, list2) {
+      const value = list2.get(name, true);
       if (value === null) {
         return null;
       }
@@ -5197,9 +5201,9 @@ var require_formdata_parser = __commonJS({
       }
       const boundary = Buffer.from(`--${boundaryString}`, "utf8");
       const entryList = [];
-      const position = { position: 0 };
-      while (input[position.position] === 13 && input[position.position + 1] === 10) {
-        position.position += 2;
+      const position2 = { position: 0 };
+      while (input[position2.position] === 13 && input[position2.position + 1] === 10) {
+        position2.position += 2;
       }
       let trailing = input.length;
       while (input[trailing - 1] === 10 && input[trailing - 2] === 13) {
@@ -5209,40 +5213,40 @@ var require_formdata_parser = __commonJS({
         input = input.subarray(0, trailing);
       }
       while (true) {
-        if (input.subarray(position.position, position.position + boundary.length).equals(boundary)) {
-          position.position += boundary.length;
+        if (input.subarray(position2.position, position2.position + boundary.length).equals(boundary)) {
+          position2.position += boundary.length;
         } else {
           return "failure";
         }
-        if (position.position === input.length - 2 && bufferStartsWith(input, dd, position) || position.position === input.length - 4 && bufferStartsWith(input, ddcrlf, position)) {
+        if (position2.position === input.length - 2 && bufferStartsWith(input, dd, position2) || position2.position === input.length - 4 && bufferStartsWith(input, ddcrlf, position2)) {
           return entryList;
         }
-        if (input[position.position] !== 13 || input[position.position + 1] !== 10) {
+        if (input[position2.position] !== 13 || input[position2.position + 1] !== 10) {
           return "failure";
         }
-        position.position += 2;
-        const result = parseMultipartFormDataHeaders(input, position);
+        position2.position += 2;
+        const result = parseMultipartFormDataHeaders(input, position2);
         if (result === "failure") {
           return "failure";
         }
         let { name, filename, contentType, encoding } = result;
-        position.position += 2;
+        position2.position += 2;
         let body;
         {
-          const boundaryIndex = input.indexOf(boundary.subarray(2), position.position);
+          const boundaryIndex = input.indexOf(boundary.subarray(2), position2.position);
           if (boundaryIndex === -1) {
             return "failure";
           }
-          body = input.subarray(position.position, boundaryIndex - 4);
-          position.position += body.length;
+          body = input.subarray(position2.position, boundaryIndex - 4);
+          position2.position += body.length;
           if (encoding === "base64") {
             body = Buffer.from(body.toString(), "base64");
           }
         }
-        if (input[position.position] !== 13 || input[position.position + 1] !== 10) {
+        if (input[position2.position] !== 13 || input[position2.position + 1] !== 10) {
           return "failure";
         } else {
-          position.position += 2;
+          position2.position += 2;
         }
         let value;
         if (filename !== null) {
@@ -5259,13 +5263,13 @@ var require_formdata_parser = __commonJS({
         entryList.push(makeEntry(name, value, filename));
       }
     }
-    function parseMultipartFormDataHeaders(input, position) {
+    function parseMultipartFormDataHeaders(input, position2) {
       let name = null;
       let filename = null;
       let contentType = null;
       let encoding = null;
       while (true) {
-        if (input[position.position] === 13 && input[position.position + 1] === 10) {
+        if (input[position2.position] === 13 && input[position2.position + 1] === 10) {
           if (name === null) {
             return "failure";
           }
@@ -5274,43 +5278,43 @@ var require_formdata_parser = __commonJS({
         let headerName = collectASequenceOfBytes(
           (char) => char !== 10 && char !== 13 && char !== 58,
           input,
-          position
+          position2
         );
         headerName = removeChars(headerName, true, true, (char) => char === 9 || char === 32);
         if (!HTTP_TOKEN_CODEPOINTS.test(headerName.toString())) {
           return "failure";
         }
-        if (input[position.position] !== 58) {
+        if (input[position2.position] !== 58) {
           return "failure";
         }
-        position.position++;
+        position2.position++;
         collectASequenceOfBytes(
           (char) => char === 32 || char === 9,
           input,
-          position
+          position2
         );
         switch (bufferToLowerCasedHeaderName(headerName)) {
           case "content-disposition": {
             name = filename = null;
-            if (!bufferStartsWith(input, formDataNameBuffer, position)) {
+            if (!bufferStartsWith(input, formDataNameBuffer, position2)) {
               return "failure";
             }
-            position.position += 17;
-            name = parseMultipartFormDataName(input, position);
+            position2.position += 17;
+            name = parseMultipartFormDataName(input, position2);
             if (name === null) {
               return "failure";
             }
-            if (bufferStartsWith(input, filenameBuffer, position)) {
-              let check = position.position + filenameBuffer.length;
+            if (bufferStartsWith(input, filenameBuffer, position2)) {
+              let check = position2.position + filenameBuffer.length;
               if (input[check] === 42) {
-                position.position += 1;
+                position2.position += 1;
                 check += 1;
               }
               if (input[check] !== 61 || input[check + 1] !== 34) {
                 return "failure";
               }
-              position.position += 12;
-              filename = parseMultipartFormDataName(input, position);
+              position2.position += 12;
+              filename = parseMultipartFormDataName(input, position2);
               if (filename === null) {
                 return "failure";
               }
@@ -5321,7 +5325,7 @@ var require_formdata_parser = __commonJS({
             let headerValue = collectASequenceOfBytes(
               (char) => char !== 10 && char !== 13,
               input,
-              position
+              position2
             );
             headerValue = removeChars(headerValue, false, true, (char) => char === 9 || char === 32);
             contentType = isomorphicDecode(headerValue);
@@ -5331,7 +5335,7 @@ var require_formdata_parser = __commonJS({
             let headerValue = collectASequenceOfBytes(
               (char) => char !== 10 && char !== 13,
               input,
-              position
+              position2
             );
             headerValue = removeChars(headerValue, false, true, (char) => char === 9 || char === 32);
             encoding = isomorphicDecode(headerValue);
@@ -5341,38 +5345,38 @@ var require_formdata_parser = __commonJS({
             collectASequenceOfBytes(
               (char) => char !== 10 && char !== 13,
               input,
-              position
+              position2
             );
           }
         }
-        if (input[position.position] !== 13 && input[position.position + 1] !== 10) {
+        if (input[position2.position] !== 13 && input[position2.position + 1] !== 10) {
           return "failure";
         } else {
-          position.position += 2;
+          position2.position += 2;
         }
       }
     }
-    function parseMultipartFormDataName(input, position) {
-      assert(input[position.position - 1] === 34);
+    function parseMultipartFormDataName(input, position2) {
+      assert(input[position2.position - 1] === 34);
       let name = collectASequenceOfBytes(
         (char) => char !== 10 && char !== 13 && char !== 34,
         input,
-        position
+        position2
       );
-      if (input[position.position] !== 34) {
+      if (input[position2.position] !== 34) {
         return null;
       } else {
-        position.position++;
+        position2.position++;
       }
       name = new TextDecoder().decode(name).replace(/%0A/ig, "\n").replace(/%0D/ig, "\r").replace(/%22/g, '"');
       return name;
     }
-    function collectASequenceOfBytes(condition, input, position) {
-      let start = position.position;
+    function collectASequenceOfBytes(condition, input, position2) {
+      let start = position2.position;
       while (start < input.length && condition(input[start])) {
         ++start;
       }
-      return input.subarray(position.position, position.position = start);
+      return input.subarray(position2.position, position2.position = start);
     }
     function removeChars(buf, leading, trailing, predicate) {
       let lead = 0;
@@ -5385,12 +5389,12 @@ var require_formdata_parser = __commonJS({
       }
       return lead === 0 && trail === buf.length - 1 ? buf : buf.subarray(lead, trail + 1);
     }
-    function bufferStartsWith(buffer, start, position) {
+    function bufferStartsWith(buffer, start, position2) {
       if (buffer.length < start.length) {
         return false;
       }
       for (let i = 0; i < start.length; i++) {
-        if (start[i] !== buffer[position.position + i]) {
+        if (start[i] !== buffer[position2.position + i]) {
           return false;
         }
       }
@@ -7504,8 +7508,8 @@ var require_redirect_handler = __commonJS({
         if (!this.location) {
           return this.handler.onHeaders(statusCode, headers, resume, statusText);
         }
-        const { origin, pathname, search } = util.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
-        const path4 = search ? `${pathname}${search}` : pathname;
+        const { origin, pathname, search: search2 } = util.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
+        const path4 = search2 ? `${pathname}${search2}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
         this.opts.path = path4;
         this.opts.origin = origin;
@@ -10691,8 +10695,8 @@ var require_mock_utils = __commonJS({
     function buildHeadersFromArray(headers) {
       const clone = headers.slice();
       const entries = [];
-      for (let index = 0; index < clone.length; index += 2) {
-        entries.push([clone[index], clone[index + 1]]);
+      for (let index2 = 0; index2 < clone.length; index2 += 2) {
+        entries.push([clone[index2], clone[index2 + 1]]);
       }
       return Object.fromEntries(entries);
     }
@@ -10779,14 +10783,14 @@ var require_mock_utils = __commonJS({
       return newMockDispatch;
     }
     function deleteMockDispatch(mockDispatches, key) {
-      const index = mockDispatches.findIndex((dispatch) => {
+      const index2 = mockDispatches.findIndex((dispatch) => {
         if (!dispatch.consumed) {
           return false;
         }
         return matchKey(dispatch, key);
       });
-      if (index !== -1) {
-        mockDispatches.splice(index, 1);
+      if (index2 !== -1) {
+        mockDispatches.splice(index2, 1);
       }
     }
     function buildKey(opts) {
@@ -11222,9 +11226,9 @@ var require_pluralizer = __commonJS({
         this.plural = plural;
       }
       pluralize(count) {
-        const one = count === 1;
-        const keys = one ? singulars : plurals;
-        const noun = one ? this.singular : this.plural;
+        const one2 = count === 1;
+        const keys = one2 ? singulars : plurals;
+        const noun = one2 ? this.singular : this.plural;
         return { ...keys, count, noun };
       }
     };
@@ -11765,13 +11769,13 @@ var require_dns = __commonJS({
         } else {
           family.offset++;
         }
-        const position = family.offset % family.ips.length;
-        ip = family.ips[position] ?? null;
+        const position2 = family.offset % family.ips.length;
+        ip = family.ips[position2] ?? null;
         if (ip == null) {
           return ip;
         }
         if (Date.now() - ip.timestamp > ip.ttl) {
-          family.ips.splice(position, 1);
+          family.ips.splice(position2, 1);
           return this.pick(origin, hostnameRecords, affinity);
         }
         return ip;
@@ -12253,9 +12257,9 @@ var require_headers = __commonJS({
       // https://fetch.spec.whatwg.org/#dom-headers-getsetcookie
       getSetCookie() {
         webidl.brandCheck(this, _Headers);
-        const list = this.#headersList.cookies;
-        if (list) {
-          return [...list];
+        const list2 = this.#headersList.cookies;
+        if (list2) {
+          return [...list2];
         }
         return [];
       }
@@ -12295,8 +12299,8 @@ var require_headers = __commonJS({
       static getHeadersList(o) {
         return o.#headersList;
       }
-      static setHeadersList(o, list) {
-        o.#headersList = list;
+      static setHeadersList(o, list2) {
+        o.#headersList = list2;
       }
     };
     var { getHeadersGuard, setHeadersGuard, getHeadersList, setHeadersList } = Headers2;
@@ -13264,13 +13268,13 @@ var require_request2 = __commonJS({
         if (this.signal.aborted) {
           ac.abort(this.signal.reason);
         } else {
-          let list = dependentControllerMap.get(this.signal);
-          if (list === void 0) {
-            list = /* @__PURE__ */ new Set();
-            dependentControllerMap.set(this.signal, list);
+          let list2 = dependentControllerMap.get(this.signal);
+          if (list2 === void 0) {
+            list2 = /* @__PURE__ */ new Set();
+            dependentControllerMap.set(this.signal, list2);
           }
           const acRef = new WeakRef(ac);
-          list.add(acRef);
+          list2.add(acRef);
           util.addAbortListener(
             ac.signal,
             buildAbort(acRef)
@@ -15053,7 +15057,7 @@ var require_util4 = __commonJS({
           if (encoding === "failure") {
             encoding = "UTF-8";
           }
-          return decode(bytes, encoding);
+          return decode2(bytes, encoding);
         }
         case "ArrayBuffer": {
           const sequence = combineByteSequences(bytes);
@@ -15070,7 +15074,7 @@ var require_util4 = __commonJS({
         }
       }
     }
-    function decode(ioQueue, encoding) {
+    function decode2(ioQueue, encoding) {
       const bytes = combineByteSequences(ioQueue);
       const BOMEncoding = BOMSniffing(bytes);
       let slice = 0;
@@ -15541,18 +15545,18 @@ var require_cache = __commonJS({
         const p = Promise.all(responsePromises);
         const responses = await p;
         const operations = [];
-        let index = 0;
+        let index2 = 0;
         for (const response of responses) {
           const operation = {
             type: "put",
             // 7.3.2
-            request: requestList[index],
+            request: requestList[index2],
             // 7.3.3
             response
             // 7.3.4
           };
           operations.push(operation);
-          index++;
+          index2++;
         }
         const cacheJobPromise = createDeferredPromise();
         let errorData = null;
@@ -16303,22 +16307,22 @@ var require_parse = __commonJS({
       let name = "";
       let value = "";
       if (header.includes(";")) {
-        const position = { position: 0 };
-        nameValuePair = collectASequenceOfCodePointsFast(";", header, position);
-        unparsedAttributes = header.slice(position.position);
+        const position2 = { position: 0 };
+        nameValuePair = collectASequenceOfCodePointsFast(";", header, position2);
+        unparsedAttributes = header.slice(position2.position);
       } else {
         nameValuePair = header;
       }
       if (!nameValuePair.includes("=")) {
         value = nameValuePair;
       } else {
-        const position = { position: 0 };
+        const position2 = { position: 0 };
         name = collectASequenceOfCodePointsFast(
           "=",
           nameValuePair,
-          position
+          position2
         );
-        value = nameValuePair.slice(position.position + 1);
+        value = nameValuePair.slice(position2.position + 1);
       }
       name = name.trim();
       value = value.trim();
@@ -16352,13 +16356,13 @@ var require_parse = __commonJS({
       let attributeName = "";
       let attributeValue = "";
       if (cookieAv.includes("=")) {
-        const position = { position: 0 };
+        const position2 = { position: 0 };
         attributeName = collectASequenceOfCodePointsFast(
           "=",
           cookieAv,
-          position
+          position2
         );
-        attributeValue = cookieAv.slice(position.position + 1);
+        attributeValue = cookieAv.slice(position2.position + 1);
       } else {
         attributeName = cookieAv;
       }
@@ -17009,16 +17013,16 @@ var require_util7 = __commonJS({
       return isTextBinaryFrame(opcode) || isContinuationFrame(opcode) || isControlFrame(opcode);
     }
     function parseExtensions(extensions) {
-      const position = { position: 0 };
+      const position2 = { position: 0 };
       const extensionList = /* @__PURE__ */ new Map();
-      while (position.position < extensions.length) {
-        const pair = collectASequenceOfCodePointsFast(";", extensions, position);
+      while (position2.position < extensions.length) {
+        const pair = collectASequenceOfCodePointsFast(";", extensions, position2);
         const [name, value = ""] = pair.split("=");
         extensionList.set(
           removeHTTPWhitespace(name, true, false),
           removeHTTPWhitespace(value, false, true)
         );
-        position.position++;
+        position2.position++;
       }
       return extensionList;
     }
@@ -17808,24 +17812,24 @@ var require_sender = __commonJS({
           if (!this.#running) {
             this.#socket.write(frame, cb);
           } else {
-            const node2 = {
+            const node3 = {
               promise: null,
               callback: cb,
               frame
             };
-            this.#queue.push(node2);
+            this.#queue.push(node3);
           }
           return;
         }
-        const node = {
+        const node2 = {
           promise: item.arrayBuffer().then((ab) => {
-            node.promise = null;
-            node.frame = createFrame(ab, hint);
+            node2.promise = null;
+            node2.frame = createFrame(ab, hint);
           }),
           callback: cb,
           frame: null
         };
-        this.#queue.push(node);
+        this.#queue.push(node2);
         if (!this.#running) {
           this.#run();
         }
@@ -17834,12 +17838,12 @@ var require_sender = __commonJS({
         this.#running = true;
         const queue = this.#queue;
         while (!queue.isEmpty()) {
-          const node = queue.shift();
-          if (node.promise !== null) {
-            await node.promise;
+          const node2 = queue.shift();
+          if (node2.promise !== null) {
+            await node2.promise;
           }
-          this.#socket.write(node.frame, node.callback);
-          node.callback = node.frame = null;
+          this.#socket.write(node2.frame, node2.callback);
+          node2.callback = node2.frame = null;
         }
         this.#running = false;
       }
@@ -19069,24 +19073,24 @@ var require_identity = __commonJS({
     var SCALAR = /* @__PURE__ */ Symbol.for("yaml.scalar");
     var SEQ = /* @__PURE__ */ Symbol.for("yaml.seq");
     var NODE_TYPE = /* @__PURE__ */ Symbol.for("yaml.node.type");
-    var isAlias = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === ALIAS;
-    var isDocument = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === DOC;
-    var isMap = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
-    var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
-    var isScalar = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
-    var isSeq = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
-    function isCollection(node) {
-      if (node && typeof node === "object")
-        switch (node[NODE_TYPE]) {
+    var isAlias = (node2) => !!node2 && typeof node2 === "object" && node2[NODE_TYPE] === ALIAS;
+    var isDocument = (node2) => !!node2 && typeof node2 === "object" && node2[NODE_TYPE] === DOC;
+    var isMap = (node2) => !!node2 && typeof node2 === "object" && node2[NODE_TYPE] === MAP;
+    var isPair = (node2) => !!node2 && typeof node2 === "object" && node2[NODE_TYPE] === PAIR;
+    var isScalar = (node2) => !!node2 && typeof node2 === "object" && node2[NODE_TYPE] === SCALAR;
+    var isSeq = (node2) => !!node2 && typeof node2 === "object" && node2[NODE_TYPE] === SEQ;
+    function isCollection(node2) {
+      if (node2 && typeof node2 === "object")
+        switch (node2[NODE_TYPE]) {
           case MAP:
           case SEQ:
             return true;
         }
       return false;
     }
-    function isNode(node) {
-      if (node && typeof node === "object")
-        switch (node[NODE_TYPE]) {
+    function isNode(node2) {
+      if (node2 && typeof node2 === "object")
+        switch (node2[NODE_TYPE]) {
           case ALIAS:
           case MAP:
           case SCALAR:
@@ -19095,7 +19099,7 @@ var require_identity = __commonJS({
         }
       return false;
     }
-    var hasAnchor = (node) => (isScalar(node) || isCollection(node)) && !!node.anchor;
+    var hasAnchor = (node2) => (isScalar(node2) || isCollection(node2)) && !!node2.anchor;
     exports2.ALIAS = ALIAS;
     exports2.DOC = DOC;
     exports2.MAP = MAP;
@@ -19123,98 +19127,98 @@ var require_visit = __commonJS({
     var BREAK = /* @__PURE__ */ Symbol("break visit");
     var SKIP = /* @__PURE__ */ Symbol("skip children");
     var REMOVE = /* @__PURE__ */ Symbol("remove node");
-    function visit(node, visitor) {
+    function visit(node2, visitor) {
       const visitor_ = initVisitor(visitor);
-      if (identity.isDocument(node)) {
-        const cd = visit_(null, node.contents, visitor_, Object.freeze([node]));
+      if (identity.isDocument(node2)) {
+        const cd = visit_(null, node2.contents, visitor_, Object.freeze([node2]));
         if (cd === REMOVE)
-          node.contents = null;
+          node2.contents = null;
       } else
-        visit_(null, node, visitor_, Object.freeze([]));
+        visit_(null, node2, visitor_, Object.freeze([]));
     }
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    function visit_(key, node, visitor, path4) {
-      const ctrl = callVisitor(key, node, visitor, path4);
+    function visit_(key, node2, visitor, path4) {
+      const ctrl = callVisitor(key, node2, visitor, path4);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
         replaceNode(key, path4, ctrl);
         return visit_(key, ctrl, visitor, path4);
       }
       if (typeof ctrl !== "symbol") {
-        if (identity.isCollection(node)) {
-          path4 = Object.freeze(path4.concat(node));
-          for (let i = 0; i < node.items.length; ++i) {
-            const ci = visit_(i, node.items[i], visitor, path4);
+        if (identity.isCollection(node2)) {
+          path4 = Object.freeze(path4.concat(node2));
+          for (let i = 0; i < node2.items.length; ++i) {
+            const ci = visit_(i, node2.items[i], visitor, path4);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
               return BREAK;
             else if (ci === REMOVE) {
-              node.items.splice(i, 1);
+              node2.items.splice(i, 1);
               i -= 1;
             }
           }
-        } else if (identity.isPair(node)) {
-          path4 = Object.freeze(path4.concat(node));
-          const ck = visit_("key", node.key, visitor, path4);
+        } else if (identity.isPair(node2)) {
+          path4 = Object.freeze(path4.concat(node2));
+          const ck = visit_("key", node2.key, visitor, path4);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
-            node.key = null;
-          const cv = visit_("value", node.value, visitor, path4);
+            node2.key = null;
+          const cv = visit_("value", node2.value, visitor, path4);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
-            node.value = null;
+            node2.value = null;
         }
       }
       return ctrl;
     }
-    async function visitAsync(node, visitor) {
+    async function visitAsync(node2, visitor) {
       const visitor_ = initVisitor(visitor);
-      if (identity.isDocument(node)) {
-        const cd = await visitAsync_(null, node.contents, visitor_, Object.freeze([node]));
+      if (identity.isDocument(node2)) {
+        const cd = await visitAsync_(null, node2.contents, visitor_, Object.freeze([node2]));
         if (cd === REMOVE)
-          node.contents = null;
+          node2.contents = null;
       } else
-        await visitAsync_(null, node, visitor_, Object.freeze([]));
+        await visitAsync_(null, node2, visitor_, Object.freeze([]));
     }
     visitAsync.BREAK = BREAK;
     visitAsync.SKIP = SKIP;
     visitAsync.REMOVE = REMOVE;
-    async function visitAsync_(key, node, visitor, path4) {
-      const ctrl = await callVisitor(key, node, visitor, path4);
+    async function visitAsync_(key, node2, visitor, path4) {
+      const ctrl = await callVisitor(key, node2, visitor, path4);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
         replaceNode(key, path4, ctrl);
         return visitAsync_(key, ctrl, visitor, path4);
       }
       if (typeof ctrl !== "symbol") {
-        if (identity.isCollection(node)) {
-          path4 = Object.freeze(path4.concat(node));
-          for (let i = 0; i < node.items.length; ++i) {
-            const ci = await visitAsync_(i, node.items[i], visitor, path4);
+        if (identity.isCollection(node2)) {
+          path4 = Object.freeze(path4.concat(node2));
+          for (let i = 0; i < node2.items.length; ++i) {
+            const ci = await visitAsync_(i, node2.items[i], visitor, path4);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
               return BREAK;
             else if (ci === REMOVE) {
-              node.items.splice(i, 1);
+              node2.items.splice(i, 1);
               i -= 1;
             }
           }
-        } else if (identity.isPair(node)) {
-          path4 = Object.freeze(path4.concat(node));
-          const ck = await visitAsync_("key", node.key, visitor, path4);
+        } else if (identity.isPair(node2)) {
+          path4 = Object.freeze(path4.concat(node2));
+          const ck = await visitAsync_("key", node2.key, visitor, path4);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
-            node.key = null;
-          const cv = await visitAsync_("value", node.value, visitor, path4);
+            node2.key = null;
+          const cv = await visitAsync_("value", node2.value, visitor, path4);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
-            node.value = null;
+            node2.value = null;
         }
       }
       return ctrl;
@@ -19237,32 +19241,32 @@ var require_visit = __commonJS({
       }
       return visitor;
     }
-    function callVisitor(key, node, visitor, path4) {
+    function callVisitor(key, node2, visitor, path4) {
       if (typeof visitor === "function")
-        return visitor(key, node, path4);
-      if (identity.isMap(node))
-        return visitor.Map?.(key, node, path4);
-      if (identity.isSeq(node))
-        return visitor.Seq?.(key, node, path4);
-      if (identity.isPair(node))
-        return visitor.Pair?.(key, node, path4);
-      if (identity.isScalar(node))
-        return visitor.Scalar?.(key, node, path4);
-      if (identity.isAlias(node))
-        return visitor.Alias?.(key, node, path4);
+        return visitor(key, node2, path4);
+      if (identity.isMap(node2))
+        return visitor.Map?.(key, node2, path4);
+      if (identity.isSeq(node2))
+        return visitor.Seq?.(key, node2, path4);
+      if (identity.isPair(node2))
+        return visitor.Pair?.(key, node2, path4);
+      if (identity.isScalar(node2))
+        return visitor.Scalar?.(key, node2, path4);
+      if (identity.isAlias(node2))
+        return visitor.Alias?.(key, node2, path4);
       return void 0;
     }
-    function replaceNode(key, path4, node) {
+    function replaceNode(key, path4, node2) {
       const parent = path4[path4.length - 1];
       if (identity.isCollection(parent)) {
-        parent.items[key] = node;
+        parent.items[key] = node2;
       } else if (identity.isPair(parent)) {
         if (key === "key")
-          parent.key = node;
+          parent.key = node2;
         else
-          parent.value = node;
+          parent.value = node2;
       } else if (identity.isDocument(parent)) {
-        parent.contents = node;
+        parent.contents = node2;
       } else {
         const pt = identity.isAlias(parent) ? "alias" : "scalar";
         throw new Error(`Cannot replace node with ${pt} parent`);
@@ -19422,9 +19426,9 @@ var require_directives = __commonJS({
         let tagNames;
         if (doc && tagEntries.length > 0 && identity.isNode(doc.contents)) {
           const tags = {};
-          visit.visit(doc.contents, (_key, node) => {
-            if (identity.isNode(node) && node.tag)
-              tags[node.tag] = true;
+          visit.visit(doc.contents, (_key, node2) => {
+            if (identity.isNode(node2) && node2.tag)
+              tags[node2.tag] = true;
           });
           tagNames = Object.keys(tags);
         } else
@@ -19461,9 +19465,9 @@ var require_anchors = __commonJS({
     function anchorNames(root) {
       const anchors = /* @__PURE__ */ new Set();
       visit.visit(root, {
-        Value(_key, node) {
-          if (node.anchor)
-            anchors.add(node.anchor);
+        Value(_key, node2) {
+          if (node2.anchor)
+            anchors.add(node2.anchor);
         }
       });
       return anchors;
@@ -19667,20 +19671,20 @@ var require_Alias = __commonJS({
         } else {
           nodes = [];
           visit.visit(doc, {
-            Node: (_key, node) => {
-              if (identity.isAlias(node) || identity.hasAnchor(node))
-                nodes.push(node);
+            Node: (_key, node2) => {
+              if (identity.isAlias(node2) || identity.hasAnchor(node2))
+                nodes.push(node2);
             }
           });
           if (ctx)
             ctx.aliasResolveCache = nodes;
         }
         let found = void 0;
-        for (const node of nodes) {
-          if (node === this)
+        for (const node2 of nodes) {
+          if (node2 === this)
             break;
-          if (node.anchor === this.source)
-            found = node;
+          if (node2.anchor === this.source)
+            found = node2;
         }
         if (found && ctx) {
           const { anchors: anchors2, doc: doc2, maxAliasCount } = ctx;
@@ -19729,22 +19733,22 @@ var require_Alias = __commonJS({
         return src;
       }
     };
-    function getAliasCount(doc, node, anchors2) {
-      if (identity.isAlias(node)) {
-        const source = node.resolve(doc);
+    function getAliasCount(doc, node2, anchors2) {
+      if (identity.isAlias(node2)) {
+        const source = node2.resolve(doc);
         const anchor = anchors2 && source && anchors2.get(source);
         return anchor ? anchor.count * anchor.aliasCount : 0;
-      } else if (identity.isCollection(node)) {
+      } else if (identity.isCollection(node2)) {
         let count = 0;
-        for (const item of node.items) {
+        for (const item of node2.items) {
           const c = getAliasCount(doc, item, anchors2);
           if (c > count)
             count = c;
         }
         return count;
-      } else if (identity.isPair(node)) {
-        const kc = getAliasCount(doc, node.key, anchors2);
-        const vc = getAliasCount(doc, node.value, anchors2);
+      } else if (identity.isPair(node2)) {
+        const kc = getAliasCount(doc, node2.key, anchors2);
+        const vc = getAliasCount(doc, node2.value, anchors2);
         return Math.max(kc, vc);
       }
       return 1;
@@ -19834,10 +19838,10 @@ var require_createNode = __commonJS({
           value = value.toJSON();
         }
         if (!value || typeof value !== "object") {
-          const node2 = new Scalar.Scalar(value);
+          const node3 = new Scalar.Scalar(value);
           if (ref)
-            ref.node = node2;
-          return node2;
+            ref.node = node3;
+          return node3;
         }
         tagObj = value instanceof Map ? schema[identity.MAP] : Symbol.iterator in Object(value) ? schema[identity.SEQ] : schema[identity.MAP];
       }
@@ -19845,14 +19849,14 @@ var require_createNode = __commonJS({
         onTagObj(tagObj);
         delete ctx.onTagObj;
       }
-      const node = tagObj?.createNode ? tagObj.createNode(ctx.schema, value, ctx) : typeof tagObj?.nodeClass?.from === "function" ? tagObj.nodeClass.from(ctx.schema, value, ctx) : new Scalar.Scalar(value);
+      const node2 = tagObj?.createNode ? tagObj.createNode(ctx.schema, value, ctx) : typeof tagObj?.nodeClass?.from === "function" ? tagObj.nodeClass.from(ctx.schema, value, ctx) : new Scalar.Scalar(value);
       if (tagName)
-        node.tag = tagName;
+        node2.tag = tagName;
       else if (!tagObj.default)
-        node.tag = tagObj.tag;
+        node2.tag = tagObj.tag;
       if (ref)
-        ref.node = node;
-      return node;
+        ref.node = node2;
+      return node2;
     }
     exports2.createNode = createNode;
   }
@@ -19922,10 +19926,10 @@ var require_Collection = __commonJS({
           this.add(value);
         else {
           const [key, ...rest] = path4;
-          const node = this.get(key, true);
-          if (identity.isCollection(node))
-            node.addIn(rest, value);
-          else if (node === void 0 && this.schema)
+          const node2 = this.get(key, true);
+          if (identity.isCollection(node2))
+            node2.addIn(rest, value);
+          else if (node2 === void 0 && this.schema)
             this.set(key, collectionFromPath(this.schema, rest, value));
           else
             throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
@@ -19939,9 +19943,9 @@ var require_Collection = __commonJS({
         const [key, ...rest] = path4;
         if (rest.length === 0)
           return this.delete(key);
-        const node = this.get(key, true);
-        if (identity.isCollection(node))
-          return node.deleteIn(rest);
+        const node2 = this.get(key, true);
+        if (identity.isCollection(node2))
+          return node2.deleteIn(rest);
         else
           throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
       }
@@ -19952,17 +19956,17 @@ var require_Collection = __commonJS({
        */
       getIn(path4, keepScalar) {
         const [key, ...rest] = path4;
-        const node = this.get(key, true);
+        const node2 = this.get(key, true);
         if (rest.length === 0)
-          return !keepScalar && identity.isScalar(node) ? node.value : node;
+          return !keepScalar && identity.isScalar(node2) ? node2.value : node2;
         else
-          return identity.isCollection(node) ? node.getIn(rest, keepScalar) : void 0;
+          return identity.isCollection(node2) ? node2.getIn(rest, keepScalar) : void 0;
       }
       hasAllNullValues(allowScalar) {
-        return this.items.every((node) => {
-          if (!identity.isPair(node))
+        return this.items.every((node2) => {
+          if (!identity.isPair(node2))
             return false;
-          const n = node.value;
+          const n = node2.value;
           return n == null || allowScalar && identity.isScalar(n) && n.value == null && !n.commentBefore && !n.comment && !n.tag;
         });
       }
@@ -19973,8 +19977,8 @@ var require_Collection = __commonJS({
         const [key, ...rest] = path4;
         if (rest.length === 0)
           return this.has(key);
-        const node = this.get(key, true);
-        return identity.isCollection(node) ? node.hasIn(rest) : false;
+        const node2 = this.get(key, true);
+        return identity.isCollection(node2) ? node2.hasIn(rest) : false;
       }
       /**
        * Sets a value in this collection. For `!!set`, `value` needs to be a
@@ -19985,10 +19989,10 @@ var require_Collection = __commonJS({
         if (rest.length === 0) {
           this.set(key, value);
         } else {
-          const node = this.get(key, true);
-          if (identity.isCollection(node))
-            node.setIn(rest, value);
-          else if (node === void 0 && this.schema)
+          const node2 = this.get(key, true);
+          if (identity.isCollection(node2))
+            node2.setIn(rest, value);
+          else if (node2 === void 0 && this.schema)
             this.set(key, collectionFromPath(this.schema, rest, value));
           else
             throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
@@ -20025,14 +20029,14 @@ var require_foldFlowLines = __commonJS({
     var FOLD_FLOW = "flow";
     var FOLD_BLOCK = "block";
     var FOLD_QUOTED = "quoted";
-    function foldFlowLines(text, indent, mode = "flow", { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
+    function foldFlowLines(text3, indent, mode = "flow", { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
       if (!lineWidth || lineWidth < 0)
-        return text;
+        return text3;
       if (lineWidth < minContentWidth)
         minContentWidth = 0;
       const endStep = Math.max(1 + minContentWidth, 1 + lineWidth - indent.length);
-      if (text.length <= endStep)
-        return text;
+      if (text3.length <= endStep)
+        return text3;
       const folds = [];
       const escapedFolds = {};
       let end = lineWidth - indent.length;
@@ -20049,14 +20053,14 @@ var require_foldFlowLines = __commonJS({
       let escStart = -1;
       let escEnd = -1;
       if (mode === FOLD_BLOCK) {
-        i = consumeMoreIndentedLines(text, i, indent.length);
+        i = consumeMoreIndentedLines(text3, i, indent.length);
         if (i !== -1)
           end = i + endStep;
       }
-      for (let ch; ch = text[i += 1]; ) {
+      for (let ch; ch = text3[i += 1]; ) {
         if (mode === FOLD_QUOTED && ch === "\\") {
           escStart = i;
-          switch (text[i + 1]) {
+          switch (text3[i + 1]) {
             case "x":
               i += 3;
               break;
@@ -20073,12 +20077,12 @@ var require_foldFlowLines = __commonJS({
         }
         if (ch === "\n") {
           if (mode === FOLD_BLOCK)
-            i = consumeMoreIndentedLines(text, i, indent.length);
+            i = consumeMoreIndentedLines(text3, i, indent.length);
           end = i + indent.length + endStep;
           split = void 0;
         } else {
           if (ch === " " && prev && prev !== " " && prev !== "\n" && prev !== "	") {
-            const next = text[i + 1];
+            const next = text3[i + 1];
             if (next && next !== " " && next !== "\n" && next !== "	")
               split = i;
           }
@@ -20090,12 +20094,12 @@ var require_foldFlowLines = __commonJS({
             } else if (mode === FOLD_QUOTED) {
               while (prev === " " || prev === "	") {
                 prev = ch;
-                ch = text[i += 1];
+                ch = text3[i += 1];
                 overflow = true;
               }
               const j = i > escEnd + 1 ? i - 2 : escStart - 1;
               if (escapedFolds[j])
-                return text;
+                return text3;
               folds.push(j);
               escapedFolds[j] = true;
               end = j + endStep;
@@ -20110,39 +20114,39 @@ var require_foldFlowLines = __commonJS({
       if (overflow && onOverflow)
         onOverflow();
       if (folds.length === 0)
-        return text;
+        return text3;
       if (onFold)
         onFold();
-      let res = text.slice(0, folds[0]);
+      let res = text3.slice(0, folds[0]);
       for (let i2 = 0; i2 < folds.length; ++i2) {
         const fold = folds[i2];
-        const end2 = folds[i2 + 1] || text.length;
+        const end2 = folds[i2 + 1] || text3.length;
         if (fold === 0)
           res = `
-${indent}${text.slice(0, end2)}`;
+${indent}${text3.slice(0, end2)}`;
         else {
           if (mode === FOLD_QUOTED && escapedFolds[fold])
-            res += `${text[fold]}\\`;
+            res += `${text3[fold]}\\`;
           res += `
-${indent}${text.slice(fold + 1, end2)}`;
+${indent}${text3.slice(fold + 1, end2)}`;
         }
       }
       return res;
     }
-    function consumeMoreIndentedLines(text, i, indent) {
+    function consumeMoreIndentedLines(text3, i, indent) {
       let end = i;
       let start = i + 1;
-      let ch = text[start];
+      let ch = text3[start];
       while (ch === " " || ch === "	") {
         if (i < start + indent) {
-          ch = text[++i];
+          ch = text3[++i];
         } else {
           do {
-            ch = text[++i];
+            ch = text3[++i];
           } while (ch && ch !== "\n");
           end = i;
           start = i + 1;
-          ch = text[start];
+          ch = text3[start];
         }
       }
       return end;
@@ -20296,12 +20300,12 @@ ${indent}`) + "'";
       blockEndNewlines = /\n+(?!\n|$)/g;
     }
     function blockString({ comment, type, value }, ctx, onComment, onChompKeep) {
-      const { blockQuote, commentString, lineWidth } = ctx.options;
-      if (!blockQuote || /\n[\t ]+$/.test(value)) {
+      const { blockQuote: blockQuote2, commentString, lineWidth } = ctx.options;
+      if (!blockQuote2 || /\n[\t ]+$/.test(value)) {
         return quotedString(value, ctx);
       }
       const indent = ctx.indent || (ctx.forceBlockIndent || containsDocumentMarker(value) ? "  " : "");
-      const literal = blockQuote === "literal" ? true : blockQuote === "folded" || type === Scalar.Scalar.BLOCK_FOLDED ? false : type === Scalar.Scalar.BLOCK_LITERAL ? true : !lineLengthOverLimit(value, lineWidth, indent.length);
+      const literal = blockQuote2 === "literal" ? true : blockQuote2 === "folded" || type === Scalar.Scalar.BLOCK_FOLDED ? false : type === Scalar.Scalar.BLOCK_LITERAL ? true : !lineLengthOverLimit(value, lineWidth, indent.length);
       if (!value)
         return literal ? "|\n" : ">\n";
       let chomp;
@@ -20356,7 +20360,7 @@ ${indent}`) + "'";
         const foldedValue = value.replace(/\n+/g, "\n$&").replace(/(?:^|\n)([\t ].*)(?:([\n\t ]*)\n(?![\n\t ]))?/g, "$1$2").replace(/\n+/g, `$&${indent}`);
         let literalFallback = false;
         const foldOptions = getFoldOptions(ctx, true);
-        if (blockQuote !== "folded" && type !== Scalar.Scalar.BLOCK_FOLDED) {
+        if (blockQuote2 !== "folded" && type !== Scalar.Scalar.BLOCK_FOLDED) {
           foldOptions.onOverflow = () => {
             literalFallback = true;
           };
@@ -20514,16 +20518,16 @@ var require_stringify = __commonJS({
       }
       return tagObj;
     }
-    function stringifyProps(node, tagObj, { anchors: anchors$1, doc }) {
+    function stringifyProps(node2, tagObj, { anchors: anchors$1, doc }) {
       if (!doc.directives)
         return "";
       const props = [];
-      const anchor = (identity.isScalar(node) || identity.isCollection(node)) && node.anchor;
+      const anchor = (identity.isScalar(node2) || identity.isCollection(node2)) && node2.anchor;
       if (anchor && anchors.anchorIsValid(anchor)) {
         anchors$1.add(anchor);
         props.push(`&${anchor}`);
       }
-      const tag = node.tag ?? (tagObj.default ? null : tagObj.tag);
+      const tag = node2.tag ?? (tagObj.default ? null : tagObj.tag);
       if (tag)
         props.push(doc.directives.tagString(tag));
       return props.join(" ");
@@ -20545,15 +20549,15 @@ var require_stringify = __commonJS({
         }
       }
       let tagObj = void 0;
-      const node = identity.isNode(item) ? item : ctx.doc.createNode(item, { onTagObj: (o) => tagObj = o });
-      tagObj ?? (tagObj = getTagObject(ctx.doc.schema.tags, node));
-      const props = stringifyProps(node, tagObj, ctx);
+      const node2 = identity.isNode(item) ? item : ctx.doc.createNode(item, { onTagObj: (o) => tagObj = o });
+      tagObj ?? (tagObj = getTagObject(ctx.doc.schema.tags, node2));
+      const props = stringifyProps(node2, tagObj, ctx);
       if (props.length > 0)
         ctx.indentAtStart = (ctx.indentAtStart ?? 0) + props.length + 1;
-      const str = typeof tagObj.stringify === "function" ? tagObj.stringify(node, ctx, onComment, onChompKeep) : identity.isScalar(node) ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep) : node.toString(ctx, onComment, onChompKeep);
+      const str = typeof tagObj.stringify === "function" ? tagObj.stringify(node2, ctx, onComment, onChompKeep) : identity.isScalar(node2) ? stringifyString.stringifyString(node2, ctx, onComment, onChompKeep) : node2.toString(ctx, onComment, onChompKeep);
       if (!props)
         return str;
-      return identity.isScalar(node) || str[0] === "{" || str[0] === "[" ? `${props} ${str}` : `${props}
+      return identity.isScalar(node2) || str[0] === "{" || str[0] === "[" ? `${props} ${str}` : `${props}
 ${ctx.indent}${str}`;
     }
     exports2.createStringifyContext = createStringifyContext;
@@ -20661,8 +20665,8 @@ ${ctx.indent}`;
         const vs0 = valueStr[0];
         const nl0 = valueStr.indexOf("\n");
         const hasNewline = nl0 !== -1;
-        const flow = ctx.inFlow ?? value.flow ?? value.items.length === 0;
-        if (hasNewline || !flow) {
+        const flow3 = ctx.inFlow ?? value.flow ?? value.items.length === 0;
+        if (hasNewline || !flow3) {
           let hasPropsLine = false;
           if (hasNewline && (vs0 === "&" || vs0 === "!")) {
             let sp0 = valueStr.indexOf(" ");
@@ -20820,8 +20824,8 @@ var require_addPairToJSMap = __commonJS({
       if (identity.isNode(key) && ctx?.doc) {
         const strCtx = stringify.createStringifyContext(ctx.doc, {});
         strCtx.anchors = /* @__PURE__ */ new Set();
-        for (const node of ctx.anchors.keys())
-          strCtx.anchors.add(node.anchor);
+        for (const node2 of ctx.anchors.keys())
+          strCtx.anchors.add(node2.anchor);
         strCtx.inFlow = true;
         strCtx.inStringifyKey = true;
         const strKey = key.toString(strCtx);
@@ -20888,8 +20892,8 @@ var require_stringifyCollection = __commonJS({
     var stringify = require_stringify();
     var stringifyComment = require_stringifyComment();
     function stringifyCollection(collection, ctx, options) {
-      const flow = ctx.inFlow ?? collection.flow;
-      const stringify2 = flow ? stringifyFlowCollection : stringifyBlockCollection;
+      const flow3 = ctx.inFlow ?? collection.flow;
+      const stringify2 = flow3 ? stringifyFlowCollection : stringifyBlockCollection;
       return stringify2(collection, ctx, options);
     }
     function stringifyBlockCollection({ comment, items }, ctx, { blockItemPrefix, flowChars, itemIndent, onChompKeep, onComment }) {
@@ -21130,8 +21134,8 @@ var require_YAMLMap = __commonJS({
       }
       get(key, keepScalar) {
         const it = findPair(this.items, key);
-        const node = it?.value;
-        return (!keepScalar && identity.isScalar(node) ? node.value : node) ?? void 0;
+        const node2 = it?.value;
+        return (!keepScalar && identity.isScalar(node2) ? node2.value : node2) ?? void 0;
       }
       has(key) {
         return !!findPair(this.items, key);
@@ -21340,7 +21344,7 @@ var require_string = __commonJS({
   "node_modules/yaml/dist/schema/common/string.js"(exports2) {
     "use strict";
     var stringifyString = require_stringifyString();
-    var string = {
+    var string3 = {
       identify: (value) => typeof value === "string",
       default: true,
       tag: "tag:yaml.org,2002:str",
@@ -21350,7 +21354,7 @@ var require_string = __commonJS({
         return stringifyString.stringifyString(item, ctx, onComment, onChompKeep);
       }
     };
-    exports2.string = string;
+    exports2.string = string3;
   }
 });
 
@@ -21444,9 +21448,9 @@ var require_float = __commonJS({
       format: "EXP",
       test: /^[-+]?(?:\.[0-9]+|[0-9]+(?:\.[0-9]*)?)[eE][-+]?[0-9]+$/,
       resolve: (str) => parseFloat(str),
-      stringify(node) {
-        const num = Number(node.value);
-        return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
+      stringify(node2) {
+        const num = Number(node2.value);
+        return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node2);
       }
     };
     var float = {
@@ -21455,11 +21459,11 @@ var require_float = __commonJS({
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:\.[0-9]+|[0-9]+\.[0-9]*)$/,
       resolve(str) {
-        const node = new Scalar.Scalar(parseFloat(str));
+        const node2 = new Scalar.Scalar(parseFloat(str));
         const dot = str.indexOf(".");
         if (dot !== -1 && str[str.length - 1] === "0")
-          node.minFractionDigits = str.length - dot - 1;
-        return node;
+          node2.minFractionDigits = str.length - dot - 1;
+        return node2;
       },
       stringify: stringifyNumber.stringifyNumber
     };
@@ -21476,11 +21480,11 @@ var require_int = __commonJS({
     var stringifyNumber = require_stringifyNumber();
     var intIdentify = (value) => typeof value === "bigint" || Number.isInteger(value);
     var intResolve = (str, offset, radix, { intAsBigInt }) => intAsBigInt ? BigInt(str) : parseInt(str.substring(offset), radix);
-    function intStringify(node, radix, prefix) {
-      const { value } = node;
+    function intStringify(node2, radix, prefix) {
+      const { value } = node2;
       if (intIdentify(value) && value >= 0)
         return prefix + value.toString(radix);
-      return stringifyNumber.stringifyNumber(node);
+      return stringifyNumber.stringifyNumber(node2);
     }
     var intOct = {
       identify: (value) => intIdentify(value) && value >= 0,
@@ -21489,7 +21493,7 @@ var require_int = __commonJS({
       format: "OCT",
       test: /^0o[0-7]+$/,
       resolve: (str, _onError, opt) => intResolve(str, 2, 8, opt),
-      stringify: (node) => intStringify(node, 8, "0o")
+      stringify: (node2) => intStringify(node2, 8, "0o")
     };
     var int = {
       identify: intIdentify,
@@ -21506,7 +21510,7 @@ var require_int = __commonJS({
       format: "HEX",
       test: /^0x[0-9a-fA-F]+$/,
       resolve: (str, _onError, opt) => intResolve(str, 2, 16, opt),
-      stringify: (node) => intStringify(node, 16, "0x")
+      stringify: (node2) => intStringify(node2, 16, "0x")
     };
     exports2.int = int;
     exports2.intHex = intHex;
@@ -21521,14 +21525,14 @@ var require_schema = __commonJS({
     var map = require_map();
     var _null = require_null();
     var seq = require_seq();
-    var string = require_string();
+    var string3 = require_string();
     var bool = require_bool();
     var float = require_float();
     var int = require_int();
     var schema = [
       map.map,
       seq.seq,
-      string.string,
+      string3.string,
       _null.nullTag,
       bool.boolTag,
       int.intOct,
@@ -21884,9 +21888,9 @@ var require_float2 = __commonJS({
       format: "EXP",
       test: /^[-+]?(?:[0-9][0-9_]*)?(?:\.[0-9_]*)?[eE][-+]?[0-9]+$/,
       resolve: (str) => parseFloat(str.replace(/_/g, "")),
-      stringify(node) {
-        const num = Number(node.value);
-        return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
+      stringify(node2) {
+        const num = Number(node2.value);
+        return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node2);
       }
     };
     var float = {
@@ -21895,14 +21899,14 @@ var require_float2 = __commonJS({
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:[0-9][0-9_]*)?\.[0-9_]*$/,
       resolve(str) {
-        const node = new Scalar.Scalar(parseFloat(str.replace(/_/g, "")));
+        const node2 = new Scalar.Scalar(parseFloat(str.replace(/_/g, "")));
         const dot = str.indexOf(".");
         if (dot !== -1) {
           const f = str.substring(dot + 1).replace(/_/g, "");
           if (f[f.length - 1] === "0")
-            node.minFractionDigits = f.length;
+            node2.minFractionDigits = f.length;
         }
-        return node;
+        return node2;
       },
       stringify: stringifyNumber.stringifyNumber
     };
@@ -21941,13 +21945,13 @@ var require_int2 = __commonJS({
       const n = parseInt(str, radix);
       return sign === "-" ? -1 * n : n;
     }
-    function intStringify(node, radix, prefix) {
-      const { value } = node;
+    function intStringify(node2, radix, prefix) {
+      const { value } = node2;
       if (intIdentify(value)) {
         const str = value.toString(radix);
         return value < 0 ? "-" + prefix + str.substr(1) : prefix + str;
       }
-      return stringifyNumber.stringifyNumber(node);
+      return stringifyNumber.stringifyNumber(node2);
     }
     var intBin = {
       identify: intIdentify,
@@ -21956,7 +21960,7 @@ var require_int2 = __commonJS({
       format: "BIN",
       test: /^[-+]?0b[0-1_]+$/,
       resolve: (str, _onError, opt) => intResolve(str, 2, 2, opt),
-      stringify: (node) => intStringify(node, 2, "0b")
+      stringify: (node2) => intStringify(node2, 2, "0b")
     };
     var intOct = {
       identify: intIdentify,
@@ -21965,7 +21969,7 @@ var require_int2 = __commonJS({
       format: "OCT",
       test: /^[-+]?0[0-7_]+$/,
       resolve: (str, _onError, opt) => intResolve(str, 1, 8, opt),
-      stringify: (node) => intStringify(node, 8, "0")
+      stringify: (node2) => intStringify(node2, 8, "0")
     };
     var int = {
       identify: intIdentify,
@@ -21982,7 +21986,7 @@ var require_int2 = __commonJS({
       format: "HEX",
       test: /^[-+]?0x[0-9a-fA-F_]+$/,
       resolve: (str, _onError, opt) => intResolve(str, 2, 16, opt),
-      stringify: (node) => intStringify(node, 16, "0x")
+      stringify: (node2) => intStringify(node2, 16, "0x")
     };
     exports2.int = int;
     exports2.intBin = intBin;
@@ -22092,13 +22096,13 @@ var require_timestamp = __commonJS({
       const res = parts.replace(/_/g, "").split(":").reduce((res2, p) => res2 * num(60) + num(p), num(0));
       return sign === "-" ? num(-1) * res : res;
     }
-    function stringifySexagesimal(node) {
-      let { value } = node;
+    function stringifySexagesimal(node2) {
+      let { value } = node2;
       let num = (n) => n;
       if (typeof value === "bigint")
         num = (n) => BigInt(n);
       else if (isNaN(value) || !isFinite(value))
-        return stringifyNumber.stringifyNumber(node);
+        return stringifyNumber.stringifyNumber(node2);
       let sign = "";
       if (value < 0) {
         sign = "-";
@@ -22175,7 +22179,7 @@ var require_schema3 = __commonJS({
     var map = require_map();
     var _null = require_null();
     var seq = require_seq();
-    var string = require_string();
+    var string3 = require_string();
     var binary = require_binary();
     var bool = require_bool2();
     var float = require_float2();
@@ -22188,7 +22192,7 @@ var require_schema3 = __commonJS({
     var schema = [
       map.map,
       seq.seq,
-      string.string,
+      string3.string,
       _null.nullTag,
       bool.trueTag,
       bool.falseTag,
@@ -22219,7 +22223,7 @@ var require_tags = __commonJS({
     var map = require_map();
     var _null = require_null();
     var seq = require_seq();
-    var string = require_string();
+    var string3 = require_string();
     var bool = require_bool();
     var float = require_float();
     var int = require_int();
@@ -22234,7 +22238,7 @@ var require_tags = __commonJS({
     var timestamp = require_timestamp();
     var schemas = /* @__PURE__ */ new Map([
       ["core", schema.schema],
-      ["failsafe", [map.map, seq.seq, string.string]],
+      ["failsafe", [map.map, seq.seq, string3.string]],
       ["json", schema$1.schema],
       ["yaml11", schema$2.schema],
       ["yaml-1.1", schema$2.schema]
@@ -22313,7 +22317,7 @@ var require_Schema = __commonJS({
     var identity = require_identity();
     var map = require_map();
     var seq = require_seq();
-    var string = require_string();
+    var string3 = require_string();
     var tags = require_tags();
     var sortMapEntriesByKey = (a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
     var Schema = class _Schema {
@@ -22324,7 +22328,7 @@ var require_Schema = __commonJS({
         this.tags = tags.getTags(customTags, this.name, merge);
         this.toStringOptions = toStringDefaults ?? null;
         Object.defineProperty(this, identity.MAP, { value: map.map });
-        Object.defineProperty(this, identity.SCALAR, { value: string.string });
+        Object.defineProperty(this, identity.SCALAR, { value: string3.string });
         Object.defineProperty(this, identity.SEQ, { value: seq.seq });
         this.sortMapEntries = typeof sortMapEntries === "function" ? sortMapEntries : sortMapEntries === true ? sortMapEntriesByKey : null;
       }
@@ -22509,13 +22513,13 @@ var require_Document = __commonJS({
        * `name` will be used as a prefix for a new unique anchor.
        * If `name` is undefined, the generated anchor will use 'a' as a prefix.
        */
-      createAlias(node, name) {
-        if (!node.anchor) {
+      createAlias(node2, name) {
+        if (!node2.anchor) {
           const prev = anchors.anchorNames(this);
-          node.anchor = // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          node2.anchor = // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
           !name || prev.has(name) ? anchors.findNewAnchor(name || "a", prev) : name;
         }
-        return new Alias.Alias(node.anchor);
+        return new Alias.Alias(node2.anchor);
       }
       createNode(value, replacer, options) {
         let _replacer = void 0;
@@ -22532,7 +22536,7 @@ var require_Document = __commonJS({
           options = replacer;
           replacer = void 0;
         }
-        const { aliasDuplicateObjects, anchorPrefix, flow, keepUndefined, onTagObj, tag } = options ?? {};
+        const { aliasDuplicateObjects, anchorPrefix, flow: flow3, keepUndefined, onTagObj, tag } = options ?? {};
         const { onAnchor, setAnchors, sourceObjects } = anchors.createNodeAnchors(
           this,
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -22547,11 +22551,11 @@ var require_Document = __commonJS({
           schema: this.schema,
           sourceObjects
         };
-        const node = createNode.createNode(value, tag, ctx);
-        if (flow && identity.isCollection(node))
-          node.flow = true;
+        const node2 = createNode.createNode(value, tag, ctx);
+        if (flow3 && identity.isCollection(node2))
+          node2.flow = true;
         setAnchors();
-        return node;
+        return node2;
       }
       /**
        * Convert a key and a value into a `Pair` using the current schema,
@@ -22796,7 +22800,7 @@ ${pointer}
 var require_resolve_props = __commonJS({
   "node_modules/yaml/dist/compose/resolve-props.js"(exports2) {
     "use strict";
-    function resolveProps(tokens, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
+    function resolveProps(tokens, { flow: flow3, indicator, next, offset, onError, parentIndent, startOnNewline }) {
       let spaceBefore = false;
       let atNewline = startOnNewline;
       let hasSpace = startOnNewline;
@@ -22825,7 +22829,7 @@ var require_resolve_props = __commonJS({
         }
         switch (token.type) {
           case "space":
-            if (!flow && (indicator !== "doc-start" || next?.type !== "flow-collection") && token.source.includes("	")) {
+            if (!flow3 && (indicator !== "doc-start" || next?.type !== "flow-collection") && token.source.includes("	")) {
               tab = token;
             }
             hasSpace = true;
@@ -22881,15 +22885,15 @@ var require_resolve_props = __commonJS({
             if (anchor || tag)
               onError(token, "BAD_PROP_ORDER", `Anchors and tags must be after the ${token.source} indicator`);
             if (found)
-              onError(token, "UNEXPECTED_TOKEN", `Unexpected ${token.source} in ${flow ?? "collection"}`);
+              onError(token, "UNEXPECTED_TOKEN", `Unexpected ${token.source} in ${flow3 ?? "collection"}`);
             found = token;
             atNewline = indicator === "seq-item-ind" || indicator === "explicit-key-ind";
             hasSpace = false;
             break;
           case "comma":
-            if (flow) {
+            if (flow3) {
               if (comma)
-                onError(token, "UNEXPECTED_TOKEN", `Unexpected , in ${flow}`);
+                onError(token, "UNEXPECTED_TOKEN", `Unexpected , in ${flow3}`);
               comma = token;
               atNewline = false;
               hasSpace = false;
@@ -22991,12 +22995,12 @@ var require_util_map_includes = __commonJS({
   "node_modules/yaml/dist/compose/util-map-includes.js"(exports2) {
     "use strict";
     var identity = require_identity();
-    function mapIncludes(ctx, items, search) {
+    function mapIncludes(ctx, items, search2) {
       const { uniqueKeys } = ctx.options;
       if (uniqueKeys === false)
         return false;
       const isEqual = typeof uniqueKeys === "function" ? uniqueKeys : (a, b) => a === b || identity.isScalar(a) && identity.isScalar(b) && a.value === b.value;
-      return items.some((pair) => isEqual(pair.key, search));
+      return items.some((pair) => isEqual(pair.key, search2));
     }
     exports2.mapIncludes = mapIncludes;
   }
@@ -23148,11 +23152,11 @@ var require_resolve_block_seq = __commonJS({
             continue;
           }
         }
-        const node = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, start, null, props, onError);
+        const node2 = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, start, null, props, onError);
         if (ctx.schema.compat)
           utilFlowIndentCheck.flowIndentCheck(bs.indent, value, onError);
-        offset = node.range[2];
-        seq.items.push(node);
+        offset = node2.range[2];
+        seq.items.push(node2);
       }
       seq.range = [bs.offset, offset, commentEnd ?? offset];
       return seq;
@@ -23452,12 +23456,12 @@ var require_compose_collection = __commonJS({
       }
       const coll = resolveCollection(CN, ctx, token, onError, tagName, tag);
       const res = tag.resolve?.(coll, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg), ctx.options) ?? coll;
-      const node = identity.isNode(res) ? res : new Scalar.Scalar(res);
-      node.range = coll.range;
-      node.tag = tagName;
+      const node2 = identity.isNode(res) ? res : new Scalar.Scalar(res);
+      node2.range = coll.range;
+      node2.tag = tagName;
       if (tag?.format)
-        node.format = tag.format;
-      return node;
+        node2.format = tag.format;
+      return node2;
     }
     exports2.composeCollection = composeCollection;
   }
@@ -23477,8 +23481,8 @@ var require_resolve_block_scalar = __commonJS({
       const lines = scalar.source ? splitLines(scalar.source) : [];
       let chompStart = lines.length;
       for (let i = lines.length - 1; i >= 0; --i) {
-        const content = lines[i][1];
-        if (content === "" || content === "\r")
+        const content3 = lines[i][1];
+        if (content3 === "" || content3 === "\r")
           chompStart = i;
         else
           break;
@@ -23494,8 +23498,8 @@ var require_resolve_block_scalar = __commonJS({
       let offset = scalar.offset + header.length;
       let contentStart = 0;
       for (let i = 0; i < chompStart; ++i) {
-        const [indent, content] = lines[i];
-        if (content === "" || content === "\r") {
+        const [indent, content3] = lines[i];
+        if (content3 === "" || content3 === "\r") {
           if (header.indent === 0 && indent.length > trimIndent)
             trimIndent = indent.length;
         } else {
@@ -23512,7 +23516,7 @@ var require_resolve_block_scalar = __commonJS({
           }
           break;
         }
-        offset += indent.length + content.length + 1;
+        offset += indent.length + content3.length + 1;
       }
       for (let i = lines.length - 1; i >= chompStart; --i) {
         if (lines[i][0].length > trimIndent)
@@ -23524,35 +23528,35 @@ var require_resolve_block_scalar = __commonJS({
       for (let i = 0; i < contentStart; ++i)
         value += lines[i][0].slice(trimIndent) + "\n";
       for (let i = contentStart; i < chompStart; ++i) {
-        let [indent, content] = lines[i];
-        offset += indent.length + content.length + 1;
-        const crlf = content[content.length - 1] === "\r";
+        let [indent, content3] = lines[i];
+        offset += indent.length + content3.length + 1;
+        const crlf = content3[content3.length - 1] === "\r";
         if (crlf)
-          content = content.slice(0, -1);
-        if (content && indent.length < trimIndent) {
+          content3 = content3.slice(0, -1);
+        if (content3 && indent.length < trimIndent) {
           const src = header.indent ? "explicit indentation indicator" : "first line";
           const message = `Block scalar lines must not be less indented than their ${src}`;
-          onError(offset - content.length - (crlf ? 2 : 1), "BAD_INDENT", message);
+          onError(offset - content3.length - (crlf ? 2 : 1), "BAD_INDENT", message);
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep + indent.slice(trimIndent) + content;
+          value += sep + indent.slice(trimIndent) + content3;
           sep = "\n";
-        } else if (indent.length > trimIndent || content[0] === "	") {
+        } else if (indent.length > trimIndent || content3[0] === "	") {
           if (sep === " ")
             sep = "\n";
           else if (!prevMoreIndented && sep === "\n")
             sep = "\n\n";
-          value += sep + indent.slice(trimIndent) + content;
+          value += sep + indent.slice(trimIndent) + content3;
           sep = "\n";
           prevMoreIndented = true;
-        } else if (content === "") {
+        } else if (content3 === "") {
           if (sep === "\n")
             value += "\n";
           else
             sep = "\n";
         } else {
-          value += sep + content;
+          value += sep + content3;
           sep = " ";
           prevMoreIndented = false;
         }
@@ -23992,11 +23996,11 @@ var require_compose_node = __commonJS({
     function composeNode(ctx, token, props, onError) {
       const atKey = ctx.atKey;
       const { spaceBefore, comment, anchor, tag } = props;
-      let node;
+      let node2;
       let isSrcToken = true;
       switch (token.type) {
         case "alias":
-          node = composeAlias(ctx, token, onError);
+          node2 = composeAlias(ctx, token, onError);
           if (anchor || tag)
             onError(token, "ALIAS_PROPS", "An alias node must not specify any properties");
           break;
@@ -24004,17 +24008,17 @@ var require_compose_node = __commonJS({
         case "single-quoted-scalar":
         case "double-quoted-scalar":
         case "block-scalar":
-          node = composeScalar.composeScalar(ctx, token, tag, onError);
+          node2 = composeScalar.composeScalar(ctx, token, tag, onError);
           if (anchor)
-            node.anchor = anchor.source.substring(1);
+            node2.anchor = anchor.source.substring(1);
           break;
         case "block-map":
         case "block-seq":
         case "flow-collection":
           try {
-            node = composeCollection.composeCollection(CN, ctx, token, props, onError);
+            node2 = composeCollection.composeCollection(CN, ctx, token, props, onError);
             if (anchor)
-              node.anchor = anchor.source.substring(1);
+              node2.anchor = anchor.source.substring(1);
           } catch (error2) {
             const message = error2 instanceof Error ? error2.message : String(error2);
             onError(token, "RESOURCE_EXHAUSTION", message);
@@ -24026,24 +24030,24 @@ var require_compose_node = __commonJS({
           isSrcToken = false;
         }
       }
-      node ?? (node = composeEmptyNode(ctx, token.offset, void 0, null, props, onError));
-      if (anchor && node.anchor === "")
+      node2 ?? (node2 = composeEmptyNode(ctx, token.offset, void 0, null, props, onError));
+      if (anchor && node2.anchor === "")
         onError(anchor, "BAD_ALIAS", "Anchor cannot be an empty string");
-      if (atKey && ctx.options.stringKeys && (!identity.isScalar(node) || typeof node.value !== "string" || node.tag && node.tag !== "tag:yaml.org,2002:str")) {
+      if (atKey && ctx.options.stringKeys && (!identity.isScalar(node2) || typeof node2.value !== "string" || node2.tag && node2.tag !== "tag:yaml.org,2002:str")) {
         const msg = "With stringKeys, all keys must be strings";
         onError(tag ?? token, "NON_STRING_KEY", msg);
       }
       if (spaceBefore)
-        node.spaceBefore = true;
+        node2.spaceBefore = true;
       if (comment) {
         if (token.type === "scalar" && token.source === "")
-          node.comment = comment;
+          node2.comment = comment;
         else
-          node.commentBefore = comment;
+          node2.commentBefore = comment;
       }
       if (ctx.options.keepSourceTokens && isSrcToken)
-        node.srcToken = token;
-      return node;
+        node2.srcToken = token;
+      return node2;
     }
     function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anchor, tag, end }, onError) {
       const token = {
@@ -24052,19 +24056,19 @@ var require_compose_node = __commonJS({
         indent: -1,
         source: ""
       };
-      const node = composeScalar.composeScalar(ctx, token, tag, onError);
+      const node2 = composeScalar.composeScalar(ctx, token, tag, onError);
       if (anchor) {
-        node.anchor = anchor.source.substring(1);
-        if (node.anchor === "")
+        node2.anchor = anchor.source.substring(1);
+        if (node2.anchor === "")
           onError(anchor, "BAD_ALIAS", "Anchor cannot be an empty string");
       }
       if (spaceBefore)
-        node.spaceBefore = true;
+        node2.spaceBefore = true;
       if (comment) {
-        node.comment = comment;
-        node.range[2] = end;
+        node2.comment = comment;
+        node2.range[2] = end;
       }
-      return node;
+      return node2;
     }
     function composeAlias({ options }, { offset, source, end }, onError) {
       const alias = new Alias.Alias(source.substring(1));
@@ -24598,10 +24602,10 @@ var require_cst_visit = __commonJS({
     visit.REMOVE = REMOVE;
     visit.itemAtPath = (cst, path4) => {
       let item = cst;
-      for (const [field, index] of path4) {
+      for (const [field, index2] of path4) {
         const tok = item?.[field];
         if (tok && "items" in tok) {
-          item = tok.items[index];
+          item = tok.items[index2];
         } else
           return void 0;
       }
@@ -25372,15 +25376,15 @@ var require_parser = __commonJS({
     var node_process = require("process");
     var cst = require_cst();
     var lexer = require_lexer();
-    function includesToken(list, type) {
-      for (let i = 0; i < list.length; ++i)
-        if (list[i].type === type)
+    function includesToken(list2, type) {
+      for (let i = 0; i < list2.length; ++i)
+        if (list2[i].type === type)
           return true;
       return false;
     }
-    function findNonEmptyIndex(list) {
-      for (let i = 0; i < list.length; ++i) {
-        switch (list[i].type) {
+    function findNonEmptyIndex(list2) {
+      for (let i = 0; i < list2.length; ++i) {
+        switch (list2[i].type) {
           case "space":
           case "comment":
           case "newline":
@@ -26288,7 +26292,7 @@ var require_public_api = __commonJS({
       }
       return doc;
     }
-    function parse2(src, reviver, options) {
+    function parse3(src, reviver, options) {
       let _reviver = void 0;
       if (typeof reviver === "function") {
         _reviver = reviver;
@@ -26329,7 +26333,7 @@ var require_public_api = __commonJS({
         return value.toString(options);
       return new Document.Document(value, _replacer, options).toString(options);
     }
-    exports2.parse = parse2;
+    exports2.parse = parse3;
     exports2.parseAllDocuments = parseAllDocuments;
     exports2.parseDocument = parseDocument2;
     exports2.stringify = stringify;
@@ -27343,29 +27347,29 @@ var require_api_endpoint_methods = __commonJS({
     var endpoints = require_api_endpoints();
     var utils_1 = require_utils2();
     function createEndpointMethods(client) {
-      function method(definition, query) {
+      function method(definition2, query) {
         return (args) => {
-          client.warnUnknownParams(args, definition);
+          client.warnUnknownParams(args, definition2);
           return client.request({
-            path: definition.path(args),
-            method: definition.method,
+            path: definition2.path(args),
+            method: definition2.method,
             query: query(args),
-            body: (0, utils_1.pick)(args, definition.bodyParams),
-            ...definition.headers ? { headers: definition.headers } : {},
+            body: (0, utils_1.pick)(args, definition2.bodyParams),
+            ...definition2.headers ? { headers: definition2.headers } : {},
             auth: args === null || args === void 0 ? void 0 : args.auth
           });
         };
       }
-      function optionalMethod(definition, query) {
+      function optionalMethod(definition2, query) {
         return (args) => {
           const requestArgs = args !== null && args !== void 0 ? args : {};
-          client.warnUnknownParams(requestArgs, definition);
+          client.warnUnknownParams(requestArgs, definition2);
           return client.request({
-            path: definition.path(),
-            method: definition.method,
+            path: definition2.path(),
+            method: definition2.method,
             query: query(requestArgs),
-            body: (0, utils_1.pick)(requestArgs, definition.bodyParams),
-            ...definition.headers ? { headers: definition.headers } : {},
+            body: (0, utils_1.pick)(requestArgs, definition2.bodyParams),
+            ...definition2.headers ? { headers: definition2.headers } : {},
             auth: requestArgs.auth
           });
         };
@@ -28758,10 +28762,10 @@ var require_Client = __commonJS({
       }
       return { frames, remaining };
     }
-    function parseSseFrame(content) {
+    function parseSseFrame(content3) {
       let eventName;
       const dataLines = [];
-      for (const line of content.split("\n")) {
+      for (const line of content3.split("\n")) {
         if (line.startsWith(":")) {
           continue;
         }
@@ -28807,7 +28811,7 @@ var require_helpers = __commonJS({
     exports2.collectDataSourceTemplates = collectDataSourceTemplates;
     exports2.iterateAllDataSourceRows = iterateAllDataSourceRows;
     exports2.collectAllDataSourceRows = collectAllDataSourceRows;
-    exports2.isFullBlock = isFullBlock;
+    exports2.isFullBlock = isFullBlock2;
     exports2.isFullPage = isFullPage2;
     exports2.isFullDataSource = isFullDataSource2;
     exports2.isFullDatabase = isFullDatabase2;
@@ -28919,7 +28923,7 @@ var require_helpers = __commonJS({
       }
       return { and: [filter, bound] };
     }
-    function isFullBlock(response) {
+    function isFullBlock2(response) {
       return response.object === "block" && "type" in response;
     }
     function isFullPage2(response) {
@@ -29432,12 +29436,12 @@ var Summary = class {
    *
    * @returns {string} content wrapped in HTML element
    */
-  wrap(tag, content, attrs = {}) {
+  wrap(tag, content3, attrs = {}) {
     const htmlAttrs = Object.entries(attrs).map(([key, value]) => ` ${key}="${value}"`).join("");
-    if (!content) {
+    if (!content3) {
       return `<${tag}${htmlAttrs}>`;
     }
-    return `<${tag}${htmlAttrs}>${content}</${tag}>`;
+    return `<${tag}${htmlAttrs}>${content3}</${tag}>`;
   }
   /**
    * Writes text in the buffer to the summary buffer file and empties buffer. Will append by default.
@@ -29498,8 +29502,8 @@ var Summary = class {
    *
    * @returns {Summary} summary instance
    */
-  addRaw(text, addEOL = false) {
-    this._buffer += text;
+  addRaw(text3, addEOL = false) {
+    this._buffer += text3;
     return addEOL ? this.addEOL() : this;
   }
   /**
@@ -29568,8 +29572,8 @@ var Summary = class {
    *
    * @returns {Summary} summary instance
    */
-  addDetails(label, content) {
-    const element = this.wrap("details", this.wrap("summary", label) + content);
+  addDetails(label, content3) {
+    const element = this.wrap("details", this.wrap("summary", label) + content3);
     return this.addRaw(element).addEOL();
   }
   /**
@@ -29595,10 +29599,10 @@ var Summary = class {
    *
    * @returns {Summary} summary instance
    */
-  addHeading(text, level) {
+  addHeading(text3, level) {
     const tag = `h${level}`;
     const allowedTag = ["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag) ? tag : "h1";
-    const element = this.wrap(allowedTag, text);
+    const element = this.wrap(allowedTag, text3);
     return this.addRaw(element).addEOL();
   }
   /**
@@ -29627,9 +29631,9 @@ var Summary = class {
    *
    * @returns {Summary} summary instance
    */
-  addQuote(text, cite) {
+  addQuote(text3, cite) {
     const attrs = Object.assign({}, cite && { cite });
-    const element = this.wrap("blockquote", text, attrs);
+    const element = this.wrap("blockquote", text3, attrs);
     return this.addRaw(element).addEOL();
   }
   /**
@@ -29640,8 +29644,8 @@ var Summary = class {
    *
    * @returns {Summary} summary instance
    */
-  addLink(text, href) {
-    const element = this.wrap("a", text, { href });
+  addLink(text3, href) {
+    const element = this.wrap("a", text3, { href });
     return this.addRaw(element).addEOL();
   }
 };
@@ -29716,15 +29720,15 @@ function parseActionConfig(configuredID, configuredBasePath) {
 // src/document.ts
 var import_yaml = __toESM(require_dist(), 1);
 function parseDocument(sourcePath, source) {
-  const content = source.replaceAll("\r\n", "\n");
-  if (!content.startsWith("---\n")) {
+  const content3 = source.replaceAll("\r\n", "\n");
+  if (!content3.startsWith("---\n")) {
     return void 0;
   }
-  const frontmatterEnd = content.indexOf("\n---\n", 4);
+  const frontmatterEnd = content3.indexOf("\n---\n", 4);
   if (frontmatterEnd < 0) {
     return void 0;
   }
-  const metadata = record((0, import_yaml.parse)(content.slice(4, frontmatterEnd)), `frontmatter in ${sourcePath}`);
+  const metadata = record((0, import_yaml.parse)(content3.slice(4, frontmatterEnd)), `frontmatter in ${sourcePath}`);
   if (!Object.hasOwn(metadata, "notion")) {
     return void 0;
   }
@@ -29742,7 +29746,7 @@ function parseDocument(sourcePath, source) {
   if (tags.some((tag) => tag === "")) {
     throw new Error(`marked document ${sourcePath} has an empty Notion tag`);
   }
-  const body = content.slice(frontmatterEnd + 5);
+  const body = content3.slice(frontmatterEnd + 5);
   const heading = firstHeading(body);
   if (heading && heading.level !== 1 && stringValue(metadata.title).trim() === "") {
     throw new Error(`marked document ${sourcePath} must start with a level-one heading`);
@@ -29831,6 +29835,7 @@ var WikiClient = class {
   client;
   roots = /* @__PURE__ */ new Map();
   pageRoots = /* @__PURE__ */ new Map();
+  blocksByPage = /* @__PURE__ */ new Map();
   owners = /* @__PURE__ */ new Map();
   ownersLoaded = false;
   sourceServer;
@@ -29936,7 +29941,7 @@ var WikiClient = class {
       pages.push({
         id: result.id,
         parentID: parent?.type === "relation" && parent.relation[0]?.id ? parent.relation[0].id : rootID,
-        title: title?.type === "title" ? title.title.map((text) => text.plain_text).join("") : "",
+        title: title?.type === "title" ? title.title.map((text3) => text3.plain_text).join("") : "",
         sourcePath: source?.type === "url" ? this.repositorySourcePath(source.url ?? "") : "",
         ownerIDs: owners?.type === "people" ? owners.people.map((owner) => owner.id) : [],
         verified: verification?.type === "verification" && verification.verification?.state === "verified",
@@ -29985,11 +29990,135 @@ var WikiClient = class {
     });
   }
   async replacePage(pageID, body) {
+    this.blocksByPage.delete(pageID);
     await this.client.pages.updateMarkdown({
       page_id: pageID,
       type: "replace_content",
       replace_content: { new_str: body, allow_deleting_content: true }
     });
+  }
+  async pageHeadings(pageID) {
+    const headings = [];
+    for (const block of await this.pageBlocks(pageID)) {
+      let richText;
+      switch (block.type) {
+        case "heading_1":
+          richText = block.heading_1.rich_text;
+          break;
+        case "heading_2":
+          richText = block.heading_2.rich_text;
+          break;
+        case "heading_3":
+          richText = block.heading_3.rich_text;
+          break;
+        case "heading_4":
+          richText = block.heading_4.rich_text;
+          break;
+        default:
+          continue;
+      }
+      headings.push({ id: block.id, text: richText.map((item) => item.plain_text).join("") });
+    }
+    return headings;
+  }
+  async rewritePageLinks(pageID, links) {
+    for (const block of await this.pageBlocks(pageID)) {
+      let changed = false;
+      const rewrite = (items) => items.map((item) => {
+        if (item.type === "text") {
+          const url = item.text.link ? links.get(item.text.link.url) : void 0;
+          changed ||= url !== void 0;
+          return {
+            type: "text",
+            annotations: item.annotations,
+            text: { ...item.text, ...url ? { link: { url } } : {} }
+          };
+        }
+        if (item.type === "equation") {
+          return { type: "equation", equation: item.equation, annotations: item.annotations };
+        }
+        if (item.mention.type === "link_preview" || item.mention.type === "link_mention") {
+          return {
+            type: "text",
+            annotations: item.annotations,
+            text: { content: item.plain_text, link: item.href ? { url: item.href } : null }
+          };
+        }
+        return { type: "mention", mention: item.mention, annotations: item.annotations };
+      });
+      let update;
+      const block_id = block.id;
+      switch (block.type) {
+        case "heading_1":
+          update = { block_id, heading_1: { rich_text: rewrite(block.heading_1.rich_text) } };
+          break;
+        case "heading_2":
+          update = { block_id, heading_2: { rich_text: rewrite(block.heading_2.rich_text) } };
+          break;
+        case "heading_3":
+          update = { block_id, heading_3: { rich_text: rewrite(block.heading_3.rich_text) } };
+          break;
+        case "heading_4":
+          update = { block_id, heading_4: { rich_text: rewrite(block.heading_4.rich_text) } };
+          break;
+        case "paragraph":
+          update = { block_id, paragraph: { rich_text: rewrite(block.paragraph.rich_text) } };
+          break;
+        case "bulleted_list_item":
+          update = { block_id, bulleted_list_item: { rich_text: rewrite(block.bulleted_list_item.rich_text) } };
+          break;
+        case "numbered_list_item":
+          update = { block_id, numbered_list_item: { rich_text: rewrite(block.numbered_list_item.rich_text) } };
+          break;
+        case "quote":
+          update = { block_id, quote: { rich_text: rewrite(block.quote.rich_text) } };
+          break;
+        case "to_do":
+          update = { block_id, to_do: { rich_text: rewrite(block.to_do.rich_text) } };
+          break;
+        case "toggle":
+          update = { block_id, toggle: { rich_text: rewrite(block.toggle.rich_text) } };
+          break;
+        case "template":
+          update = { block_id, template: { rich_text: rewrite(block.template.rich_text) } };
+          break;
+        case "callout":
+          update = { block_id, callout: { rich_text: rewrite(block.callout.rich_text) } };
+          break;
+        case "table_row":
+          update = { block_id, table_row: { cells: block.table_row.cells.map(rewrite) } };
+          break;
+        default:
+          continue;
+      }
+      if (changed) {
+        await this.client.blocks.update(update);
+      }
+    }
+  }
+  async pageBlocks(pageID) {
+    const cached = this.blocksByPage.get(pageID);
+    if (cached) {
+      return cached;
+    }
+    const blocks = [];
+    const visit = async (blockID) => {
+      for await (const block of (0, import_client.iteratePaginatedAPI)(this.client.blocks.children.list, {
+        block_id: blockID,
+        page_size: 100
+      })) {
+        if (!(0, import_client.isFullBlock)(block)) {
+          throw new Error(`Notion returned a partial block for ${blockID}`);
+        }
+        blocks.push(block);
+        if (block.has_children && block.type !== "child_page" && block.type !== "child_database") {
+          await visit(block.id);
+        }
+      }
+    };
+    await visit(pageID);
+    this.blocksByPage.set(pageID, blocks);
+    return blocks;
   }
   async publishPage(page, parentID, ownerIDs, tags, sourcePath) {
     const rootID = this.pageRoots.get(page.id);
@@ -30125,50 +30254,7182 @@ function propertyType(property) {
 
 // src/sync.ts
 var import_node_path2 = __toESM(require("node:path"), 1);
+
+// node_modules/github-slugger/regex.js
+var regex = /[\0-\x1F!-,\.\/:-@\[-\^`\{-\xA9\xAB-\xB4\xB6-\xB9\xBB-\xBF\xD7\xF7\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02EB\u02ED\u02EF-\u02FF\u0375\u0378\u0379\u037E\u0380-\u0385\u0387\u038B\u038D\u03A2\u03F6\u0482\u0530\u0557\u0558\u055A-\u055F\u0589-\u0590\u05BE\u05C0\u05C3\u05C6\u05C8-\u05CF\u05EB-\u05EE\u05F3-\u060F\u061B-\u061F\u066A-\u066D\u06D4\u06DD\u06DE\u06E9\u06FD\u06FE\u0700-\u070F\u074B\u074C\u07B2-\u07BF\u07F6-\u07F9\u07FB\u07FC\u07FE\u07FF\u082E-\u083F\u085C-\u085F\u086B-\u089F\u08B5\u08C8-\u08D2\u08E2\u0964\u0965\u0970\u0984\u098D\u098E\u0991\u0992\u09A9\u09B1\u09B3-\u09B5\u09BA\u09BB\u09C5\u09C6\u09C9\u09CA\u09CF-\u09D6\u09D8-\u09DB\u09DE\u09E4\u09E5\u09F2-\u09FB\u09FD\u09FF\u0A00\u0A04\u0A0B-\u0A0E\u0A11\u0A12\u0A29\u0A31\u0A34\u0A37\u0A3A\u0A3B\u0A3D\u0A43-\u0A46\u0A49\u0A4A\u0A4E-\u0A50\u0A52-\u0A58\u0A5D\u0A5F-\u0A65\u0A76-\u0A80\u0A84\u0A8E\u0A92\u0AA9\u0AB1\u0AB4\u0ABA\u0ABB\u0AC6\u0ACA\u0ACE\u0ACF\u0AD1-\u0ADF\u0AE4\u0AE5\u0AF0-\u0AF8\u0B00\u0B04\u0B0D\u0B0E\u0B11\u0B12\u0B29\u0B31\u0B34\u0B3A\u0B3B\u0B45\u0B46\u0B49\u0B4A\u0B4E-\u0B54\u0B58-\u0B5B\u0B5E\u0B64\u0B65\u0B70\u0B72-\u0B81\u0B84\u0B8B-\u0B8D\u0B91\u0B96-\u0B98\u0B9B\u0B9D\u0BA0-\u0BA2\u0BA5-\u0BA7\u0BAB-\u0BAD\u0BBA-\u0BBD\u0BC3-\u0BC5\u0BC9\u0BCE\u0BCF\u0BD1-\u0BD6\u0BD8-\u0BE5\u0BF0-\u0BFF\u0C0D\u0C11\u0C29\u0C3A-\u0C3C\u0C45\u0C49\u0C4E-\u0C54\u0C57\u0C5B-\u0C5F\u0C64\u0C65\u0C70-\u0C7F\u0C84\u0C8D\u0C91\u0CA9\u0CB4\u0CBA\u0CBB\u0CC5\u0CC9\u0CCE-\u0CD4\u0CD7-\u0CDD\u0CDF\u0CE4\u0CE5\u0CF0\u0CF3-\u0CFF\u0D0D\u0D11\u0D45\u0D49\u0D4F-\u0D53\u0D58-\u0D5E\u0D64\u0D65\u0D70-\u0D79\u0D80\u0D84\u0D97-\u0D99\u0DB2\u0DBC\u0DBE\u0DBF\u0DC7-\u0DC9\u0DCB-\u0DCE\u0DD5\u0DD7\u0DE0-\u0DE5\u0DF0\u0DF1\u0DF4-\u0E00\u0E3B-\u0E3F\u0E4F\u0E5A-\u0E80\u0E83\u0E85\u0E8B\u0EA4\u0EA6\u0EBE\u0EBF\u0EC5\u0EC7\u0ECE\u0ECF\u0EDA\u0EDB\u0EE0-\u0EFF\u0F01-\u0F17\u0F1A-\u0F1F\u0F2A-\u0F34\u0F36\u0F38\u0F3A-\u0F3D\u0F48\u0F6D-\u0F70\u0F85\u0F98\u0FBD-\u0FC5\u0FC7-\u0FFF\u104A-\u104F\u109E\u109F\u10C6\u10C8-\u10CC\u10CE\u10CF\u10FB\u1249\u124E\u124F\u1257\u1259\u125E\u125F\u1289\u128E\u128F\u12B1\u12B6\u12B7\u12BF\u12C1\u12C6\u12C7\u12D7\u1311\u1316\u1317\u135B\u135C\u1360-\u137F\u1390-\u139F\u13F6\u13F7\u13FE-\u1400\u166D\u166E\u1680\u169B-\u169F\u16EB-\u16ED\u16F9-\u16FF\u170D\u1715-\u171F\u1735-\u173F\u1754-\u175F\u176D\u1771\u1774-\u177F\u17D4-\u17D6\u17D8-\u17DB\u17DE\u17DF\u17EA-\u180A\u180E\u180F\u181A-\u181F\u1879-\u187F\u18AB-\u18AF\u18F6-\u18FF\u191F\u192C-\u192F\u193C-\u1945\u196E\u196F\u1975-\u197F\u19AC-\u19AF\u19CA-\u19CF\u19DA-\u19FF\u1A1C-\u1A1F\u1A5F\u1A7D\u1A7E\u1A8A-\u1A8F\u1A9A-\u1AA6\u1AA8-\u1AAF\u1AC1-\u1AFF\u1B4C-\u1B4F\u1B5A-\u1B6A\u1B74-\u1B7F\u1BF4-\u1BFF\u1C38-\u1C3F\u1C4A-\u1C4C\u1C7E\u1C7F\u1C89-\u1C8F\u1CBB\u1CBC\u1CC0-\u1CCF\u1CD3\u1CFB-\u1CFF\u1DFA\u1F16\u1F17\u1F1E\u1F1F\u1F46\u1F47\u1F4E\u1F4F\u1F58\u1F5A\u1F5C\u1F5E\u1F7E\u1F7F\u1FB5\u1FBD\u1FBF-\u1FC1\u1FC5\u1FCD-\u1FCF\u1FD4\u1FD5\u1FDC-\u1FDF\u1FED-\u1FF1\u1FF5\u1FFD-\u203E\u2041-\u2053\u2055-\u2070\u2072-\u207E\u2080-\u208F\u209D-\u20CF\u20F1-\u2101\u2103-\u2106\u2108\u2109\u2114\u2116-\u2118\u211E-\u2123\u2125\u2127\u2129\u212E\u213A\u213B\u2140-\u2144\u214A-\u214D\u214F-\u215F\u2189-\u24B5\u24EA-\u2BFF\u2C2F\u2C5F\u2CE5-\u2CEA\u2CF4-\u2CFF\u2D26\u2D28-\u2D2C\u2D2E\u2D2F\u2D68-\u2D6E\u2D70-\u2D7E\u2D97-\u2D9F\u2DA7\u2DAF\u2DB7\u2DBF\u2DC7\u2DCF\u2DD7\u2DDF\u2E00-\u2E2E\u2E30-\u3004\u3008-\u3020\u3030\u3036\u3037\u303D-\u3040\u3097\u3098\u309B\u309C\u30A0\u30FB\u3100-\u3104\u3130\u318F-\u319F\u31C0-\u31EF\u3200-\u33FF\u4DC0-\u4DFF\u9FFD-\u9FFF\uA48D-\uA4CF\uA4FE\uA4FF\uA60D-\uA60F\uA62C-\uA63F\uA673\uA67E\uA6F2-\uA716\uA720\uA721\uA789\uA78A\uA7C0\uA7C1\uA7CB-\uA7F4\uA828-\uA82B\uA82D-\uA83F\uA874-\uA87F\uA8C6-\uA8CF\uA8DA-\uA8DF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA954-\uA95F\uA97D-\uA97F\uA9C1-\uA9CE\uA9DA-\uA9DF\uA9FF\uAA37-\uAA3F\uAA4E\uAA4F\uAA5A-\uAA5F\uAA77-\uAA79\uAAC3-\uAADA\uAADE\uAADF\uAAF0\uAAF1\uAAF7-\uAB00\uAB07\uAB08\uAB0F\uAB10\uAB17-\uAB1F\uAB27\uAB2F\uAB5B\uAB6A-\uAB6F\uABEB\uABEE\uABEF\uABFA-\uABFF\uD7A4-\uD7AF\uD7C7-\uD7CA\uD7FC-\uD7FF\uE000-\uF8FF\uFA6E\uFA6F\uFADA-\uFAFF\uFB07-\uFB12\uFB18-\uFB1C\uFB29\uFB37\uFB3D\uFB3F\uFB42\uFB45\uFBB2-\uFBD2\uFD3E-\uFD4F\uFD90\uFD91\uFDC8-\uFDEF\uFDFC-\uFDFF\uFE10-\uFE1F\uFE30-\uFE32\uFE35-\uFE4C\uFE50-\uFE6F\uFE75\uFEFD-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF3E\uFF40\uFF5B-\uFF65\uFFBF-\uFFC1\uFFC8\uFFC9\uFFD0\uFFD1\uFFD8\uFFD9\uFFDD-\uFFFF]|\uD800[\uDC0C\uDC27\uDC3B\uDC3E\uDC4E\uDC4F\uDC5E-\uDC7F\uDCFB-\uDD3F\uDD75-\uDDFC\uDDFE-\uDE7F\uDE9D-\uDE9F\uDED1-\uDEDF\uDEE1-\uDEFF\uDF20-\uDF2C\uDF4B-\uDF4F\uDF7B-\uDF7F\uDF9E\uDF9F\uDFC4-\uDFC7\uDFD0\uDFD6-\uDFFF]|\uD801[\uDC9E\uDC9F\uDCAA-\uDCAF\uDCD4-\uDCD7\uDCFC-\uDCFF\uDD28-\uDD2F\uDD64-\uDDFF\uDF37-\uDF3F\uDF56-\uDF5F\uDF68-\uDFFF]|\uD802[\uDC06\uDC07\uDC09\uDC36\uDC39-\uDC3B\uDC3D\uDC3E\uDC56-\uDC5F\uDC77-\uDC7F\uDC9F-\uDCDF\uDCF3\uDCF6-\uDCFF\uDD16-\uDD1F\uDD3A-\uDD7F\uDDB8-\uDDBD\uDDC0-\uDDFF\uDE04\uDE07-\uDE0B\uDE14\uDE18\uDE36\uDE37\uDE3B-\uDE3E\uDE40-\uDE5F\uDE7D-\uDE7F\uDE9D-\uDEBF\uDEC8\uDEE7-\uDEFF\uDF36-\uDF3F\uDF56-\uDF5F\uDF73-\uDF7F\uDF92-\uDFFF]|\uD803[\uDC49-\uDC7F\uDCB3-\uDCBF\uDCF3-\uDCFF\uDD28-\uDD2F\uDD3A-\uDE7F\uDEAA\uDEAD-\uDEAF\uDEB2-\uDEFF\uDF1D-\uDF26\uDF28-\uDF2F\uDF51-\uDFAF\uDFC5-\uDFDF\uDFF7-\uDFFF]|\uD804[\uDC47-\uDC65\uDC70-\uDC7E\uDCBB-\uDCCF\uDCE9-\uDCEF\uDCFA-\uDCFF\uDD35\uDD40-\uDD43\uDD48-\uDD4F\uDD74\uDD75\uDD77-\uDD7F\uDDC5-\uDDC8\uDDCD\uDDDB\uDDDD-\uDDFF\uDE12\uDE38-\uDE3D\uDE3F-\uDE7F\uDE87\uDE89\uDE8E\uDE9E\uDEA9-\uDEAF\uDEEB-\uDEEF\uDEFA-\uDEFF\uDF04\uDF0D\uDF0E\uDF11\uDF12\uDF29\uDF31\uDF34\uDF3A\uDF45\uDF46\uDF49\uDF4A\uDF4E\uDF4F\uDF51-\uDF56\uDF58-\uDF5C\uDF64\uDF65\uDF6D-\uDF6F\uDF75-\uDFFF]|\uD805[\uDC4B-\uDC4F\uDC5A-\uDC5D\uDC62-\uDC7F\uDCC6\uDCC8-\uDCCF\uDCDA-\uDD7F\uDDB6\uDDB7\uDDC1-\uDDD7\uDDDE-\uDDFF\uDE41-\uDE43\uDE45-\uDE4F\uDE5A-\uDE7F\uDEB9-\uDEBF\uDECA-\uDEFF\uDF1B\uDF1C\uDF2C-\uDF2F\uDF3A-\uDFFF]|\uD806[\uDC3B-\uDC9F\uDCEA-\uDCFE\uDD07\uDD08\uDD0A\uDD0B\uDD14\uDD17\uDD36\uDD39\uDD3A\uDD44-\uDD4F\uDD5A-\uDD9F\uDDA8\uDDA9\uDDD8\uDDD9\uDDE2\uDDE5-\uDDFF\uDE3F-\uDE46\uDE48-\uDE4F\uDE9A-\uDE9C\uDE9E-\uDEBF\uDEF9-\uDFFF]|\uD807[\uDC09\uDC37\uDC41-\uDC4F\uDC5A-\uDC71\uDC90\uDC91\uDCA8\uDCB7-\uDCFF\uDD07\uDD0A\uDD37-\uDD39\uDD3B\uDD3E\uDD48-\uDD4F\uDD5A-\uDD5F\uDD66\uDD69\uDD8F\uDD92\uDD99-\uDD9F\uDDAA-\uDEDF\uDEF7-\uDFAF\uDFB1-\uDFFF]|\uD808[\uDF9A-\uDFFF]|\uD809[\uDC6F-\uDC7F\uDD44-\uDFFF]|[\uD80A\uD80B\uD80E-\uD810\uD812-\uD819\uD824-\uD82B\uD82D\uD82E\uD830-\uD833\uD837\uD839\uD83D\uD83F\uD87B-\uD87D\uD87F\uD885-\uDB3F\uDB41-\uDBFF][\uDC00-\uDFFF]|\uD80D[\uDC2F-\uDFFF]|\uD811[\uDE47-\uDFFF]|\uD81A[\uDE39-\uDE3F\uDE5F\uDE6A-\uDECF\uDEEE\uDEEF\uDEF5-\uDEFF\uDF37-\uDF3F\uDF44-\uDF4F\uDF5A-\uDF62\uDF78-\uDF7C\uDF90-\uDFFF]|\uD81B[\uDC00-\uDE3F\uDE80-\uDEFF\uDF4B-\uDF4E\uDF88-\uDF8E\uDFA0-\uDFDF\uDFE2\uDFE5-\uDFEF\uDFF2-\uDFFF]|\uD821[\uDFF8-\uDFFF]|\uD823[\uDCD6-\uDCFF\uDD09-\uDFFF]|\uD82C[\uDD1F-\uDD4F\uDD53-\uDD63\uDD68-\uDD6F\uDEFC-\uDFFF]|\uD82F[\uDC6B-\uDC6F\uDC7D-\uDC7F\uDC89-\uDC8F\uDC9A-\uDC9C\uDC9F-\uDFFF]|\uD834[\uDC00-\uDD64\uDD6A-\uDD6C\uDD73-\uDD7A\uDD83\uDD84\uDD8C-\uDDA9\uDDAE-\uDE41\uDE45-\uDFFF]|\uD835[\uDC55\uDC9D\uDCA0\uDCA1\uDCA3\uDCA4\uDCA7\uDCA8\uDCAD\uDCBA\uDCBC\uDCC4\uDD06\uDD0B\uDD0C\uDD15\uDD1D\uDD3A\uDD3F\uDD45\uDD47-\uDD49\uDD51\uDEA6\uDEA7\uDEC1\uDEDB\uDEFB\uDF15\uDF35\uDF4F\uDF6F\uDF89\uDFA9\uDFC3\uDFCC\uDFCD]|\uD836[\uDC00-\uDDFF\uDE37-\uDE3A\uDE6D-\uDE74\uDE76-\uDE83\uDE85-\uDE9A\uDEA0\uDEB0-\uDFFF]|\uD838[\uDC07\uDC19\uDC1A\uDC22\uDC25\uDC2B-\uDCFF\uDD2D-\uDD2F\uDD3E\uDD3F\uDD4A-\uDD4D\uDD4F-\uDEBF\uDEFA-\uDFFF]|\uD83A[\uDCC5-\uDCCF\uDCD7-\uDCFF\uDD4C-\uDD4F\uDD5A-\uDFFF]|\uD83B[\uDC00-\uDDFF\uDE04\uDE20\uDE23\uDE25\uDE26\uDE28\uDE33\uDE38\uDE3A\uDE3C-\uDE41\uDE43-\uDE46\uDE48\uDE4A\uDE4C\uDE50\uDE53\uDE55\uDE56\uDE58\uDE5A\uDE5C\uDE5E\uDE60\uDE63\uDE65\uDE66\uDE6B\uDE73\uDE78\uDE7D\uDE7F\uDE8A\uDE9C-\uDEA0\uDEA4\uDEAA\uDEBC-\uDFFF]|\uD83C[\uDC00-\uDD2F\uDD4A-\uDD4F\uDD6A-\uDD6F\uDD8A-\uDFFF]|\uD83E[\uDC00-\uDFEF\uDFFA-\uDFFF]|\uD869[\uDEDE-\uDEFF]|\uD86D[\uDF35-\uDF3F]|\uD86E[\uDC1E\uDC1F]|\uD873[\uDEA2-\uDEAF]|\uD87A[\uDFE1-\uDFFF]|\uD87E[\uDE1E-\uDFFF]|\uD884[\uDF4B-\uDFFF]|\uDB40[\uDC00-\uDCFF\uDDF0-\uDFFF]/g;
+
+// node_modules/github-slugger/index.js
+var own = Object.hasOwnProperty;
+var BananaSlug = class {
+  /**
+   * Create a new slug class.
+   */
+  constructor() {
+    this.occurrences;
+    this.reset();
+  }
+  /**
+   * Generate a unique slug.
+  *
+  * Tracks previously generated slugs: repeated calls with the same value
+  * will result in different slugs.
+  * Use the `slug` function to get same slugs.
+   *
+   * @param  {string} value
+   *   String of text to slugify
+   * @param  {boolean} [maintainCase=false]
+   *   Keep the current case, otherwise make all lowercase
+   * @return {string}
+   *   A unique slug string
+   */
+  slug(value, maintainCase) {
+    const self = this;
+    let result = slug(value, maintainCase === true);
+    const originalSlug = result;
+    while (own.call(self.occurrences, result)) {
+      self.occurrences[originalSlug]++;
+      result = originalSlug + "-" + self.occurrences[originalSlug];
+    }
+    self.occurrences[result] = 0;
+    return result;
+  }
+  /**
+   * Reset - Forget all previous slugs
+   *
+   * @return void
+   */
+  reset() {
+    this.occurrences = /* @__PURE__ */ Object.create(null);
+  }
+};
+function slug(value, maintainCase) {
+  if (typeof value !== "string") return "";
+  if (!maintainCase) value = value.toLowerCase();
+  return value.replace(regex, "").replace(/ /g, "-");
+}
+
+// node_modules/mdast-util-to-string/lib/index.js
+var emptyOptions = {};
+function toString(value, options) {
+  const settings = options || emptyOptions;
+  const includeImageAlt = typeof settings.includeImageAlt === "boolean" ? settings.includeImageAlt : true;
+  const includeHtml = typeof settings.includeHtml === "boolean" ? settings.includeHtml : true;
+  return one(value, includeImageAlt, includeHtml);
+}
+function one(value, includeImageAlt, includeHtml) {
+  if (node(value)) {
+    if ("value" in value) {
+      return value.type === "html" && !includeHtml ? "" : value.value;
+    }
+    if (includeImageAlt && "alt" in value && value.alt) {
+      return value.alt;
+    }
+    if ("children" in value) {
+      return all(value.children, includeImageAlt, includeHtml);
+    }
+  }
+  if (Array.isArray(value)) {
+    return all(value, includeImageAlt, includeHtml);
+  }
+  return "";
+}
+function all(values, includeImageAlt, includeHtml) {
+  const result = [];
+  let index2 = -1;
+  while (++index2 < values.length) {
+    result[index2] = one(values[index2], includeImageAlt, includeHtml);
+  }
+  return result.join("");
+}
+function node(value) {
+  return Boolean(value && typeof value === "object");
+}
+
+// node_modules/character-entities/index.js
+var characterEntities = {
+  AElig: "\xC6",
+  AMP: "&",
+  Aacute: "\xC1",
+  Abreve: "\u0102",
+  Acirc: "\xC2",
+  Acy: "\u0410",
+  Afr: "\u{1D504}",
+  Agrave: "\xC0",
+  Alpha: "\u0391",
+  Amacr: "\u0100",
+  And: "\u2A53",
+  Aogon: "\u0104",
+  Aopf: "\u{1D538}",
+  ApplyFunction: "\u2061",
+  Aring: "\xC5",
+  Ascr: "\u{1D49C}",
+  Assign: "\u2254",
+  Atilde: "\xC3",
+  Auml: "\xC4",
+  Backslash: "\u2216",
+  Barv: "\u2AE7",
+  Barwed: "\u2306",
+  Bcy: "\u0411",
+  Because: "\u2235",
+  Bernoullis: "\u212C",
+  Beta: "\u0392",
+  Bfr: "\u{1D505}",
+  Bopf: "\u{1D539}",
+  Breve: "\u02D8",
+  Bscr: "\u212C",
+  Bumpeq: "\u224E",
+  CHcy: "\u0427",
+  COPY: "\xA9",
+  Cacute: "\u0106",
+  Cap: "\u22D2",
+  CapitalDifferentialD: "\u2145",
+  Cayleys: "\u212D",
+  Ccaron: "\u010C",
+  Ccedil: "\xC7",
+  Ccirc: "\u0108",
+  Cconint: "\u2230",
+  Cdot: "\u010A",
+  Cedilla: "\xB8",
+  CenterDot: "\xB7",
+  Cfr: "\u212D",
+  Chi: "\u03A7",
+  CircleDot: "\u2299",
+  CircleMinus: "\u2296",
+  CirclePlus: "\u2295",
+  CircleTimes: "\u2297",
+  ClockwiseContourIntegral: "\u2232",
+  CloseCurlyDoubleQuote: "\u201D",
+  CloseCurlyQuote: "\u2019",
+  Colon: "\u2237",
+  Colone: "\u2A74",
+  Congruent: "\u2261",
+  Conint: "\u222F",
+  ContourIntegral: "\u222E",
+  Copf: "\u2102",
+  Coproduct: "\u2210",
+  CounterClockwiseContourIntegral: "\u2233",
+  Cross: "\u2A2F",
+  Cscr: "\u{1D49E}",
+  Cup: "\u22D3",
+  CupCap: "\u224D",
+  DD: "\u2145",
+  DDotrahd: "\u2911",
+  DJcy: "\u0402",
+  DScy: "\u0405",
+  DZcy: "\u040F",
+  Dagger: "\u2021",
+  Darr: "\u21A1",
+  Dashv: "\u2AE4",
+  Dcaron: "\u010E",
+  Dcy: "\u0414",
+  Del: "\u2207",
+  Delta: "\u0394",
+  Dfr: "\u{1D507}",
+  DiacriticalAcute: "\xB4",
+  DiacriticalDot: "\u02D9",
+  DiacriticalDoubleAcute: "\u02DD",
+  DiacriticalGrave: "`",
+  DiacriticalTilde: "\u02DC",
+  Diamond: "\u22C4",
+  DifferentialD: "\u2146",
+  Dopf: "\u{1D53B}",
+  Dot: "\xA8",
+  DotDot: "\u20DC",
+  DotEqual: "\u2250",
+  DoubleContourIntegral: "\u222F",
+  DoubleDot: "\xA8",
+  DoubleDownArrow: "\u21D3",
+  DoubleLeftArrow: "\u21D0",
+  DoubleLeftRightArrow: "\u21D4",
+  DoubleLeftTee: "\u2AE4",
+  DoubleLongLeftArrow: "\u27F8",
+  DoubleLongLeftRightArrow: "\u27FA",
+  DoubleLongRightArrow: "\u27F9",
+  DoubleRightArrow: "\u21D2",
+  DoubleRightTee: "\u22A8",
+  DoubleUpArrow: "\u21D1",
+  DoubleUpDownArrow: "\u21D5",
+  DoubleVerticalBar: "\u2225",
+  DownArrow: "\u2193",
+  DownArrowBar: "\u2913",
+  DownArrowUpArrow: "\u21F5",
+  DownBreve: "\u0311",
+  DownLeftRightVector: "\u2950",
+  DownLeftTeeVector: "\u295E",
+  DownLeftVector: "\u21BD",
+  DownLeftVectorBar: "\u2956",
+  DownRightTeeVector: "\u295F",
+  DownRightVector: "\u21C1",
+  DownRightVectorBar: "\u2957",
+  DownTee: "\u22A4",
+  DownTeeArrow: "\u21A7",
+  Downarrow: "\u21D3",
+  Dscr: "\u{1D49F}",
+  Dstrok: "\u0110",
+  ENG: "\u014A",
+  ETH: "\xD0",
+  Eacute: "\xC9",
+  Ecaron: "\u011A",
+  Ecirc: "\xCA",
+  Ecy: "\u042D",
+  Edot: "\u0116",
+  Efr: "\u{1D508}",
+  Egrave: "\xC8",
+  Element: "\u2208",
+  Emacr: "\u0112",
+  EmptySmallSquare: "\u25FB",
+  EmptyVerySmallSquare: "\u25AB",
+  Eogon: "\u0118",
+  Eopf: "\u{1D53C}",
+  Epsilon: "\u0395",
+  Equal: "\u2A75",
+  EqualTilde: "\u2242",
+  Equilibrium: "\u21CC",
+  Escr: "\u2130",
+  Esim: "\u2A73",
+  Eta: "\u0397",
+  Euml: "\xCB",
+  Exists: "\u2203",
+  ExponentialE: "\u2147",
+  Fcy: "\u0424",
+  Ffr: "\u{1D509}",
+  FilledSmallSquare: "\u25FC",
+  FilledVerySmallSquare: "\u25AA",
+  Fopf: "\u{1D53D}",
+  ForAll: "\u2200",
+  Fouriertrf: "\u2131",
+  Fscr: "\u2131",
+  GJcy: "\u0403",
+  GT: ">",
+  Gamma: "\u0393",
+  Gammad: "\u03DC",
+  Gbreve: "\u011E",
+  Gcedil: "\u0122",
+  Gcirc: "\u011C",
+  Gcy: "\u0413",
+  Gdot: "\u0120",
+  Gfr: "\u{1D50A}",
+  Gg: "\u22D9",
+  Gopf: "\u{1D53E}",
+  GreaterEqual: "\u2265",
+  GreaterEqualLess: "\u22DB",
+  GreaterFullEqual: "\u2267",
+  GreaterGreater: "\u2AA2",
+  GreaterLess: "\u2277",
+  GreaterSlantEqual: "\u2A7E",
+  GreaterTilde: "\u2273",
+  Gscr: "\u{1D4A2}",
+  Gt: "\u226B",
+  HARDcy: "\u042A",
+  Hacek: "\u02C7",
+  Hat: "^",
+  Hcirc: "\u0124",
+  Hfr: "\u210C",
+  HilbertSpace: "\u210B",
+  Hopf: "\u210D",
+  HorizontalLine: "\u2500",
+  Hscr: "\u210B",
+  Hstrok: "\u0126",
+  HumpDownHump: "\u224E",
+  HumpEqual: "\u224F",
+  IEcy: "\u0415",
+  IJlig: "\u0132",
+  IOcy: "\u0401",
+  Iacute: "\xCD",
+  Icirc: "\xCE",
+  Icy: "\u0418",
+  Idot: "\u0130",
+  Ifr: "\u2111",
+  Igrave: "\xCC",
+  Im: "\u2111",
+  Imacr: "\u012A",
+  ImaginaryI: "\u2148",
+  Implies: "\u21D2",
+  Int: "\u222C",
+  Integral: "\u222B",
+  Intersection: "\u22C2",
+  InvisibleComma: "\u2063",
+  InvisibleTimes: "\u2062",
+  Iogon: "\u012E",
+  Iopf: "\u{1D540}",
+  Iota: "\u0399",
+  Iscr: "\u2110",
+  Itilde: "\u0128",
+  Iukcy: "\u0406",
+  Iuml: "\xCF",
+  Jcirc: "\u0134",
+  Jcy: "\u0419",
+  Jfr: "\u{1D50D}",
+  Jopf: "\u{1D541}",
+  Jscr: "\u{1D4A5}",
+  Jsercy: "\u0408",
+  Jukcy: "\u0404",
+  KHcy: "\u0425",
+  KJcy: "\u040C",
+  Kappa: "\u039A",
+  Kcedil: "\u0136",
+  Kcy: "\u041A",
+  Kfr: "\u{1D50E}",
+  Kopf: "\u{1D542}",
+  Kscr: "\u{1D4A6}",
+  LJcy: "\u0409",
+  LT: "<",
+  Lacute: "\u0139",
+  Lambda: "\u039B",
+  Lang: "\u27EA",
+  Laplacetrf: "\u2112",
+  Larr: "\u219E",
+  Lcaron: "\u013D",
+  Lcedil: "\u013B",
+  Lcy: "\u041B",
+  LeftAngleBracket: "\u27E8",
+  LeftArrow: "\u2190",
+  LeftArrowBar: "\u21E4",
+  LeftArrowRightArrow: "\u21C6",
+  LeftCeiling: "\u2308",
+  LeftDoubleBracket: "\u27E6",
+  LeftDownTeeVector: "\u2961",
+  LeftDownVector: "\u21C3",
+  LeftDownVectorBar: "\u2959",
+  LeftFloor: "\u230A",
+  LeftRightArrow: "\u2194",
+  LeftRightVector: "\u294E",
+  LeftTee: "\u22A3",
+  LeftTeeArrow: "\u21A4",
+  LeftTeeVector: "\u295A",
+  LeftTriangle: "\u22B2",
+  LeftTriangleBar: "\u29CF",
+  LeftTriangleEqual: "\u22B4",
+  LeftUpDownVector: "\u2951",
+  LeftUpTeeVector: "\u2960",
+  LeftUpVector: "\u21BF",
+  LeftUpVectorBar: "\u2958",
+  LeftVector: "\u21BC",
+  LeftVectorBar: "\u2952",
+  Leftarrow: "\u21D0",
+  Leftrightarrow: "\u21D4",
+  LessEqualGreater: "\u22DA",
+  LessFullEqual: "\u2266",
+  LessGreater: "\u2276",
+  LessLess: "\u2AA1",
+  LessSlantEqual: "\u2A7D",
+  LessTilde: "\u2272",
+  Lfr: "\u{1D50F}",
+  Ll: "\u22D8",
+  Lleftarrow: "\u21DA",
+  Lmidot: "\u013F",
+  LongLeftArrow: "\u27F5",
+  LongLeftRightArrow: "\u27F7",
+  LongRightArrow: "\u27F6",
+  Longleftarrow: "\u27F8",
+  Longleftrightarrow: "\u27FA",
+  Longrightarrow: "\u27F9",
+  Lopf: "\u{1D543}",
+  LowerLeftArrow: "\u2199",
+  LowerRightArrow: "\u2198",
+  Lscr: "\u2112",
+  Lsh: "\u21B0",
+  Lstrok: "\u0141",
+  Lt: "\u226A",
+  Map: "\u2905",
+  Mcy: "\u041C",
+  MediumSpace: "\u205F",
+  Mellintrf: "\u2133",
+  Mfr: "\u{1D510}",
+  MinusPlus: "\u2213",
+  Mopf: "\u{1D544}",
+  Mscr: "\u2133",
+  Mu: "\u039C",
+  NJcy: "\u040A",
+  Nacute: "\u0143",
+  Ncaron: "\u0147",
+  Ncedil: "\u0145",
+  Ncy: "\u041D",
+  NegativeMediumSpace: "\u200B",
+  NegativeThickSpace: "\u200B",
+  NegativeThinSpace: "\u200B",
+  NegativeVeryThinSpace: "\u200B",
+  NestedGreaterGreater: "\u226B",
+  NestedLessLess: "\u226A",
+  NewLine: "\n",
+  Nfr: "\u{1D511}",
+  NoBreak: "\u2060",
+  NonBreakingSpace: "\xA0",
+  Nopf: "\u2115",
+  Not: "\u2AEC",
+  NotCongruent: "\u2262",
+  NotCupCap: "\u226D",
+  NotDoubleVerticalBar: "\u2226",
+  NotElement: "\u2209",
+  NotEqual: "\u2260",
+  NotEqualTilde: "\u2242\u0338",
+  NotExists: "\u2204",
+  NotGreater: "\u226F",
+  NotGreaterEqual: "\u2271",
+  NotGreaterFullEqual: "\u2267\u0338",
+  NotGreaterGreater: "\u226B\u0338",
+  NotGreaterLess: "\u2279",
+  NotGreaterSlantEqual: "\u2A7E\u0338",
+  NotGreaterTilde: "\u2275",
+  NotHumpDownHump: "\u224E\u0338",
+  NotHumpEqual: "\u224F\u0338",
+  NotLeftTriangle: "\u22EA",
+  NotLeftTriangleBar: "\u29CF\u0338",
+  NotLeftTriangleEqual: "\u22EC",
+  NotLess: "\u226E",
+  NotLessEqual: "\u2270",
+  NotLessGreater: "\u2278",
+  NotLessLess: "\u226A\u0338",
+  NotLessSlantEqual: "\u2A7D\u0338",
+  NotLessTilde: "\u2274",
+  NotNestedGreaterGreater: "\u2AA2\u0338",
+  NotNestedLessLess: "\u2AA1\u0338",
+  NotPrecedes: "\u2280",
+  NotPrecedesEqual: "\u2AAF\u0338",
+  NotPrecedesSlantEqual: "\u22E0",
+  NotReverseElement: "\u220C",
+  NotRightTriangle: "\u22EB",
+  NotRightTriangleBar: "\u29D0\u0338",
+  NotRightTriangleEqual: "\u22ED",
+  NotSquareSubset: "\u228F\u0338",
+  NotSquareSubsetEqual: "\u22E2",
+  NotSquareSuperset: "\u2290\u0338",
+  NotSquareSupersetEqual: "\u22E3",
+  NotSubset: "\u2282\u20D2",
+  NotSubsetEqual: "\u2288",
+  NotSucceeds: "\u2281",
+  NotSucceedsEqual: "\u2AB0\u0338",
+  NotSucceedsSlantEqual: "\u22E1",
+  NotSucceedsTilde: "\u227F\u0338",
+  NotSuperset: "\u2283\u20D2",
+  NotSupersetEqual: "\u2289",
+  NotTilde: "\u2241",
+  NotTildeEqual: "\u2244",
+  NotTildeFullEqual: "\u2247",
+  NotTildeTilde: "\u2249",
+  NotVerticalBar: "\u2224",
+  Nscr: "\u{1D4A9}",
+  Ntilde: "\xD1",
+  Nu: "\u039D",
+  OElig: "\u0152",
+  Oacute: "\xD3",
+  Ocirc: "\xD4",
+  Ocy: "\u041E",
+  Odblac: "\u0150",
+  Ofr: "\u{1D512}",
+  Ograve: "\xD2",
+  Omacr: "\u014C",
+  Omega: "\u03A9",
+  Omicron: "\u039F",
+  Oopf: "\u{1D546}",
+  OpenCurlyDoubleQuote: "\u201C",
+  OpenCurlyQuote: "\u2018",
+  Or: "\u2A54",
+  Oscr: "\u{1D4AA}",
+  Oslash: "\xD8",
+  Otilde: "\xD5",
+  Otimes: "\u2A37",
+  Ouml: "\xD6",
+  OverBar: "\u203E",
+  OverBrace: "\u23DE",
+  OverBracket: "\u23B4",
+  OverParenthesis: "\u23DC",
+  PartialD: "\u2202",
+  Pcy: "\u041F",
+  Pfr: "\u{1D513}",
+  Phi: "\u03A6",
+  Pi: "\u03A0",
+  PlusMinus: "\xB1",
+  Poincareplane: "\u210C",
+  Popf: "\u2119",
+  Pr: "\u2ABB",
+  Precedes: "\u227A",
+  PrecedesEqual: "\u2AAF",
+  PrecedesSlantEqual: "\u227C",
+  PrecedesTilde: "\u227E",
+  Prime: "\u2033",
+  Product: "\u220F",
+  Proportion: "\u2237",
+  Proportional: "\u221D",
+  Pscr: "\u{1D4AB}",
+  Psi: "\u03A8",
+  QUOT: '"',
+  Qfr: "\u{1D514}",
+  Qopf: "\u211A",
+  Qscr: "\u{1D4AC}",
+  RBarr: "\u2910",
+  REG: "\xAE",
+  Racute: "\u0154",
+  Rang: "\u27EB",
+  Rarr: "\u21A0",
+  Rarrtl: "\u2916",
+  Rcaron: "\u0158",
+  Rcedil: "\u0156",
+  Rcy: "\u0420",
+  Re: "\u211C",
+  ReverseElement: "\u220B",
+  ReverseEquilibrium: "\u21CB",
+  ReverseUpEquilibrium: "\u296F",
+  Rfr: "\u211C",
+  Rho: "\u03A1",
+  RightAngleBracket: "\u27E9",
+  RightArrow: "\u2192",
+  RightArrowBar: "\u21E5",
+  RightArrowLeftArrow: "\u21C4",
+  RightCeiling: "\u2309",
+  RightDoubleBracket: "\u27E7",
+  RightDownTeeVector: "\u295D",
+  RightDownVector: "\u21C2",
+  RightDownVectorBar: "\u2955",
+  RightFloor: "\u230B",
+  RightTee: "\u22A2",
+  RightTeeArrow: "\u21A6",
+  RightTeeVector: "\u295B",
+  RightTriangle: "\u22B3",
+  RightTriangleBar: "\u29D0",
+  RightTriangleEqual: "\u22B5",
+  RightUpDownVector: "\u294F",
+  RightUpTeeVector: "\u295C",
+  RightUpVector: "\u21BE",
+  RightUpVectorBar: "\u2954",
+  RightVector: "\u21C0",
+  RightVectorBar: "\u2953",
+  Rightarrow: "\u21D2",
+  Ropf: "\u211D",
+  RoundImplies: "\u2970",
+  Rrightarrow: "\u21DB",
+  Rscr: "\u211B",
+  Rsh: "\u21B1",
+  RuleDelayed: "\u29F4",
+  SHCHcy: "\u0429",
+  SHcy: "\u0428",
+  SOFTcy: "\u042C",
+  Sacute: "\u015A",
+  Sc: "\u2ABC",
+  Scaron: "\u0160",
+  Scedil: "\u015E",
+  Scirc: "\u015C",
+  Scy: "\u0421",
+  Sfr: "\u{1D516}",
+  ShortDownArrow: "\u2193",
+  ShortLeftArrow: "\u2190",
+  ShortRightArrow: "\u2192",
+  ShortUpArrow: "\u2191",
+  Sigma: "\u03A3",
+  SmallCircle: "\u2218",
+  Sopf: "\u{1D54A}",
+  Sqrt: "\u221A",
+  Square: "\u25A1",
+  SquareIntersection: "\u2293",
+  SquareSubset: "\u228F",
+  SquareSubsetEqual: "\u2291",
+  SquareSuperset: "\u2290",
+  SquareSupersetEqual: "\u2292",
+  SquareUnion: "\u2294",
+  Sscr: "\u{1D4AE}",
+  Star: "\u22C6",
+  Sub: "\u22D0",
+  Subset: "\u22D0",
+  SubsetEqual: "\u2286",
+  Succeeds: "\u227B",
+  SucceedsEqual: "\u2AB0",
+  SucceedsSlantEqual: "\u227D",
+  SucceedsTilde: "\u227F",
+  SuchThat: "\u220B",
+  Sum: "\u2211",
+  Sup: "\u22D1",
+  Superset: "\u2283",
+  SupersetEqual: "\u2287",
+  Supset: "\u22D1",
+  THORN: "\xDE",
+  TRADE: "\u2122",
+  TSHcy: "\u040B",
+  TScy: "\u0426",
+  Tab: "	",
+  Tau: "\u03A4",
+  Tcaron: "\u0164",
+  Tcedil: "\u0162",
+  Tcy: "\u0422",
+  Tfr: "\u{1D517}",
+  Therefore: "\u2234",
+  Theta: "\u0398",
+  ThickSpace: "\u205F\u200A",
+  ThinSpace: "\u2009",
+  Tilde: "\u223C",
+  TildeEqual: "\u2243",
+  TildeFullEqual: "\u2245",
+  TildeTilde: "\u2248",
+  Topf: "\u{1D54B}",
+  TripleDot: "\u20DB",
+  Tscr: "\u{1D4AF}",
+  Tstrok: "\u0166",
+  Uacute: "\xDA",
+  Uarr: "\u219F",
+  Uarrocir: "\u2949",
+  Ubrcy: "\u040E",
+  Ubreve: "\u016C",
+  Ucirc: "\xDB",
+  Ucy: "\u0423",
+  Udblac: "\u0170",
+  Ufr: "\u{1D518}",
+  Ugrave: "\xD9",
+  Umacr: "\u016A",
+  UnderBar: "_",
+  UnderBrace: "\u23DF",
+  UnderBracket: "\u23B5",
+  UnderParenthesis: "\u23DD",
+  Union: "\u22C3",
+  UnionPlus: "\u228E",
+  Uogon: "\u0172",
+  Uopf: "\u{1D54C}",
+  UpArrow: "\u2191",
+  UpArrowBar: "\u2912",
+  UpArrowDownArrow: "\u21C5",
+  UpDownArrow: "\u2195",
+  UpEquilibrium: "\u296E",
+  UpTee: "\u22A5",
+  UpTeeArrow: "\u21A5",
+  Uparrow: "\u21D1",
+  Updownarrow: "\u21D5",
+  UpperLeftArrow: "\u2196",
+  UpperRightArrow: "\u2197",
+  Upsi: "\u03D2",
+  Upsilon: "\u03A5",
+  Uring: "\u016E",
+  Uscr: "\u{1D4B0}",
+  Utilde: "\u0168",
+  Uuml: "\xDC",
+  VDash: "\u22AB",
+  Vbar: "\u2AEB",
+  Vcy: "\u0412",
+  Vdash: "\u22A9",
+  Vdashl: "\u2AE6",
+  Vee: "\u22C1",
+  Verbar: "\u2016",
+  Vert: "\u2016",
+  VerticalBar: "\u2223",
+  VerticalLine: "|",
+  VerticalSeparator: "\u2758",
+  VerticalTilde: "\u2240",
+  VeryThinSpace: "\u200A",
+  Vfr: "\u{1D519}",
+  Vopf: "\u{1D54D}",
+  Vscr: "\u{1D4B1}",
+  Vvdash: "\u22AA",
+  Wcirc: "\u0174",
+  Wedge: "\u22C0",
+  Wfr: "\u{1D51A}",
+  Wopf: "\u{1D54E}",
+  Wscr: "\u{1D4B2}",
+  Xfr: "\u{1D51B}",
+  Xi: "\u039E",
+  Xopf: "\u{1D54F}",
+  Xscr: "\u{1D4B3}",
+  YAcy: "\u042F",
+  YIcy: "\u0407",
+  YUcy: "\u042E",
+  Yacute: "\xDD",
+  Ycirc: "\u0176",
+  Ycy: "\u042B",
+  Yfr: "\u{1D51C}",
+  Yopf: "\u{1D550}",
+  Yscr: "\u{1D4B4}",
+  Yuml: "\u0178",
+  ZHcy: "\u0416",
+  Zacute: "\u0179",
+  Zcaron: "\u017D",
+  Zcy: "\u0417",
+  Zdot: "\u017B",
+  ZeroWidthSpace: "\u200B",
+  Zeta: "\u0396",
+  Zfr: "\u2128",
+  Zopf: "\u2124",
+  Zscr: "\u{1D4B5}",
+  aacute: "\xE1",
+  abreve: "\u0103",
+  ac: "\u223E",
+  acE: "\u223E\u0333",
+  acd: "\u223F",
+  acirc: "\xE2",
+  acute: "\xB4",
+  acy: "\u0430",
+  aelig: "\xE6",
+  af: "\u2061",
+  afr: "\u{1D51E}",
+  agrave: "\xE0",
+  alefsym: "\u2135",
+  aleph: "\u2135",
+  alpha: "\u03B1",
+  amacr: "\u0101",
+  amalg: "\u2A3F",
+  amp: "&",
+  and: "\u2227",
+  andand: "\u2A55",
+  andd: "\u2A5C",
+  andslope: "\u2A58",
+  andv: "\u2A5A",
+  ang: "\u2220",
+  ange: "\u29A4",
+  angle: "\u2220",
+  angmsd: "\u2221",
+  angmsdaa: "\u29A8",
+  angmsdab: "\u29A9",
+  angmsdac: "\u29AA",
+  angmsdad: "\u29AB",
+  angmsdae: "\u29AC",
+  angmsdaf: "\u29AD",
+  angmsdag: "\u29AE",
+  angmsdah: "\u29AF",
+  angrt: "\u221F",
+  angrtvb: "\u22BE",
+  angrtvbd: "\u299D",
+  angsph: "\u2222",
+  angst: "\xC5",
+  angzarr: "\u237C",
+  aogon: "\u0105",
+  aopf: "\u{1D552}",
+  ap: "\u2248",
+  apE: "\u2A70",
+  apacir: "\u2A6F",
+  ape: "\u224A",
+  apid: "\u224B",
+  apos: "'",
+  approx: "\u2248",
+  approxeq: "\u224A",
+  aring: "\xE5",
+  ascr: "\u{1D4B6}",
+  ast: "*",
+  asymp: "\u2248",
+  asympeq: "\u224D",
+  atilde: "\xE3",
+  auml: "\xE4",
+  awconint: "\u2233",
+  awint: "\u2A11",
+  bNot: "\u2AED",
+  backcong: "\u224C",
+  backepsilon: "\u03F6",
+  backprime: "\u2035",
+  backsim: "\u223D",
+  backsimeq: "\u22CD",
+  barvee: "\u22BD",
+  barwed: "\u2305",
+  barwedge: "\u2305",
+  bbrk: "\u23B5",
+  bbrktbrk: "\u23B6",
+  bcong: "\u224C",
+  bcy: "\u0431",
+  bdquo: "\u201E",
+  becaus: "\u2235",
+  because: "\u2235",
+  bemptyv: "\u29B0",
+  bepsi: "\u03F6",
+  bernou: "\u212C",
+  beta: "\u03B2",
+  beth: "\u2136",
+  between: "\u226C",
+  bfr: "\u{1D51F}",
+  bigcap: "\u22C2",
+  bigcirc: "\u25EF",
+  bigcup: "\u22C3",
+  bigodot: "\u2A00",
+  bigoplus: "\u2A01",
+  bigotimes: "\u2A02",
+  bigsqcup: "\u2A06",
+  bigstar: "\u2605",
+  bigtriangledown: "\u25BD",
+  bigtriangleup: "\u25B3",
+  biguplus: "\u2A04",
+  bigvee: "\u22C1",
+  bigwedge: "\u22C0",
+  bkarow: "\u290D",
+  blacklozenge: "\u29EB",
+  blacksquare: "\u25AA",
+  blacktriangle: "\u25B4",
+  blacktriangledown: "\u25BE",
+  blacktriangleleft: "\u25C2",
+  blacktriangleright: "\u25B8",
+  blank: "\u2423",
+  blk12: "\u2592",
+  blk14: "\u2591",
+  blk34: "\u2593",
+  block: "\u2588",
+  bne: "=\u20E5",
+  bnequiv: "\u2261\u20E5",
+  bnot: "\u2310",
+  bopf: "\u{1D553}",
+  bot: "\u22A5",
+  bottom: "\u22A5",
+  bowtie: "\u22C8",
+  boxDL: "\u2557",
+  boxDR: "\u2554",
+  boxDl: "\u2556",
+  boxDr: "\u2553",
+  boxH: "\u2550",
+  boxHD: "\u2566",
+  boxHU: "\u2569",
+  boxHd: "\u2564",
+  boxHu: "\u2567",
+  boxUL: "\u255D",
+  boxUR: "\u255A",
+  boxUl: "\u255C",
+  boxUr: "\u2559",
+  boxV: "\u2551",
+  boxVH: "\u256C",
+  boxVL: "\u2563",
+  boxVR: "\u2560",
+  boxVh: "\u256B",
+  boxVl: "\u2562",
+  boxVr: "\u255F",
+  boxbox: "\u29C9",
+  boxdL: "\u2555",
+  boxdR: "\u2552",
+  boxdl: "\u2510",
+  boxdr: "\u250C",
+  boxh: "\u2500",
+  boxhD: "\u2565",
+  boxhU: "\u2568",
+  boxhd: "\u252C",
+  boxhu: "\u2534",
+  boxminus: "\u229F",
+  boxplus: "\u229E",
+  boxtimes: "\u22A0",
+  boxuL: "\u255B",
+  boxuR: "\u2558",
+  boxul: "\u2518",
+  boxur: "\u2514",
+  boxv: "\u2502",
+  boxvH: "\u256A",
+  boxvL: "\u2561",
+  boxvR: "\u255E",
+  boxvh: "\u253C",
+  boxvl: "\u2524",
+  boxvr: "\u251C",
+  bprime: "\u2035",
+  breve: "\u02D8",
+  brvbar: "\xA6",
+  bscr: "\u{1D4B7}",
+  bsemi: "\u204F",
+  bsim: "\u223D",
+  bsime: "\u22CD",
+  bsol: "\\",
+  bsolb: "\u29C5",
+  bsolhsub: "\u27C8",
+  bull: "\u2022",
+  bullet: "\u2022",
+  bump: "\u224E",
+  bumpE: "\u2AAE",
+  bumpe: "\u224F",
+  bumpeq: "\u224F",
+  cacute: "\u0107",
+  cap: "\u2229",
+  capand: "\u2A44",
+  capbrcup: "\u2A49",
+  capcap: "\u2A4B",
+  capcup: "\u2A47",
+  capdot: "\u2A40",
+  caps: "\u2229\uFE00",
+  caret: "\u2041",
+  caron: "\u02C7",
+  ccaps: "\u2A4D",
+  ccaron: "\u010D",
+  ccedil: "\xE7",
+  ccirc: "\u0109",
+  ccups: "\u2A4C",
+  ccupssm: "\u2A50",
+  cdot: "\u010B",
+  cedil: "\xB8",
+  cemptyv: "\u29B2",
+  cent: "\xA2",
+  centerdot: "\xB7",
+  cfr: "\u{1D520}",
+  chcy: "\u0447",
+  check: "\u2713",
+  checkmark: "\u2713",
+  chi: "\u03C7",
+  cir: "\u25CB",
+  cirE: "\u29C3",
+  circ: "\u02C6",
+  circeq: "\u2257",
+  circlearrowleft: "\u21BA",
+  circlearrowright: "\u21BB",
+  circledR: "\xAE",
+  circledS: "\u24C8",
+  circledast: "\u229B",
+  circledcirc: "\u229A",
+  circleddash: "\u229D",
+  cire: "\u2257",
+  cirfnint: "\u2A10",
+  cirmid: "\u2AEF",
+  cirscir: "\u29C2",
+  clubs: "\u2663",
+  clubsuit: "\u2663",
+  colon: ":",
+  colone: "\u2254",
+  coloneq: "\u2254",
+  comma: ",",
+  commat: "@",
+  comp: "\u2201",
+  compfn: "\u2218",
+  complement: "\u2201",
+  complexes: "\u2102",
+  cong: "\u2245",
+  congdot: "\u2A6D",
+  conint: "\u222E",
+  copf: "\u{1D554}",
+  coprod: "\u2210",
+  copy: "\xA9",
+  copysr: "\u2117",
+  crarr: "\u21B5",
+  cross: "\u2717",
+  cscr: "\u{1D4B8}",
+  csub: "\u2ACF",
+  csube: "\u2AD1",
+  csup: "\u2AD0",
+  csupe: "\u2AD2",
+  ctdot: "\u22EF",
+  cudarrl: "\u2938",
+  cudarrr: "\u2935",
+  cuepr: "\u22DE",
+  cuesc: "\u22DF",
+  cularr: "\u21B6",
+  cularrp: "\u293D",
+  cup: "\u222A",
+  cupbrcap: "\u2A48",
+  cupcap: "\u2A46",
+  cupcup: "\u2A4A",
+  cupdot: "\u228D",
+  cupor: "\u2A45",
+  cups: "\u222A\uFE00",
+  curarr: "\u21B7",
+  curarrm: "\u293C",
+  curlyeqprec: "\u22DE",
+  curlyeqsucc: "\u22DF",
+  curlyvee: "\u22CE",
+  curlywedge: "\u22CF",
+  curren: "\xA4",
+  curvearrowleft: "\u21B6",
+  curvearrowright: "\u21B7",
+  cuvee: "\u22CE",
+  cuwed: "\u22CF",
+  cwconint: "\u2232",
+  cwint: "\u2231",
+  cylcty: "\u232D",
+  dArr: "\u21D3",
+  dHar: "\u2965",
+  dagger: "\u2020",
+  daleth: "\u2138",
+  darr: "\u2193",
+  dash: "\u2010",
+  dashv: "\u22A3",
+  dbkarow: "\u290F",
+  dblac: "\u02DD",
+  dcaron: "\u010F",
+  dcy: "\u0434",
+  dd: "\u2146",
+  ddagger: "\u2021",
+  ddarr: "\u21CA",
+  ddotseq: "\u2A77",
+  deg: "\xB0",
+  delta: "\u03B4",
+  demptyv: "\u29B1",
+  dfisht: "\u297F",
+  dfr: "\u{1D521}",
+  dharl: "\u21C3",
+  dharr: "\u21C2",
+  diam: "\u22C4",
+  diamond: "\u22C4",
+  diamondsuit: "\u2666",
+  diams: "\u2666",
+  die: "\xA8",
+  digamma: "\u03DD",
+  disin: "\u22F2",
+  div: "\xF7",
+  divide: "\xF7",
+  divideontimes: "\u22C7",
+  divonx: "\u22C7",
+  djcy: "\u0452",
+  dlcorn: "\u231E",
+  dlcrop: "\u230D",
+  dollar: "$",
+  dopf: "\u{1D555}",
+  dot: "\u02D9",
+  doteq: "\u2250",
+  doteqdot: "\u2251",
+  dotminus: "\u2238",
+  dotplus: "\u2214",
+  dotsquare: "\u22A1",
+  doublebarwedge: "\u2306",
+  downarrow: "\u2193",
+  downdownarrows: "\u21CA",
+  downharpoonleft: "\u21C3",
+  downharpoonright: "\u21C2",
+  drbkarow: "\u2910",
+  drcorn: "\u231F",
+  drcrop: "\u230C",
+  dscr: "\u{1D4B9}",
+  dscy: "\u0455",
+  dsol: "\u29F6",
+  dstrok: "\u0111",
+  dtdot: "\u22F1",
+  dtri: "\u25BF",
+  dtrif: "\u25BE",
+  duarr: "\u21F5",
+  duhar: "\u296F",
+  dwangle: "\u29A6",
+  dzcy: "\u045F",
+  dzigrarr: "\u27FF",
+  eDDot: "\u2A77",
+  eDot: "\u2251",
+  eacute: "\xE9",
+  easter: "\u2A6E",
+  ecaron: "\u011B",
+  ecir: "\u2256",
+  ecirc: "\xEA",
+  ecolon: "\u2255",
+  ecy: "\u044D",
+  edot: "\u0117",
+  ee: "\u2147",
+  efDot: "\u2252",
+  efr: "\u{1D522}",
+  eg: "\u2A9A",
+  egrave: "\xE8",
+  egs: "\u2A96",
+  egsdot: "\u2A98",
+  el: "\u2A99",
+  elinters: "\u23E7",
+  ell: "\u2113",
+  els: "\u2A95",
+  elsdot: "\u2A97",
+  emacr: "\u0113",
+  empty: "\u2205",
+  emptyset: "\u2205",
+  emptyv: "\u2205",
+  emsp13: "\u2004",
+  emsp14: "\u2005",
+  emsp: "\u2003",
+  eng: "\u014B",
+  ensp: "\u2002",
+  eogon: "\u0119",
+  eopf: "\u{1D556}",
+  epar: "\u22D5",
+  eparsl: "\u29E3",
+  eplus: "\u2A71",
+  epsi: "\u03B5",
+  epsilon: "\u03B5",
+  epsiv: "\u03F5",
+  eqcirc: "\u2256",
+  eqcolon: "\u2255",
+  eqsim: "\u2242",
+  eqslantgtr: "\u2A96",
+  eqslantless: "\u2A95",
+  equals: "=",
+  equest: "\u225F",
+  equiv: "\u2261",
+  equivDD: "\u2A78",
+  eqvparsl: "\u29E5",
+  erDot: "\u2253",
+  erarr: "\u2971",
+  escr: "\u212F",
+  esdot: "\u2250",
+  esim: "\u2242",
+  eta: "\u03B7",
+  eth: "\xF0",
+  euml: "\xEB",
+  euro: "\u20AC",
+  excl: "!",
+  exist: "\u2203",
+  expectation: "\u2130",
+  exponentiale: "\u2147",
+  fallingdotseq: "\u2252",
+  fcy: "\u0444",
+  female: "\u2640",
+  ffilig: "\uFB03",
+  fflig: "\uFB00",
+  ffllig: "\uFB04",
+  ffr: "\u{1D523}",
+  filig: "\uFB01",
+  fjlig: "fj",
+  flat: "\u266D",
+  fllig: "\uFB02",
+  fltns: "\u25B1",
+  fnof: "\u0192",
+  fopf: "\u{1D557}",
+  forall: "\u2200",
+  fork: "\u22D4",
+  forkv: "\u2AD9",
+  fpartint: "\u2A0D",
+  frac12: "\xBD",
+  frac13: "\u2153",
+  frac14: "\xBC",
+  frac15: "\u2155",
+  frac16: "\u2159",
+  frac18: "\u215B",
+  frac23: "\u2154",
+  frac25: "\u2156",
+  frac34: "\xBE",
+  frac35: "\u2157",
+  frac38: "\u215C",
+  frac45: "\u2158",
+  frac56: "\u215A",
+  frac58: "\u215D",
+  frac78: "\u215E",
+  frasl: "\u2044",
+  frown: "\u2322",
+  fscr: "\u{1D4BB}",
+  gE: "\u2267",
+  gEl: "\u2A8C",
+  gacute: "\u01F5",
+  gamma: "\u03B3",
+  gammad: "\u03DD",
+  gap: "\u2A86",
+  gbreve: "\u011F",
+  gcirc: "\u011D",
+  gcy: "\u0433",
+  gdot: "\u0121",
+  ge: "\u2265",
+  gel: "\u22DB",
+  geq: "\u2265",
+  geqq: "\u2267",
+  geqslant: "\u2A7E",
+  ges: "\u2A7E",
+  gescc: "\u2AA9",
+  gesdot: "\u2A80",
+  gesdoto: "\u2A82",
+  gesdotol: "\u2A84",
+  gesl: "\u22DB\uFE00",
+  gesles: "\u2A94",
+  gfr: "\u{1D524}",
+  gg: "\u226B",
+  ggg: "\u22D9",
+  gimel: "\u2137",
+  gjcy: "\u0453",
+  gl: "\u2277",
+  glE: "\u2A92",
+  gla: "\u2AA5",
+  glj: "\u2AA4",
+  gnE: "\u2269",
+  gnap: "\u2A8A",
+  gnapprox: "\u2A8A",
+  gne: "\u2A88",
+  gneq: "\u2A88",
+  gneqq: "\u2269",
+  gnsim: "\u22E7",
+  gopf: "\u{1D558}",
+  grave: "`",
+  gscr: "\u210A",
+  gsim: "\u2273",
+  gsime: "\u2A8E",
+  gsiml: "\u2A90",
+  gt: ">",
+  gtcc: "\u2AA7",
+  gtcir: "\u2A7A",
+  gtdot: "\u22D7",
+  gtlPar: "\u2995",
+  gtquest: "\u2A7C",
+  gtrapprox: "\u2A86",
+  gtrarr: "\u2978",
+  gtrdot: "\u22D7",
+  gtreqless: "\u22DB",
+  gtreqqless: "\u2A8C",
+  gtrless: "\u2277",
+  gtrsim: "\u2273",
+  gvertneqq: "\u2269\uFE00",
+  gvnE: "\u2269\uFE00",
+  hArr: "\u21D4",
+  hairsp: "\u200A",
+  half: "\xBD",
+  hamilt: "\u210B",
+  hardcy: "\u044A",
+  harr: "\u2194",
+  harrcir: "\u2948",
+  harrw: "\u21AD",
+  hbar: "\u210F",
+  hcirc: "\u0125",
+  hearts: "\u2665",
+  heartsuit: "\u2665",
+  hellip: "\u2026",
+  hercon: "\u22B9",
+  hfr: "\u{1D525}",
+  hksearow: "\u2925",
+  hkswarow: "\u2926",
+  hoarr: "\u21FF",
+  homtht: "\u223B",
+  hookleftarrow: "\u21A9",
+  hookrightarrow: "\u21AA",
+  hopf: "\u{1D559}",
+  horbar: "\u2015",
+  hscr: "\u{1D4BD}",
+  hslash: "\u210F",
+  hstrok: "\u0127",
+  hybull: "\u2043",
+  hyphen: "\u2010",
+  iacute: "\xED",
+  ic: "\u2063",
+  icirc: "\xEE",
+  icy: "\u0438",
+  iecy: "\u0435",
+  iexcl: "\xA1",
+  iff: "\u21D4",
+  ifr: "\u{1D526}",
+  igrave: "\xEC",
+  ii: "\u2148",
+  iiiint: "\u2A0C",
+  iiint: "\u222D",
+  iinfin: "\u29DC",
+  iiota: "\u2129",
+  ijlig: "\u0133",
+  imacr: "\u012B",
+  image: "\u2111",
+  imagline: "\u2110",
+  imagpart: "\u2111",
+  imath: "\u0131",
+  imof: "\u22B7",
+  imped: "\u01B5",
+  in: "\u2208",
+  incare: "\u2105",
+  infin: "\u221E",
+  infintie: "\u29DD",
+  inodot: "\u0131",
+  int: "\u222B",
+  intcal: "\u22BA",
+  integers: "\u2124",
+  intercal: "\u22BA",
+  intlarhk: "\u2A17",
+  intprod: "\u2A3C",
+  iocy: "\u0451",
+  iogon: "\u012F",
+  iopf: "\u{1D55A}",
+  iota: "\u03B9",
+  iprod: "\u2A3C",
+  iquest: "\xBF",
+  iscr: "\u{1D4BE}",
+  isin: "\u2208",
+  isinE: "\u22F9",
+  isindot: "\u22F5",
+  isins: "\u22F4",
+  isinsv: "\u22F3",
+  isinv: "\u2208",
+  it: "\u2062",
+  itilde: "\u0129",
+  iukcy: "\u0456",
+  iuml: "\xEF",
+  jcirc: "\u0135",
+  jcy: "\u0439",
+  jfr: "\u{1D527}",
+  jmath: "\u0237",
+  jopf: "\u{1D55B}",
+  jscr: "\u{1D4BF}",
+  jsercy: "\u0458",
+  jukcy: "\u0454",
+  kappa: "\u03BA",
+  kappav: "\u03F0",
+  kcedil: "\u0137",
+  kcy: "\u043A",
+  kfr: "\u{1D528}",
+  kgreen: "\u0138",
+  khcy: "\u0445",
+  kjcy: "\u045C",
+  kopf: "\u{1D55C}",
+  kscr: "\u{1D4C0}",
+  lAarr: "\u21DA",
+  lArr: "\u21D0",
+  lAtail: "\u291B",
+  lBarr: "\u290E",
+  lE: "\u2266",
+  lEg: "\u2A8B",
+  lHar: "\u2962",
+  lacute: "\u013A",
+  laemptyv: "\u29B4",
+  lagran: "\u2112",
+  lambda: "\u03BB",
+  lang: "\u27E8",
+  langd: "\u2991",
+  langle: "\u27E8",
+  lap: "\u2A85",
+  laquo: "\xAB",
+  larr: "\u2190",
+  larrb: "\u21E4",
+  larrbfs: "\u291F",
+  larrfs: "\u291D",
+  larrhk: "\u21A9",
+  larrlp: "\u21AB",
+  larrpl: "\u2939",
+  larrsim: "\u2973",
+  larrtl: "\u21A2",
+  lat: "\u2AAB",
+  latail: "\u2919",
+  late: "\u2AAD",
+  lates: "\u2AAD\uFE00",
+  lbarr: "\u290C",
+  lbbrk: "\u2772",
+  lbrace: "{",
+  lbrack: "[",
+  lbrke: "\u298B",
+  lbrksld: "\u298F",
+  lbrkslu: "\u298D",
+  lcaron: "\u013E",
+  lcedil: "\u013C",
+  lceil: "\u2308",
+  lcub: "{",
+  lcy: "\u043B",
+  ldca: "\u2936",
+  ldquo: "\u201C",
+  ldquor: "\u201E",
+  ldrdhar: "\u2967",
+  ldrushar: "\u294B",
+  ldsh: "\u21B2",
+  le: "\u2264",
+  leftarrow: "\u2190",
+  leftarrowtail: "\u21A2",
+  leftharpoondown: "\u21BD",
+  leftharpoonup: "\u21BC",
+  leftleftarrows: "\u21C7",
+  leftrightarrow: "\u2194",
+  leftrightarrows: "\u21C6",
+  leftrightharpoons: "\u21CB",
+  leftrightsquigarrow: "\u21AD",
+  leftthreetimes: "\u22CB",
+  leg: "\u22DA",
+  leq: "\u2264",
+  leqq: "\u2266",
+  leqslant: "\u2A7D",
+  les: "\u2A7D",
+  lescc: "\u2AA8",
+  lesdot: "\u2A7F",
+  lesdoto: "\u2A81",
+  lesdotor: "\u2A83",
+  lesg: "\u22DA\uFE00",
+  lesges: "\u2A93",
+  lessapprox: "\u2A85",
+  lessdot: "\u22D6",
+  lesseqgtr: "\u22DA",
+  lesseqqgtr: "\u2A8B",
+  lessgtr: "\u2276",
+  lesssim: "\u2272",
+  lfisht: "\u297C",
+  lfloor: "\u230A",
+  lfr: "\u{1D529}",
+  lg: "\u2276",
+  lgE: "\u2A91",
+  lhard: "\u21BD",
+  lharu: "\u21BC",
+  lharul: "\u296A",
+  lhblk: "\u2584",
+  ljcy: "\u0459",
+  ll: "\u226A",
+  llarr: "\u21C7",
+  llcorner: "\u231E",
+  llhard: "\u296B",
+  lltri: "\u25FA",
+  lmidot: "\u0140",
+  lmoust: "\u23B0",
+  lmoustache: "\u23B0",
+  lnE: "\u2268",
+  lnap: "\u2A89",
+  lnapprox: "\u2A89",
+  lne: "\u2A87",
+  lneq: "\u2A87",
+  lneqq: "\u2268",
+  lnsim: "\u22E6",
+  loang: "\u27EC",
+  loarr: "\u21FD",
+  lobrk: "\u27E6",
+  longleftarrow: "\u27F5",
+  longleftrightarrow: "\u27F7",
+  longmapsto: "\u27FC",
+  longrightarrow: "\u27F6",
+  looparrowleft: "\u21AB",
+  looparrowright: "\u21AC",
+  lopar: "\u2985",
+  lopf: "\u{1D55D}",
+  loplus: "\u2A2D",
+  lotimes: "\u2A34",
+  lowast: "\u2217",
+  lowbar: "_",
+  loz: "\u25CA",
+  lozenge: "\u25CA",
+  lozf: "\u29EB",
+  lpar: "(",
+  lparlt: "\u2993",
+  lrarr: "\u21C6",
+  lrcorner: "\u231F",
+  lrhar: "\u21CB",
+  lrhard: "\u296D",
+  lrm: "\u200E",
+  lrtri: "\u22BF",
+  lsaquo: "\u2039",
+  lscr: "\u{1D4C1}",
+  lsh: "\u21B0",
+  lsim: "\u2272",
+  lsime: "\u2A8D",
+  lsimg: "\u2A8F",
+  lsqb: "[",
+  lsquo: "\u2018",
+  lsquor: "\u201A",
+  lstrok: "\u0142",
+  lt: "<",
+  ltcc: "\u2AA6",
+  ltcir: "\u2A79",
+  ltdot: "\u22D6",
+  lthree: "\u22CB",
+  ltimes: "\u22C9",
+  ltlarr: "\u2976",
+  ltquest: "\u2A7B",
+  ltrPar: "\u2996",
+  ltri: "\u25C3",
+  ltrie: "\u22B4",
+  ltrif: "\u25C2",
+  lurdshar: "\u294A",
+  luruhar: "\u2966",
+  lvertneqq: "\u2268\uFE00",
+  lvnE: "\u2268\uFE00",
+  mDDot: "\u223A",
+  macr: "\xAF",
+  male: "\u2642",
+  malt: "\u2720",
+  maltese: "\u2720",
+  map: "\u21A6",
+  mapsto: "\u21A6",
+  mapstodown: "\u21A7",
+  mapstoleft: "\u21A4",
+  mapstoup: "\u21A5",
+  marker: "\u25AE",
+  mcomma: "\u2A29",
+  mcy: "\u043C",
+  mdash: "\u2014",
+  measuredangle: "\u2221",
+  mfr: "\u{1D52A}",
+  mho: "\u2127",
+  micro: "\xB5",
+  mid: "\u2223",
+  midast: "*",
+  midcir: "\u2AF0",
+  middot: "\xB7",
+  minus: "\u2212",
+  minusb: "\u229F",
+  minusd: "\u2238",
+  minusdu: "\u2A2A",
+  mlcp: "\u2ADB",
+  mldr: "\u2026",
+  mnplus: "\u2213",
+  models: "\u22A7",
+  mopf: "\u{1D55E}",
+  mp: "\u2213",
+  mscr: "\u{1D4C2}",
+  mstpos: "\u223E",
+  mu: "\u03BC",
+  multimap: "\u22B8",
+  mumap: "\u22B8",
+  nGg: "\u22D9\u0338",
+  nGt: "\u226B\u20D2",
+  nGtv: "\u226B\u0338",
+  nLeftarrow: "\u21CD",
+  nLeftrightarrow: "\u21CE",
+  nLl: "\u22D8\u0338",
+  nLt: "\u226A\u20D2",
+  nLtv: "\u226A\u0338",
+  nRightarrow: "\u21CF",
+  nVDash: "\u22AF",
+  nVdash: "\u22AE",
+  nabla: "\u2207",
+  nacute: "\u0144",
+  nang: "\u2220\u20D2",
+  nap: "\u2249",
+  napE: "\u2A70\u0338",
+  napid: "\u224B\u0338",
+  napos: "\u0149",
+  napprox: "\u2249",
+  natur: "\u266E",
+  natural: "\u266E",
+  naturals: "\u2115",
+  nbsp: "\xA0",
+  nbump: "\u224E\u0338",
+  nbumpe: "\u224F\u0338",
+  ncap: "\u2A43",
+  ncaron: "\u0148",
+  ncedil: "\u0146",
+  ncong: "\u2247",
+  ncongdot: "\u2A6D\u0338",
+  ncup: "\u2A42",
+  ncy: "\u043D",
+  ndash: "\u2013",
+  ne: "\u2260",
+  neArr: "\u21D7",
+  nearhk: "\u2924",
+  nearr: "\u2197",
+  nearrow: "\u2197",
+  nedot: "\u2250\u0338",
+  nequiv: "\u2262",
+  nesear: "\u2928",
+  nesim: "\u2242\u0338",
+  nexist: "\u2204",
+  nexists: "\u2204",
+  nfr: "\u{1D52B}",
+  ngE: "\u2267\u0338",
+  nge: "\u2271",
+  ngeq: "\u2271",
+  ngeqq: "\u2267\u0338",
+  ngeqslant: "\u2A7E\u0338",
+  nges: "\u2A7E\u0338",
+  ngsim: "\u2275",
+  ngt: "\u226F",
+  ngtr: "\u226F",
+  nhArr: "\u21CE",
+  nharr: "\u21AE",
+  nhpar: "\u2AF2",
+  ni: "\u220B",
+  nis: "\u22FC",
+  nisd: "\u22FA",
+  niv: "\u220B",
+  njcy: "\u045A",
+  nlArr: "\u21CD",
+  nlE: "\u2266\u0338",
+  nlarr: "\u219A",
+  nldr: "\u2025",
+  nle: "\u2270",
+  nleftarrow: "\u219A",
+  nleftrightarrow: "\u21AE",
+  nleq: "\u2270",
+  nleqq: "\u2266\u0338",
+  nleqslant: "\u2A7D\u0338",
+  nles: "\u2A7D\u0338",
+  nless: "\u226E",
+  nlsim: "\u2274",
+  nlt: "\u226E",
+  nltri: "\u22EA",
+  nltrie: "\u22EC",
+  nmid: "\u2224",
+  nopf: "\u{1D55F}",
+  not: "\xAC",
+  notin: "\u2209",
+  notinE: "\u22F9\u0338",
+  notindot: "\u22F5\u0338",
+  notinva: "\u2209",
+  notinvb: "\u22F7",
+  notinvc: "\u22F6",
+  notni: "\u220C",
+  notniva: "\u220C",
+  notnivb: "\u22FE",
+  notnivc: "\u22FD",
+  npar: "\u2226",
+  nparallel: "\u2226",
+  nparsl: "\u2AFD\u20E5",
+  npart: "\u2202\u0338",
+  npolint: "\u2A14",
+  npr: "\u2280",
+  nprcue: "\u22E0",
+  npre: "\u2AAF\u0338",
+  nprec: "\u2280",
+  npreceq: "\u2AAF\u0338",
+  nrArr: "\u21CF",
+  nrarr: "\u219B",
+  nrarrc: "\u2933\u0338",
+  nrarrw: "\u219D\u0338",
+  nrightarrow: "\u219B",
+  nrtri: "\u22EB",
+  nrtrie: "\u22ED",
+  nsc: "\u2281",
+  nsccue: "\u22E1",
+  nsce: "\u2AB0\u0338",
+  nscr: "\u{1D4C3}",
+  nshortmid: "\u2224",
+  nshortparallel: "\u2226",
+  nsim: "\u2241",
+  nsime: "\u2244",
+  nsimeq: "\u2244",
+  nsmid: "\u2224",
+  nspar: "\u2226",
+  nsqsube: "\u22E2",
+  nsqsupe: "\u22E3",
+  nsub: "\u2284",
+  nsubE: "\u2AC5\u0338",
+  nsube: "\u2288",
+  nsubset: "\u2282\u20D2",
+  nsubseteq: "\u2288",
+  nsubseteqq: "\u2AC5\u0338",
+  nsucc: "\u2281",
+  nsucceq: "\u2AB0\u0338",
+  nsup: "\u2285",
+  nsupE: "\u2AC6\u0338",
+  nsupe: "\u2289",
+  nsupset: "\u2283\u20D2",
+  nsupseteq: "\u2289",
+  nsupseteqq: "\u2AC6\u0338",
+  ntgl: "\u2279",
+  ntilde: "\xF1",
+  ntlg: "\u2278",
+  ntriangleleft: "\u22EA",
+  ntrianglelefteq: "\u22EC",
+  ntriangleright: "\u22EB",
+  ntrianglerighteq: "\u22ED",
+  nu: "\u03BD",
+  num: "#",
+  numero: "\u2116",
+  numsp: "\u2007",
+  nvDash: "\u22AD",
+  nvHarr: "\u2904",
+  nvap: "\u224D\u20D2",
+  nvdash: "\u22AC",
+  nvge: "\u2265\u20D2",
+  nvgt: ">\u20D2",
+  nvinfin: "\u29DE",
+  nvlArr: "\u2902",
+  nvle: "\u2264\u20D2",
+  nvlt: "<\u20D2",
+  nvltrie: "\u22B4\u20D2",
+  nvrArr: "\u2903",
+  nvrtrie: "\u22B5\u20D2",
+  nvsim: "\u223C\u20D2",
+  nwArr: "\u21D6",
+  nwarhk: "\u2923",
+  nwarr: "\u2196",
+  nwarrow: "\u2196",
+  nwnear: "\u2927",
+  oS: "\u24C8",
+  oacute: "\xF3",
+  oast: "\u229B",
+  ocir: "\u229A",
+  ocirc: "\xF4",
+  ocy: "\u043E",
+  odash: "\u229D",
+  odblac: "\u0151",
+  odiv: "\u2A38",
+  odot: "\u2299",
+  odsold: "\u29BC",
+  oelig: "\u0153",
+  ofcir: "\u29BF",
+  ofr: "\u{1D52C}",
+  ogon: "\u02DB",
+  ograve: "\xF2",
+  ogt: "\u29C1",
+  ohbar: "\u29B5",
+  ohm: "\u03A9",
+  oint: "\u222E",
+  olarr: "\u21BA",
+  olcir: "\u29BE",
+  olcross: "\u29BB",
+  oline: "\u203E",
+  olt: "\u29C0",
+  omacr: "\u014D",
+  omega: "\u03C9",
+  omicron: "\u03BF",
+  omid: "\u29B6",
+  ominus: "\u2296",
+  oopf: "\u{1D560}",
+  opar: "\u29B7",
+  operp: "\u29B9",
+  oplus: "\u2295",
+  or: "\u2228",
+  orarr: "\u21BB",
+  ord: "\u2A5D",
+  order: "\u2134",
+  orderof: "\u2134",
+  ordf: "\xAA",
+  ordm: "\xBA",
+  origof: "\u22B6",
+  oror: "\u2A56",
+  orslope: "\u2A57",
+  orv: "\u2A5B",
+  oscr: "\u2134",
+  oslash: "\xF8",
+  osol: "\u2298",
+  otilde: "\xF5",
+  otimes: "\u2297",
+  otimesas: "\u2A36",
+  ouml: "\xF6",
+  ovbar: "\u233D",
+  par: "\u2225",
+  para: "\xB6",
+  parallel: "\u2225",
+  parsim: "\u2AF3",
+  parsl: "\u2AFD",
+  part: "\u2202",
+  pcy: "\u043F",
+  percnt: "%",
+  period: ".",
+  permil: "\u2030",
+  perp: "\u22A5",
+  pertenk: "\u2031",
+  pfr: "\u{1D52D}",
+  phi: "\u03C6",
+  phiv: "\u03D5",
+  phmmat: "\u2133",
+  phone: "\u260E",
+  pi: "\u03C0",
+  pitchfork: "\u22D4",
+  piv: "\u03D6",
+  planck: "\u210F",
+  planckh: "\u210E",
+  plankv: "\u210F",
+  plus: "+",
+  plusacir: "\u2A23",
+  plusb: "\u229E",
+  pluscir: "\u2A22",
+  plusdo: "\u2214",
+  plusdu: "\u2A25",
+  pluse: "\u2A72",
+  plusmn: "\xB1",
+  plussim: "\u2A26",
+  plustwo: "\u2A27",
+  pm: "\xB1",
+  pointint: "\u2A15",
+  popf: "\u{1D561}",
+  pound: "\xA3",
+  pr: "\u227A",
+  prE: "\u2AB3",
+  prap: "\u2AB7",
+  prcue: "\u227C",
+  pre: "\u2AAF",
+  prec: "\u227A",
+  precapprox: "\u2AB7",
+  preccurlyeq: "\u227C",
+  preceq: "\u2AAF",
+  precnapprox: "\u2AB9",
+  precneqq: "\u2AB5",
+  precnsim: "\u22E8",
+  precsim: "\u227E",
+  prime: "\u2032",
+  primes: "\u2119",
+  prnE: "\u2AB5",
+  prnap: "\u2AB9",
+  prnsim: "\u22E8",
+  prod: "\u220F",
+  profalar: "\u232E",
+  profline: "\u2312",
+  profsurf: "\u2313",
+  prop: "\u221D",
+  propto: "\u221D",
+  prsim: "\u227E",
+  prurel: "\u22B0",
+  pscr: "\u{1D4C5}",
+  psi: "\u03C8",
+  puncsp: "\u2008",
+  qfr: "\u{1D52E}",
+  qint: "\u2A0C",
+  qopf: "\u{1D562}",
+  qprime: "\u2057",
+  qscr: "\u{1D4C6}",
+  quaternions: "\u210D",
+  quatint: "\u2A16",
+  quest: "?",
+  questeq: "\u225F",
+  quot: '"',
+  rAarr: "\u21DB",
+  rArr: "\u21D2",
+  rAtail: "\u291C",
+  rBarr: "\u290F",
+  rHar: "\u2964",
+  race: "\u223D\u0331",
+  racute: "\u0155",
+  radic: "\u221A",
+  raemptyv: "\u29B3",
+  rang: "\u27E9",
+  rangd: "\u2992",
+  range: "\u29A5",
+  rangle: "\u27E9",
+  raquo: "\xBB",
+  rarr: "\u2192",
+  rarrap: "\u2975",
+  rarrb: "\u21E5",
+  rarrbfs: "\u2920",
+  rarrc: "\u2933",
+  rarrfs: "\u291E",
+  rarrhk: "\u21AA",
+  rarrlp: "\u21AC",
+  rarrpl: "\u2945",
+  rarrsim: "\u2974",
+  rarrtl: "\u21A3",
+  rarrw: "\u219D",
+  ratail: "\u291A",
+  ratio: "\u2236",
+  rationals: "\u211A",
+  rbarr: "\u290D",
+  rbbrk: "\u2773",
+  rbrace: "}",
+  rbrack: "]",
+  rbrke: "\u298C",
+  rbrksld: "\u298E",
+  rbrkslu: "\u2990",
+  rcaron: "\u0159",
+  rcedil: "\u0157",
+  rceil: "\u2309",
+  rcub: "}",
+  rcy: "\u0440",
+  rdca: "\u2937",
+  rdldhar: "\u2969",
+  rdquo: "\u201D",
+  rdquor: "\u201D",
+  rdsh: "\u21B3",
+  real: "\u211C",
+  realine: "\u211B",
+  realpart: "\u211C",
+  reals: "\u211D",
+  rect: "\u25AD",
+  reg: "\xAE",
+  rfisht: "\u297D",
+  rfloor: "\u230B",
+  rfr: "\u{1D52F}",
+  rhard: "\u21C1",
+  rharu: "\u21C0",
+  rharul: "\u296C",
+  rho: "\u03C1",
+  rhov: "\u03F1",
+  rightarrow: "\u2192",
+  rightarrowtail: "\u21A3",
+  rightharpoondown: "\u21C1",
+  rightharpoonup: "\u21C0",
+  rightleftarrows: "\u21C4",
+  rightleftharpoons: "\u21CC",
+  rightrightarrows: "\u21C9",
+  rightsquigarrow: "\u219D",
+  rightthreetimes: "\u22CC",
+  ring: "\u02DA",
+  risingdotseq: "\u2253",
+  rlarr: "\u21C4",
+  rlhar: "\u21CC",
+  rlm: "\u200F",
+  rmoust: "\u23B1",
+  rmoustache: "\u23B1",
+  rnmid: "\u2AEE",
+  roang: "\u27ED",
+  roarr: "\u21FE",
+  robrk: "\u27E7",
+  ropar: "\u2986",
+  ropf: "\u{1D563}",
+  roplus: "\u2A2E",
+  rotimes: "\u2A35",
+  rpar: ")",
+  rpargt: "\u2994",
+  rppolint: "\u2A12",
+  rrarr: "\u21C9",
+  rsaquo: "\u203A",
+  rscr: "\u{1D4C7}",
+  rsh: "\u21B1",
+  rsqb: "]",
+  rsquo: "\u2019",
+  rsquor: "\u2019",
+  rthree: "\u22CC",
+  rtimes: "\u22CA",
+  rtri: "\u25B9",
+  rtrie: "\u22B5",
+  rtrif: "\u25B8",
+  rtriltri: "\u29CE",
+  ruluhar: "\u2968",
+  rx: "\u211E",
+  sacute: "\u015B",
+  sbquo: "\u201A",
+  sc: "\u227B",
+  scE: "\u2AB4",
+  scap: "\u2AB8",
+  scaron: "\u0161",
+  sccue: "\u227D",
+  sce: "\u2AB0",
+  scedil: "\u015F",
+  scirc: "\u015D",
+  scnE: "\u2AB6",
+  scnap: "\u2ABA",
+  scnsim: "\u22E9",
+  scpolint: "\u2A13",
+  scsim: "\u227F",
+  scy: "\u0441",
+  sdot: "\u22C5",
+  sdotb: "\u22A1",
+  sdote: "\u2A66",
+  seArr: "\u21D8",
+  searhk: "\u2925",
+  searr: "\u2198",
+  searrow: "\u2198",
+  sect: "\xA7",
+  semi: ";",
+  seswar: "\u2929",
+  setminus: "\u2216",
+  setmn: "\u2216",
+  sext: "\u2736",
+  sfr: "\u{1D530}",
+  sfrown: "\u2322",
+  sharp: "\u266F",
+  shchcy: "\u0449",
+  shcy: "\u0448",
+  shortmid: "\u2223",
+  shortparallel: "\u2225",
+  shy: "\xAD",
+  sigma: "\u03C3",
+  sigmaf: "\u03C2",
+  sigmav: "\u03C2",
+  sim: "\u223C",
+  simdot: "\u2A6A",
+  sime: "\u2243",
+  simeq: "\u2243",
+  simg: "\u2A9E",
+  simgE: "\u2AA0",
+  siml: "\u2A9D",
+  simlE: "\u2A9F",
+  simne: "\u2246",
+  simplus: "\u2A24",
+  simrarr: "\u2972",
+  slarr: "\u2190",
+  smallsetminus: "\u2216",
+  smashp: "\u2A33",
+  smeparsl: "\u29E4",
+  smid: "\u2223",
+  smile: "\u2323",
+  smt: "\u2AAA",
+  smte: "\u2AAC",
+  smtes: "\u2AAC\uFE00",
+  softcy: "\u044C",
+  sol: "/",
+  solb: "\u29C4",
+  solbar: "\u233F",
+  sopf: "\u{1D564}",
+  spades: "\u2660",
+  spadesuit: "\u2660",
+  spar: "\u2225",
+  sqcap: "\u2293",
+  sqcaps: "\u2293\uFE00",
+  sqcup: "\u2294",
+  sqcups: "\u2294\uFE00",
+  sqsub: "\u228F",
+  sqsube: "\u2291",
+  sqsubset: "\u228F",
+  sqsubseteq: "\u2291",
+  sqsup: "\u2290",
+  sqsupe: "\u2292",
+  sqsupset: "\u2290",
+  sqsupseteq: "\u2292",
+  squ: "\u25A1",
+  square: "\u25A1",
+  squarf: "\u25AA",
+  squf: "\u25AA",
+  srarr: "\u2192",
+  sscr: "\u{1D4C8}",
+  ssetmn: "\u2216",
+  ssmile: "\u2323",
+  sstarf: "\u22C6",
+  star: "\u2606",
+  starf: "\u2605",
+  straightepsilon: "\u03F5",
+  straightphi: "\u03D5",
+  strns: "\xAF",
+  sub: "\u2282",
+  subE: "\u2AC5",
+  subdot: "\u2ABD",
+  sube: "\u2286",
+  subedot: "\u2AC3",
+  submult: "\u2AC1",
+  subnE: "\u2ACB",
+  subne: "\u228A",
+  subplus: "\u2ABF",
+  subrarr: "\u2979",
+  subset: "\u2282",
+  subseteq: "\u2286",
+  subseteqq: "\u2AC5",
+  subsetneq: "\u228A",
+  subsetneqq: "\u2ACB",
+  subsim: "\u2AC7",
+  subsub: "\u2AD5",
+  subsup: "\u2AD3",
+  succ: "\u227B",
+  succapprox: "\u2AB8",
+  succcurlyeq: "\u227D",
+  succeq: "\u2AB0",
+  succnapprox: "\u2ABA",
+  succneqq: "\u2AB6",
+  succnsim: "\u22E9",
+  succsim: "\u227F",
+  sum: "\u2211",
+  sung: "\u266A",
+  sup1: "\xB9",
+  sup2: "\xB2",
+  sup3: "\xB3",
+  sup: "\u2283",
+  supE: "\u2AC6",
+  supdot: "\u2ABE",
+  supdsub: "\u2AD8",
+  supe: "\u2287",
+  supedot: "\u2AC4",
+  suphsol: "\u27C9",
+  suphsub: "\u2AD7",
+  suplarr: "\u297B",
+  supmult: "\u2AC2",
+  supnE: "\u2ACC",
+  supne: "\u228B",
+  supplus: "\u2AC0",
+  supset: "\u2283",
+  supseteq: "\u2287",
+  supseteqq: "\u2AC6",
+  supsetneq: "\u228B",
+  supsetneqq: "\u2ACC",
+  supsim: "\u2AC8",
+  supsub: "\u2AD4",
+  supsup: "\u2AD6",
+  swArr: "\u21D9",
+  swarhk: "\u2926",
+  swarr: "\u2199",
+  swarrow: "\u2199",
+  swnwar: "\u292A",
+  szlig: "\xDF",
+  target: "\u2316",
+  tau: "\u03C4",
+  tbrk: "\u23B4",
+  tcaron: "\u0165",
+  tcedil: "\u0163",
+  tcy: "\u0442",
+  tdot: "\u20DB",
+  telrec: "\u2315",
+  tfr: "\u{1D531}",
+  there4: "\u2234",
+  therefore: "\u2234",
+  theta: "\u03B8",
+  thetasym: "\u03D1",
+  thetav: "\u03D1",
+  thickapprox: "\u2248",
+  thicksim: "\u223C",
+  thinsp: "\u2009",
+  thkap: "\u2248",
+  thksim: "\u223C",
+  thorn: "\xFE",
+  tilde: "\u02DC",
+  times: "\xD7",
+  timesb: "\u22A0",
+  timesbar: "\u2A31",
+  timesd: "\u2A30",
+  tint: "\u222D",
+  toea: "\u2928",
+  top: "\u22A4",
+  topbot: "\u2336",
+  topcir: "\u2AF1",
+  topf: "\u{1D565}",
+  topfork: "\u2ADA",
+  tosa: "\u2929",
+  tprime: "\u2034",
+  trade: "\u2122",
+  triangle: "\u25B5",
+  triangledown: "\u25BF",
+  triangleleft: "\u25C3",
+  trianglelefteq: "\u22B4",
+  triangleq: "\u225C",
+  triangleright: "\u25B9",
+  trianglerighteq: "\u22B5",
+  tridot: "\u25EC",
+  trie: "\u225C",
+  triminus: "\u2A3A",
+  triplus: "\u2A39",
+  trisb: "\u29CD",
+  tritime: "\u2A3B",
+  trpezium: "\u23E2",
+  tscr: "\u{1D4C9}",
+  tscy: "\u0446",
+  tshcy: "\u045B",
+  tstrok: "\u0167",
+  twixt: "\u226C",
+  twoheadleftarrow: "\u219E",
+  twoheadrightarrow: "\u21A0",
+  uArr: "\u21D1",
+  uHar: "\u2963",
+  uacute: "\xFA",
+  uarr: "\u2191",
+  ubrcy: "\u045E",
+  ubreve: "\u016D",
+  ucirc: "\xFB",
+  ucy: "\u0443",
+  udarr: "\u21C5",
+  udblac: "\u0171",
+  udhar: "\u296E",
+  ufisht: "\u297E",
+  ufr: "\u{1D532}",
+  ugrave: "\xF9",
+  uharl: "\u21BF",
+  uharr: "\u21BE",
+  uhblk: "\u2580",
+  ulcorn: "\u231C",
+  ulcorner: "\u231C",
+  ulcrop: "\u230F",
+  ultri: "\u25F8",
+  umacr: "\u016B",
+  uml: "\xA8",
+  uogon: "\u0173",
+  uopf: "\u{1D566}",
+  uparrow: "\u2191",
+  updownarrow: "\u2195",
+  upharpoonleft: "\u21BF",
+  upharpoonright: "\u21BE",
+  uplus: "\u228E",
+  upsi: "\u03C5",
+  upsih: "\u03D2",
+  upsilon: "\u03C5",
+  upuparrows: "\u21C8",
+  urcorn: "\u231D",
+  urcorner: "\u231D",
+  urcrop: "\u230E",
+  uring: "\u016F",
+  urtri: "\u25F9",
+  uscr: "\u{1D4CA}",
+  utdot: "\u22F0",
+  utilde: "\u0169",
+  utri: "\u25B5",
+  utrif: "\u25B4",
+  uuarr: "\u21C8",
+  uuml: "\xFC",
+  uwangle: "\u29A7",
+  vArr: "\u21D5",
+  vBar: "\u2AE8",
+  vBarv: "\u2AE9",
+  vDash: "\u22A8",
+  vangrt: "\u299C",
+  varepsilon: "\u03F5",
+  varkappa: "\u03F0",
+  varnothing: "\u2205",
+  varphi: "\u03D5",
+  varpi: "\u03D6",
+  varpropto: "\u221D",
+  varr: "\u2195",
+  varrho: "\u03F1",
+  varsigma: "\u03C2",
+  varsubsetneq: "\u228A\uFE00",
+  varsubsetneqq: "\u2ACB\uFE00",
+  varsupsetneq: "\u228B\uFE00",
+  varsupsetneqq: "\u2ACC\uFE00",
+  vartheta: "\u03D1",
+  vartriangleleft: "\u22B2",
+  vartriangleright: "\u22B3",
+  vcy: "\u0432",
+  vdash: "\u22A2",
+  vee: "\u2228",
+  veebar: "\u22BB",
+  veeeq: "\u225A",
+  vellip: "\u22EE",
+  verbar: "|",
+  vert: "|",
+  vfr: "\u{1D533}",
+  vltri: "\u22B2",
+  vnsub: "\u2282\u20D2",
+  vnsup: "\u2283\u20D2",
+  vopf: "\u{1D567}",
+  vprop: "\u221D",
+  vrtri: "\u22B3",
+  vscr: "\u{1D4CB}",
+  vsubnE: "\u2ACB\uFE00",
+  vsubne: "\u228A\uFE00",
+  vsupnE: "\u2ACC\uFE00",
+  vsupne: "\u228B\uFE00",
+  vzigzag: "\u299A",
+  wcirc: "\u0175",
+  wedbar: "\u2A5F",
+  wedge: "\u2227",
+  wedgeq: "\u2259",
+  weierp: "\u2118",
+  wfr: "\u{1D534}",
+  wopf: "\u{1D568}",
+  wp: "\u2118",
+  wr: "\u2240",
+  wreath: "\u2240",
+  wscr: "\u{1D4CC}",
+  xcap: "\u22C2",
+  xcirc: "\u25EF",
+  xcup: "\u22C3",
+  xdtri: "\u25BD",
+  xfr: "\u{1D535}",
+  xhArr: "\u27FA",
+  xharr: "\u27F7",
+  xi: "\u03BE",
+  xlArr: "\u27F8",
+  xlarr: "\u27F5",
+  xmap: "\u27FC",
+  xnis: "\u22FB",
+  xodot: "\u2A00",
+  xopf: "\u{1D569}",
+  xoplus: "\u2A01",
+  xotime: "\u2A02",
+  xrArr: "\u27F9",
+  xrarr: "\u27F6",
+  xscr: "\u{1D4CD}",
+  xsqcup: "\u2A06",
+  xuplus: "\u2A04",
+  xutri: "\u25B3",
+  xvee: "\u22C1",
+  xwedge: "\u22C0",
+  yacute: "\xFD",
+  yacy: "\u044F",
+  ycirc: "\u0177",
+  ycy: "\u044B",
+  yen: "\xA5",
+  yfr: "\u{1D536}",
+  yicy: "\u0457",
+  yopf: "\u{1D56A}",
+  yscr: "\u{1D4CE}",
+  yucy: "\u044E",
+  yuml: "\xFF",
+  zacute: "\u017A",
+  zcaron: "\u017E",
+  zcy: "\u0437",
+  zdot: "\u017C",
+  zeetrf: "\u2128",
+  zeta: "\u03B6",
+  zfr: "\u{1D537}",
+  zhcy: "\u0436",
+  zigrarr: "\u21DD",
+  zopf: "\u{1D56B}",
+  zscr: "\u{1D4CF}",
+  zwj: "\u200D",
+  zwnj: "\u200C"
+};
+
+// node_modules/decode-named-character-reference/index.js
+var own2 = {}.hasOwnProperty;
+function decodeNamedCharacterReference(value) {
+  return own2.call(characterEntities, value) ? characterEntities[value] : false;
+}
+
+// node_modules/micromark-util-chunked/index.js
+function splice(list2, start, remove, items) {
+  const end = list2.length;
+  let chunkStart = 0;
+  let parameters;
+  if (start < 0) {
+    start = -start > end ? 0 : end + start;
+  } else {
+    start = start > end ? end : start;
+  }
+  remove = remove > 0 ? remove : 0;
+  if (items.length < 1e4) {
+    parameters = Array.from(items);
+    parameters.unshift(start, remove);
+    list2.splice(...parameters);
+  } else {
+    if (remove) list2.splice(start, remove);
+    while (chunkStart < items.length) {
+      parameters = items.slice(chunkStart, chunkStart + 1e4);
+      parameters.unshift(start, 0);
+      list2.splice(...parameters);
+      chunkStart += 1e4;
+      start += 1e4;
+    }
+  }
+}
+function push(list2, items) {
+  if (list2.length > 0) {
+    splice(list2, list2.length, 0, items);
+    return list2;
+  }
+  return items;
+}
+
+// node_modules/micromark-util-combine-extensions/index.js
+var hasOwnProperty = {}.hasOwnProperty;
+function combineExtensions(extensions) {
+  const all2 = {};
+  let index2 = -1;
+  while (++index2 < extensions.length) {
+    syntaxExtension(all2, extensions[index2]);
+  }
+  return all2;
+}
+function syntaxExtension(all2, extension2) {
+  let hook;
+  for (hook in extension2) {
+    const maybe = hasOwnProperty.call(all2, hook) ? all2[hook] : void 0;
+    const left = maybe || (all2[hook] = {});
+    const right = extension2[hook];
+    let code;
+    if (right) {
+      for (code in right) {
+        if (!hasOwnProperty.call(left, code)) left[code] = [];
+        const value = right[code];
+        constructs(
+          // @ts-expect-error Looks like a list.
+          left[code],
+          Array.isArray(value) ? value : value ? [value] : []
+        );
+      }
+    }
+  }
+}
+function constructs(existing, list2) {
+  let index2 = -1;
+  const before = [];
+  while (++index2 < list2.length) {
+    ;
+    (list2[index2].add === "after" ? existing : before).push(list2[index2]);
+  }
+  splice(existing, 0, 0, before);
+}
+
+// node_modules/micromark-util-decode-numeric-character-reference/index.js
+function decodeNumericCharacterReference(value, base) {
+  const code = Number.parseInt(value, base);
+  if (
+    // C0 except for HT, LF, FF, CR, space.
+    code < 9 || code === 11 || code > 13 && code < 32 || // Control character (DEL) of C0, and C1 controls.
+    code > 126 && code < 160 || // Lone high surrogates and low surrogates.
+    code > 55295 && code < 57344 || // Noncharacters.
+    code > 64975 && code < 65008 || /* eslint-disable no-bitwise */
+    (code & 65535) === 65535 || (code & 65535) === 65534 || /* eslint-enable no-bitwise */
+    // Out of range
+    code > 1114111
+  ) {
+    return "\uFFFD";
+  }
+  return String.fromCodePoint(code);
+}
+
+// node_modules/micromark-util-normalize-identifier/index.js
+function normalizeIdentifier(value) {
+  return value.replace(/[\t\n\r ]+/g, " ").replace(/^ | $/g, "").toLowerCase().toUpperCase();
+}
+
+// node_modules/micromark-util-character/index.js
+var asciiAlpha = regexCheck(/[A-Za-z]/);
+var asciiAlphanumeric = regexCheck(/[\dA-Za-z]/);
+var asciiAtext = regexCheck(/[#-'*+\--9=?A-Z^-~]/);
+function asciiControl(code) {
+  return (
+    // Special whitespace codes (which have negative values), C0 and Control
+    // character DEL
+    code !== null && (code < 32 || code === 127)
+  );
+}
+var asciiDigit = regexCheck(/\d/);
+var asciiHexDigit = regexCheck(/[\dA-Fa-f]/);
+var asciiPunctuation = regexCheck(/[!-/:-@[-`{-~]/);
+function markdownLineEnding(code) {
+  return code !== null && code < -2;
+}
+function markdownLineEndingOrSpace(code) {
+  return code !== null && (code < 0 || code === 32);
+}
+function markdownSpace(code) {
+  return code === -2 || code === -1 || code === 32;
+}
+var unicodePunctuation = regexCheck(new RegExp("\\p{P}|\\p{S}", "u"));
+var unicodeWhitespace = regexCheck(/\s/);
+function regexCheck(regex2) {
+  return check;
+  function check(code) {
+    return code !== null && code > -1 && regex2.test(String.fromCharCode(code));
+  }
+}
+
+// node_modules/micromark-factory-space/index.js
+function factorySpace(effects, ok, type, max) {
+  const limit = max ? max - 1 : Infinity;
+  let size = 0;
+  return start;
+  function start(code) {
+    if (markdownSpace(code)) {
+      effects.enter(type);
+      return prefix(code);
+    }
+    return ok(code);
+  }
+  function prefix(code) {
+    if (markdownSpace(code) && size++ < limit) {
+      effects.consume(code);
+      return prefix;
+    }
+    effects.exit(type);
+    return ok(code);
+  }
+}
+function factorySpaceMinMax(effects, ok, nok, type, min, max) {
+  let size = 0;
+  return start;
+  function start(code) {
+    if (max > 0 && markdownSpace(code)) {
+      effects.enter(type);
+      return prefix(code);
+    }
+    return after(code);
+  }
+  function prefix(code) {
+    if (markdownSpace(code) && size < max) {
+      effects.consume(code);
+      size++;
+      return prefix;
+    }
+    effects.exit(type);
+    return after(code);
+  }
+  function after(code) {
+    return size >= min ? ok(code) : nok(code);
+  }
+}
+
+// node_modules/micromark/lib/initialize/content.js
+var content = {
+  tokenize: initializeContent
+};
+function initializeContent(effects) {
+  const contentStart = effects.attempt(this.parser.constructs.contentInitial, afterContentStartConstruct, paragraphInitial);
+  let previous2;
+  return contentStart;
+  function afterContentStartConstruct(code) {
+    if (code === null) {
+      effects.consume(code);
+      return;
+    }
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return factorySpace(effects, contentStart, "linePrefix");
+  }
+  function paragraphInitial(code) {
+    effects.enter("paragraph");
+    return lineStart(code);
+  }
+  function lineStart(code) {
+    const token = effects.enter("chunkText", {
+      contentType: "text",
+      previous: previous2
+    });
+    if (previous2) {
+      previous2.next = token;
+    }
+    previous2 = token;
+    return data(code);
+  }
+  function data(code) {
+    if (code === null) {
+      effects.exit("chunkText");
+      effects.exit("paragraph");
+      effects.consume(code);
+      return;
+    }
+    if (markdownLineEnding(code)) {
+      effects.consume(code);
+      effects.exit("chunkText");
+      return lineStart;
+    }
+    effects.consume(code);
+    return data;
+  }
+}
+
+// node_modules/micromark-util-edit-map/index.js
+var EditMap = class {
+  /**
+   * Create a new edit map.
+   *
+   * @returns
+   *   New instance.
+   */
+  constructor() {
+    this.index = /* @__PURE__ */ new Map();
+    this.map = [];
+  }
+  /**
+   * Create an edit: a remove and/or add at a certain place.
+   *
+   * @param {number} index
+   *   Index at which to apply the edit.
+   * @param {number} remove
+   *   Count of items to remove at the index.
+   * @param {Array<Event>} add
+   *   Items to add at the index.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  add(index2, remove, add) {
+    addImplementation(this, index2, remove, add, false);
+  }
+  /**
+   * Create an edit: but insert `add` before existing additions, instead of
+   * after them.
+   *
+   * @param {number} index
+   *   Index at which to apply the edit.
+   * @param {number} remove
+   *   Count of items to remove at the index.
+   * @param {Array<Event>} add
+   *   Items to add at the index.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  addBefore(index2, remove, add) {
+    addImplementation(this, index2, remove, add, true);
+  }
+  /**
+   * Done, change the events.
+   *
+   * @param {Array<Event>} events
+   *   List of events to apply the edits to.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  consume(events) {
+    this.map.sort(function(a, b) {
+      return a[0] - b[0];
+    });
+    if (this.map.length === 0) {
+      return;
+    }
+    let index2 = this.map.length;
+    const vecs = [];
+    while (index2 > 0) {
+      index2 -= 1;
+      vecs.push(events.slice(this.map[index2][0] + this.map[index2][1]), this.map[index2][2]);
+      events.length = this.map[index2][0];
+    }
+    vecs.push(events.slice());
+    events.length = 0;
+    let slice = vecs.pop();
+    while (slice) {
+      for (const element of slice) {
+        events.push(element);
+      }
+      slice = vecs.pop();
+    }
+    this.map.length = 0;
+    this.index.clear();
+  }
+};
+function addImplementation(editMap, at, remove, add, before) {
+  if (remove === 0 && add.length === 0) {
+    return;
+  }
+  const existing = editMap.index.get(at);
+  if (existing) {
+    existing[1] += remove;
+    if (before) {
+      add.push(...existing[2]);
+      existing[2] = add;
+    } else {
+      existing[2].push(...add);
+    }
+    return;
+  }
+  const change = [at, remove, add];
+  editMap.map.push(change);
+  editMap.index.set(at, change);
+}
+
+// node_modules/micromark/lib/initialize/document.js
+var document2 = {
+  tokenize: initializeDocument
+};
+var containerConstruct = {
+  tokenize: tokenizeContainer
+};
+function initializeDocument(effects) {
+  const self = this;
+  const stack = [];
+  let continued = 0;
+  let childFlow;
+  let childToken;
+  let lineStartOffset;
+  return start;
+  function start(code) {
+    if (continued < stack.length) {
+      const item = stack[continued];
+      self.containerState = item[1];
+      return effects.attempt(item[0].continuation, documentContinue, checkNewContainers)(code);
+    }
+    return checkNewContainers(code);
+  }
+  function documentContinue(code) {
+    continued++;
+    if (self.containerState._closeFlow) {
+      self.containerState._closeFlow = void 0;
+      if (childFlow) {
+        closeFlow();
+      }
+      const indexBeforeExits = self.events.length;
+      let indexBeforeFlow = indexBeforeExits;
+      let point3;
+      while (indexBeforeFlow--) {
+        if (self.events[indexBeforeFlow][0] === "exit" && self.events[indexBeforeFlow][1].type === "chunkFlow") {
+          point3 = self.events[indexBeforeFlow][1].end;
+          break;
+        }
+      }
+      exitContainers(continued);
+      let index2 = indexBeforeExits;
+      while (index2 < self.events.length) {
+        self.events[index2][1].end = {
+          ...point3
+        };
+        index2++;
+      }
+      const editMap = new EditMap();
+      editMap.add(indexBeforeFlow + 1, 0, self.events.slice(indexBeforeExits));
+      editMap.add(indexBeforeExits, index2 - indexBeforeExits, []);
+      editMap.consume(self.events);
+      return checkNewContainers(code);
+    }
+    return start(code);
+  }
+  function checkNewContainers(code) {
+    if (continued === stack.length) {
+      if (!childFlow) {
+        return documentContinued(code);
+      }
+      if (childFlow.currentConstruct && childFlow.currentConstruct.concrete) {
+        return flowStart(code);
+      }
+      self.interrupt = Boolean(childFlow.currentConstruct && !childFlow._gfmTableDynamicInterruptHack);
+    }
+    self.containerState = {};
+    return effects.check(containerConstruct, thereIsANewContainer, thereIsNoNewContainer)(code);
+  }
+  function thereIsANewContainer(code) {
+    if (childFlow) {
+      closeFlow();
+    }
+    exitContainers(continued);
+    return documentContinued(code);
+  }
+  function thereIsNoNewContainer(code) {
+    self.parser.lazy[self.now().line] = continued !== stack.length;
+    lineStartOffset = self.now().offset;
+    return flowStart(code);
+  }
+  function documentContinued(code) {
+    self.containerState = {};
+    return effects.attempt(containerConstruct, containerContinue, flowStart)(code);
+  }
+  function containerContinue(code) {
+    continued++;
+    stack.push([self.currentConstruct, self.containerState]);
+    return documentContinued(code);
+  }
+  function flowStart(code) {
+    if (code === null) {
+      if (childFlow) {
+        closeFlow();
+      }
+      exitContainers(0);
+      effects.consume(code);
+      return;
+    }
+    childFlow = childFlow || self.parser.flow(self.now());
+    effects.enter("chunkFlow", {
+      _tokenizer: childFlow,
+      contentType: "flow",
+      previous: childToken
+    });
+    return flowContinue(code);
+  }
+  function flowContinue(code) {
+    if (code === null) {
+      writeToChild(effects.exit("chunkFlow"), true);
+      exitContainers(0);
+      effects.consume(code);
+      return;
+    }
+    if (markdownLineEnding(code)) {
+      effects.consume(code);
+      writeToChild(effects.exit("chunkFlow"));
+      continued = 0;
+      self.interrupt = void 0;
+      return start;
+    }
+    effects.consume(code);
+    return flowContinue;
+  }
+  function writeToChild(token, endOfFile) {
+    const stream = self.sliceStream(token);
+    if (endOfFile) {
+      stream.push(null);
+    }
+    token.previous = childToken;
+    if (childToken) {
+      childToken.next = token;
+    }
+    childToken = token;
+    childFlow.defineSkip(token.start);
+    childFlow.write(stream);
+    if (self.parser.lazy[token.start.line]) {
+      let index2 = childFlow.events.length;
+      while (index2--) {
+        if (
+          // The token starts before the line ending…
+          childFlow.events[index2][1].start.offset < lineStartOffset && // …and either is not ended yet…
+          (!childFlow.events[index2][1].end || // …or ends after it.
+          childFlow.events[index2][1].end.offset > lineStartOffset)
+        ) {
+          return;
+        }
+      }
+      const indexBeforeExits = self.events.length;
+      let indexBeforeFlow = indexBeforeExits;
+      let seen;
+      let point3;
+      while (indexBeforeFlow--) {
+        if (self.events[indexBeforeFlow][0] === "exit" && self.events[indexBeforeFlow][1].type === "chunkFlow") {
+          if (seen) {
+            point3 = self.events[indexBeforeFlow][1].end;
+            break;
+          }
+          seen = true;
+        }
+      }
+      exitContainers(continued);
+      index2 = indexBeforeExits;
+      while (index2 < self.events.length) {
+        self.events[index2][1].end = {
+          ...point3
+        };
+        index2++;
+      }
+      const editMap = new EditMap();
+      editMap.add(indexBeforeFlow + 1, 0, self.events.slice(indexBeforeExits));
+      editMap.add(indexBeforeExits, index2 - indexBeforeExits, []);
+      editMap.consume(self.events);
+    }
+  }
+  function exitContainers(size) {
+    let index2 = stack.length;
+    while (index2-- > size) {
+      const entry = stack[index2];
+      self.containerState = entry[1];
+      entry[0].exit.call(self, effects);
+    }
+    stack.length = size;
+  }
+  function closeFlow() {
+    childFlow.write([null]);
+    childToken = void 0;
+    childFlow = void 0;
+    self.containerState._closeFlow = void 0;
+  }
+}
+function tokenizeContainer(effects, ok, nok) {
+  return factorySpace(effects, effects.attempt(this.parser.constructs.document, ok, nok), "linePrefix", this.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4);
+}
+
+// node_modules/micromark-util-classify-character/index.js
+function classifyCharacter(code) {
+  if (code === null || markdownLineEndingOrSpace(code) || unicodeWhitespace(code)) {
+    return 1;
+  }
+  if (unicodePunctuation(code)) {
+    return 2;
+  }
+}
+
+// node_modules/micromark-util-resolve-all/index.js
+function resolveAll(constructs2, events, context) {
+  const called = [];
+  let index2 = -1;
+  while (++index2 < constructs2.length) {
+    const resolve = constructs2[index2].resolveAll;
+    if (resolve && !called.includes(resolve)) {
+      events = resolve(events, context);
+      called.push(resolve);
+    }
+  }
+  return events;
+}
+
+// node_modules/micromark-core-commonmark/lib/attention.js
+var attention = {
+  name: "attention",
+  resolveAll: resolveAllAttention,
+  tokenize: tokenizeAttention
+};
+function resolveAllAttention(events, context) {
+  let index2 = -1;
+  let nextEvents;
+  while (++index2 < events.length) {
+    if (events[index2][0] === "enter" && events[index2][1].type === "attentionSequence" && events[index2][1]._close) {
+      let open2 = index2;
+      while (open2--) {
+        if (events[open2][0] === "exit" && events[open2][1].type === "attentionSequence" && events[open2][1]._open && // If the markers are the same:
+        context.sliceSerialize(events[open2][1]).charCodeAt(0) === context.sliceSerialize(events[index2][1]).charCodeAt(0)) {
+          if ((events[open2][1]._close || events[index2][1]._open) && (events[index2][1].end.offset - events[index2][1].start.offset) % 3 && !((events[open2][1].end.offset - events[open2][1].start.offset + events[index2][1].end.offset - events[index2][1].start.offset) % 3)) {
+            continue;
+          }
+          const use = events[open2][1].end.offset - events[open2][1].start.offset > 1 && events[index2][1].end.offset - events[index2][1].start.offset > 1 ? 2 : 1;
+          const start = {
+            ...events[open2][1].end
+          };
+          const end = {
+            ...events[index2][1].start
+          };
+          movePoint(start, -use);
+          movePoint(end, use);
+          const openingSequence = {
+            type: use > 1 ? "strongSequence" : "emphasisSequence",
+            start,
+            end: {
+              ...events[open2][1].end
+            }
+          };
+          const closingSequence = {
+            type: use > 1 ? "strongSequence" : "emphasisSequence",
+            start: {
+              ...events[index2][1].start
+            },
+            end
+          };
+          const text3 = {
+            type: use > 1 ? "strongText" : "emphasisText",
+            start: {
+              ...events[open2][1].end
+            },
+            end: {
+              ...events[index2][1].start
+            }
+          };
+          const group = {
+            type: use > 1 ? "strong" : "emphasis",
+            start: {
+              ...openingSequence.start
+            },
+            end: {
+              ...closingSequence.end
+            }
+          };
+          events[open2][1].end = {
+            ...openingSequence.start
+          };
+          events[index2][1].start = {
+            ...closingSequence.end
+          };
+          nextEvents = [];
+          if (events[open2][1].end.offset - events[open2][1].start.offset) {
+            nextEvents = push(nextEvents, [["enter", events[open2][1], context], ["exit", events[open2][1], context]]);
+          }
+          nextEvents = push(nextEvents, [["enter", group, context], ["enter", openingSequence, context], ["exit", openingSequence, context], ["enter", text3, context]]);
+          nextEvents = push(nextEvents, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open2 + 1, index2), context));
+          nextEvents = push(nextEvents, [["exit", text3, context], ["enter", closingSequence, context], ["exit", closingSequence, context], ["exit", group, context]]);
+          let offset = 0;
+          if (events[index2][1].end.offset - events[index2][1].start.offset) {
+            offset = 2;
+            nextEvents = push(nextEvents, [["enter", events[index2][1], context], ["exit", events[index2][1], context]]);
+          }
+          splice(events, open2 - 1, index2 - open2 + 3, nextEvents);
+          index2 = open2 + nextEvents.length - offset - 2;
+          break;
+        }
+      }
+    }
+  }
+  index2 = -1;
+  while (++index2 < events.length) {
+    if (events[index2][1].type === "attentionSequence") {
+      events[index2][1].type = "data";
+    }
+  }
+  return events;
+}
+function tokenizeAttention(effects, ok) {
+  const attentionMarkers2 = this.parser.constructs.attentionMarkers.null;
+  const previous2 = this.previous;
+  const before = classifyCharacter(previous2);
+  let marker;
+  return start;
+  function start(code) {
+    marker = code;
+    effects.enter("attentionSequence");
+    return inside(code);
+  }
+  function inside(code) {
+    if (code === marker) {
+      effects.consume(code);
+      return inside;
+    }
+    const token = effects.exit("attentionSequence");
+    const after = classifyCharacter(code);
+    const open2 = !after || after === 2 && before || attentionMarkers2.includes(code) && code !== 42 && code !== 95;
+    const close = !before || before === 2 && after || attentionMarkers2.includes(previous2) && previous2 !== 42 && previous2 !== 95;
+    token._open = Boolean(marker === 42 ? open2 : open2 && (before || !close));
+    token._close = Boolean(marker === 42 ? close : close && (after || !open2));
+    return ok(code);
+  }
+}
+function movePoint(point3, offset) {
+  point3.column += offset;
+  point3.offset += offset;
+  point3._bufferIndex += offset;
+}
+
+// node_modules/micromark-core-commonmark/lib/autolink.js
+var autolink = {
+  name: "autolink",
+  tokenize: tokenizeAutolink
+};
+function tokenizeAutolink(effects, ok, nok) {
+  let size = 0;
+  return start;
+  function start(code) {
+    effects.enter("autolink");
+    effects.enter("autolinkMarker");
+    effects.consume(code);
+    effects.exit("autolinkMarker");
+    effects.enter("autolinkProtocol");
+    return open2;
+  }
+  function open2(code) {
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      return schemeOrEmailAtext;
+    }
+    if (code === 64) {
+      return nok(code);
+    }
+    return emailAtext(code);
+  }
+  function schemeOrEmailAtext(code) {
+    if (code === 43 || code === 45 || code === 46 || asciiAlphanumeric(code)) {
+      size = 1;
+      return schemeInsideOrEmailAtext(code);
+    }
+    return emailAtext(code);
+  }
+  function schemeInsideOrEmailAtext(code) {
+    if (code === 58) {
+      effects.consume(code);
+      size = 0;
+      return urlInside;
+    }
+    if ((code === 43 || code === 45 || code === 46 || asciiAlphanumeric(code)) && size++ < 32) {
+      effects.consume(code);
+      return schemeInsideOrEmailAtext;
+    }
+    size = 0;
+    return emailAtext(code);
+  }
+  function urlInside(code) {
+    if (code === 62) {
+      effects.exit("autolinkProtocol");
+      effects.enter("autolinkMarker");
+      effects.consume(code);
+      effects.exit("autolinkMarker");
+      effects.exit("autolink");
+      return ok;
+    }
+    if (code === null || code === 32 || code === 60 || asciiControl(code)) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return urlInside;
+  }
+  function emailAtext(code) {
+    if (code === 64) {
+      effects.consume(code);
+      return emailAtSignOrDot;
+    }
+    if (asciiAtext(code)) {
+      effects.consume(code);
+      return emailAtext;
+    }
+    return nok(code);
+  }
+  function emailAtSignOrDot(code) {
+    return asciiAlphanumeric(code) ? emailLabel(code) : nok(code);
+  }
+  function emailLabel(code) {
+    if (code === 46) {
+      effects.consume(code);
+      size = 0;
+      return emailAtSignOrDot;
+    }
+    if (code === 62) {
+      effects.exit("autolinkProtocol").type = "autolinkEmail";
+      effects.enter("autolinkMarker");
+      effects.consume(code);
+      effects.exit("autolinkMarker");
+      effects.exit("autolink");
+      return ok;
+    }
+    return emailValue(code);
+  }
+  function emailValue(code) {
+    if ((code === 45 || asciiAlphanumeric(code)) && size++ < 63) {
+      const next = code === 45 ? emailValue : emailLabel;
+      effects.consume(code);
+      return next;
+    }
+    return nok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/blank-line.js
+var blankLine = {
+  partial: true,
+  tokenize: tokenizeBlankLine
+};
+function tokenizeBlankLine(effects, ok, nok) {
+  return start;
+  function start(code) {
+    return markdownSpace(code) ? factorySpace(effects, after, "linePrefix")(code) : after(code);
+  }
+  function after(code) {
+    return code === null || markdownLineEnding(code) ? ok(code) : nok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/block-quote.js
+var blockQuote = {
+  continuation: {
+    tokenize: tokenizeBlockQuoteContinuation
+  },
+  exit,
+  name: "blockQuote",
+  tokenize: tokenizeBlockQuoteStart
+};
+function tokenizeBlockQuoteStart(effects, ok, nok) {
+  const self = this;
+  return start;
+  function start(code) {
+    if (code === 62) {
+      const state = self.containerState;
+      if (!state.open) {
+        effects.enter("blockQuote", {
+          _container: true
+        });
+        state.open = true;
+      }
+      effects.enter("blockQuotePrefix");
+      effects.enter("blockQuoteMarker");
+      effects.consume(code);
+      effects.exit("blockQuoteMarker");
+      return after;
+    }
+    return nok(code);
+  }
+  function after(code) {
+    if (markdownSpace(code)) {
+      effects.enter("blockQuotePrefixWhitespace");
+      effects.consume(code);
+      effects.exit("blockQuotePrefixWhitespace");
+      effects.exit("blockQuotePrefix");
+      return ok;
+    }
+    effects.exit("blockQuotePrefix");
+    return ok(code);
+  }
+}
+function tokenizeBlockQuoteContinuation(effects, ok, nok) {
+  const self = this;
+  return contStart;
+  function contStart(code) {
+    if (markdownSpace(code)) {
+      return factorySpace(effects, contBefore, "linePrefix", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4)(code);
+    }
+    return contBefore(code);
+  }
+  function contBefore(code) {
+    return effects.attempt(blockQuote, ok, nok)(code);
+  }
+}
+function exit(effects) {
+  effects.exit("blockQuote");
+}
+
+// node_modules/micromark-core-commonmark/lib/character-escape.js
+var characterEscape = {
+  name: "characterEscape",
+  tokenize: tokenizeCharacterEscape
+};
+function tokenizeCharacterEscape(effects, ok, nok) {
+  return start;
+  function start(code) {
+    effects.enter("characterEscape");
+    effects.enter("escapeMarker");
+    effects.consume(code);
+    effects.exit("escapeMarker");
+    return inside;
+  }
+  function inside(code) {
+    if (asciiPunctuation(code)) {
+      effects.enter("characterEscapeValue");
+      effects.consume(code);
+      effects.exit("characterEscapeValue");
+      effects.exit("characterEscape");
+      return ok;
+    }
+    return nok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/character-reference.js
+var characterReference = {
+  name: "characterReference",
+  tokenize: tokenizeCharacterReference
+};
+function tokenizeCharacterReference(effects, ok, nok) {
+  const self = this;
+  let size = 0;
+  let max;
+  let test;
+  return start;
+  function start(code) {
+    effects.enter("characterReference");
+    effects.enter("characterReferenceMarker");
+    effects.consume(code);
+    effects.exit("characterReferenceMarker");
+    return open2;
+  }
+  function open2(code) {
+    if (code === 35) {
+      effects.enter("characterReferenceMarkerNumeric");
+      effects.consume(code);
+      effects.exit("characterReferenceMarkerNumeric");
+      return numeric;
+    }
+    effects.enter("characterReferenceValue");
+    max = 31;
+    test = asciiAlphanumeric;
+    return value(code);
+  }
+  function numeric(code) {
+    if (code === 88 || code === 120) {
+      effects.enter("characterReferenceMarkerHexadecimal");
+      effects.consume(code);
+      effects.exit("characterReferenceMarkerHexadecimal");
+      effects.enter("characterReferenceValue");
+      max = 6;
+      test = asciiHexDigit;
+      return value;
+    }
+    effects.enter("characterReferenceValue");
+    max = 7;
+    test = asciiDigit;
+    return value(code);
+  }
+  function value(code) {
+    if (code === 59 && size) {
+      const token = effects.exit("characterReferenceValue");
+      if (test === asciiAlphanumeric && !decodeNamedCharacterReference(self.sliceSerialize(token))) {
+        return nok(code);
+      }
+      effects.enter("characterReferenceMarker");
+      effects.consume(code);
+      effects.exit("characterReferenceMarker");
+      effects.exit("characterReference");
+      return ok;
+    }
+    if (test(code) && size++ < max) {
+      effects.consume(code);
+      return value;
+    }
+    return nok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/partial-non-lazy-continuation.js
+var nonLazyContinuation = {
+  partial: true,
+  tokenize: tokenizeNonLazyContinuation
+};
+function tokenizeNonLazyContinuation(effects, ok, nok) {
+  const self = this;
+  return start;
+  function start(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return after;
+  }
+  function after(code) {
+    return self.parser.lazy[self.now().line] ? nok(code) : ok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/code-fenced.js
+var codeFenced = {
+  concrete: true,
+  name: "codeFenced",
+  tokenize: tokenizeCodeFenced
+};
+function tokenizeCodeFenced(effects, ok, nok) {
+  const self = this;
+  const closeStart = {
+    partial: true,
+    tokenize: tokenizeCloseStart
+  };
+  let initialPrefix = 0;
+  let sizeOpen = 0;
+  let marker;
+  return start;
+  function start(code) {
+    return beforeSequenceOpen(code);
+  }
+  function beforeSequenceOpen(code) {
+    const tail = self.events[self.events.length - 1];
+    initialPrefix = tail && tail[1].type === "linePrefix" ? tail[2].sliceSerialize(tail[1], true).length : 0;
+    marker = code;
+    effects.enter("codeFenced");
+    effects.enter("codeFencedFence");
+    effects.enter("codeFencedFenceSequence");
+    return sequenceOpen(code);
+  }
+  function sequenceOpen(code) {
+    if (code === marker) {
+      sizeOpen++;
+      effects.consume(code);
+      return sequenceOpen;
+    }
+    if (sizeOpen < 3) {
+      return nok(code);
+    }
+    effects.exit("codeFencedFenceSequence");
+    return markdownSpace(code) ? factorySpace(effects, infoBefore, "whitespace")(code) : infoBefore(code);
+  }
+  function infoBefore(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("codeFencedFence");
+      return self.interrupt ? ok(code) : effects.check(nonLazyContinuation, atNonLazyBreak, after)(code);
+    }
+    effects.enter("codeFencedFenceInfo");
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return info2(code);
+  }
+  function info2(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("chunkString");
+      effects.exit("codeFencedFenceInfo");
+      return infoBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.exit("chunkString");
+      effects.exit("codeFencedFenceInfo");
+      return factorySpace(effects, metaBefore, "whitespace")(code);
+    }
+    if (code === 96 && code === marker) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return info2;
+  }
+  function metaBefore(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return infoBefore(code);
+    }
+    effects.enter("codeFencedFenceMeta");
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return meta(code);
+  }
+  function meta(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("chunkString");
+      effects.exit("codeFencedFenceMeta");
+      return infoBefore(code);
+    }
+    if (code === 96 && code === marker) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return meta;
+  }
+  function atNonLazyBreak(code) {
+    return effects.attempt(closeStart, after, contentBefore)(code);
+  }
+  function contentBefore(code) {
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return contentStart;
+  }
+  function contentStart(code) {
+    return initialPrefix > 0 && markdownSpace(code) ? factorySpace(effects, beforeContentChunk, "linePrefix", initialPrefix + 1)(code) : beforeContentChunk(code);
+  }
+  function beforeContentChunk(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return effects.check(nonLazyContinuation, atNonLazyBreak, after)(code);
+    }
+    effects.enter("codeFlowValue");
+    return contentChunk(code);
+  }
+  function contentChunk(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("codeFlowValue");
+      return beforeContentChunk(code);
+    }
+    effects.consume(code);
+    return contentChunk;
+  }
+  function after(code) {
+    effects.exit("codeFenced");
+    return ok(code);
+  }
+  function tokenizeCloseStart(effects2, ok2, nok2) {
+    let size = 0;
+    return startBefore;
+    function startBefore(code) {
+      effects2.enter("lineEnding");
+      effects2.consume(code);
+      effects2.exit("lineEnding");
+      return start2;
+    }
+    function start2(code) {
+      effects2.enter("codeFencedFence");
+      return markdownSpace(code) ? factorySpace(effects2, beforeSequenceClose, "linePrefix", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4)(code) : beforeSequenceClose(code);
+    }
+    function beforeSequenceClose(code) {
+      if (code === marker) {
+        effects2.enter("codeFencedFenceSequence");
+        return sequenceClose(code);
+      }
+      return nok2(code);
+    }
+    function sequenceClose(code) {
+      if (code === marker) {
+        size++;
+        effects2.consume(code);
+        return sequenceClose;
+      }
+      if (size >= sizeOpen) {
+        effects2.exit("codeFencedFenceSequence");
+        return markdownSpace(code) ? factorySpace(effects2, sequenceCloseAfter, "whitespace")(code) : sequenceCloseAfter(code);
+      }
+      return nok2(code);
+    }
+    function sequenceCloseAfter(code) {
+      if (code === null || markdownLineEnding(code)) {
+        effects2.exit("codeFencedFence");
+        return ok2(code);
+      }
+      return nok2(code);
+    }
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/code-indented.js
+var codeIndented = {
+  name: "codeIndented",
+  tokenize: tokenizeCodeIndented
+};
+var furtherStart = {
+  partial: true,
+  tokenize: tokenizeFurtherStart
+};
+function tokenizeCodeIndented(effects, ok, nok) {
+  return start;
+  function start(code) {
+    effects.enter("codeIndented");
+    return factorySpaceMinMax(effects, atBreak, nok, "linePrefix", 4, 4)(code);
+  }
+  function atBreak(code) {
+    if (code === null) {
+      return after(code);
+    }
+    if (markdownLineEnding(code)) {
+      return effects.attempt(furtherStart, atBreak, after)(code);
+    }
+    effects.enter("codeFlowValue");
+    return inside(code);
+  }
+  function inside(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("codeFlowValue");
+      return atBreak(code);
+    }
+    effects.consume(code);
+    return inside;
+  }
+  function after(code) {
+    effects.exit("codeIndented");
+    return ok(code);
+  }
+}
+function tokenizeFurtherStart(effects, ok, nok) {
+  const self = this;
+  return furtherStart2;
+  function furtherStart2(code) {
+    if (self.parser.lazy[self.now().line]) {
+      return nok(code);
+    }
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      return furtherStart2;
+    }
+    return factorySpaceMinMax(effects, ok, onNotEnoughPrefix, "linePrefix", 4, 4)(code);
+  }
+  function onNotEnoughPrefix(code) {
+    return markdownLineEnding(code) ? furtherStart2(code) : nok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/code-text.js
+var codeText = {
+  name: "codeText",
+  previous,
+  resolve: resolveCodeText,
+  tokenize: tokenizeCodeText
+};
+function resolveCodeText(events) {
+  let tailExitIndex = events.length - 4;
+  let headEnterIndex = 3;
+  let index2;
+  let enter;
+  if ((events[headEnterIndex][1].type === "lineEnding" || events[headEnterIndex][1].type === "space") && (events[tailExitIndex][1].type === "lineEnding" || events[tailExitIndex][1].type === "space")) {
+    index2 = headEnterIndex;
+    while (++index2 < tailExitIndex) {
+      if (events[index2][1].type === "codeTextData") {
+        events[headEnterIndex][1].type = "codeTextPadding";
+        events[tailExitIndex][1].type = "codeTextPadding";
+        headEnterIndex += 2;
+        tailExitIndex -= 2;
+        break;
+      }
+    }
+  }
+  index2 = headEnterIndex - 1;
+  tailExitIndex++;
+  while (++index2 <= tailExitIndex) {
+    if (enter === void 0) {
+      if (index2 !== tailExitIndex && events[index2][1].type !== "lineEnding") {
+        enter = index2;
+      }
+    } else if (index2 === tailExitIndex || events[index2][1].type === "lineEnding") {
+      events[enter][1].type = "codeTextData";
+      if (index2 !== enter + 2) {
+        events[enter][1].end = events[index2 - 1][1].end;
+        events.splice(enter + 2, index2 - enter - 2);
+        tailExitIndex -= index2 - enter - 2;
+        index2 = enter + 2;
+      }
+      enter = void 0;
+    }
+  }
+  return events;
+}
+function previous(code) {
+  return code !== 96 || this.events[this.events.length - 1][1].type === "characterEscape";
+}
+function tokenizeCodeText(effects, ok, nok) {
+  const self = this;
+  let sizeOpen = 0;
+  let size;
+  let token;
+  return start;
+  function start(code) {
+    effects.enter("codeText");
+    effects.enter("codeTextSequence");
+    return sequenceOpen(code);
+  }
+  function sequenceOpen(code) {
+    if (code === 96) {
+      effects.consume(code);
+      sizeOpen++;
+      return sequenceOpen;
+    }
+    effects.exit("codeTextSequence");
+    return between(code);
+  }
+  function between(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    if (code === 32) {
+      effects.enter("space");
+      effects.consume(code);
+      effects.exit("space");
+      return between;
+    }
+    if (code === 96) {
+      token = effects.enter("codeTextSequence");
+      size = 0;
+      return sequenceClose(code);
+    }
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      return between;
+    }
+    effects.enter("codeTextData");
+    return data(code);
+  }
+  function data(code) {
+    if (code === null || code === 32 || code === 96 || markdownLineEnding(code)) {
+      effects.exit("codeTextData");
+      return between(code);
+    }
+    effects.consume(code);
+    return data;
+  }
+  function sequenceClose(code) {
+    if (code === 96) {
+      effects.consume(code);
+      size++;
+      return sequenceClose;
+    }
+    if (size === sizeOpen) {
+      effects.exit("codeTextSequence");
+      effects.exit("codeText");
+      return ok(code);
+    }
+    token.type = "codeTextData";
+    return data(code);
+  }
+}
+
+// node_modules/micromark-util-subtokenize/lib/splice-buffer.js
+var SpliceBuffer = class {
+  /**
+   * @param {ReadonlyArray<T> | null | undefined} [initial]
+   *   Initial items (optional).
+   * @returns
+   *   Splice buffer.
+   */
+  constructor(initial) {
+    this.left = initial ? [...initial] : [];
+    this.right = [];
+  }
+  /**
+   * Array access;
+   * does not move the cursor.
+   *
+   * @param {number} index
+   *   Index.
+   * @return {T}
+   *   Item.
+   */
+  get(index2) {
+    if (index2 < 0 || index2 >= this.left.length + this.right.length) {
+      throw new RangeError("Cannot access index `" + index2 + "` in a splice buffer of size `" + (this.left.length + this.right.length) + "`");
+    }
+    if (index2 < this.left.length) return this.left[index2];
+    return this.right[this.right.length - index2 + this.left.length - 1];
+  }
+  /**
+   * The length of the splice buffer, one greater than the largest index in the
+   * array.
+   */
+  get length() {
+    return this.left.length + this.right.length;
+  }
+  /**
+   * Remove and return `list[0]`;
+   * moves the cursor to `0`.
+   *
+   * @returns {T | undefined}
+   *   Item, optional.
+   */
+  shift() {
+    this.setCursor(0);
+    return this.right.pop();
+  }
+  /**
+   * Slice the buffer to get an array;
+   * does not move the cursor.
+   *
+   * @param {number} start
+   *   Start.
+   * @param {number | null | undefined} [end]
+   *   End (optional).
+   * @returns {Array<T>}
+   *   Array of items.
+   */
+  slice(start, end) {
+    const stop = end === null || end === void 0 ? Number.POSITIVE_INFINITY : end;
+    if (stop < this.left.length) {
+      return this.left.slice(start, stop);
+    }
+    if (start > this.left.length) {
+      return this.right.slice(this.right.length - stop + this.left.length, this.right.length - start + this.left.length).reverse();
+    }
+    return this.left.slice(start).concat(this.right.slice(this.right.length - stop + this.left.length).reverse());
+  }
+  /**
+   * Mimics the behavior of Array.prototype.splice() except for the change of
+   * interface necessary to avoid segfaults when patching in very large arrays.
+   *
+   * This operation moves cursor is moved to `start` and results in the cursor
+   * placed after any inserted items.
+   *
+   * @param {number} start
+   *   Start;
+   *   zero-based index at which to start changing the array;
+   *   negative numbers count backwards from the end of the array and values
+   *   that are out-of bounds are clamped to the appropriate end of the array.
+   * @param {number | null | undefined} [deleteCount=0]
+   *   Delete count (default: `0`);
+   *   maximum number of elements to delete, starting from start.
+   * @param {Array<T> | null | undefined} [items=[]]
+   *   Items to include in place of the deleted items (default: `[]`).
+   * @return {Array<T>}
+   *   Any removed items.
+   */
+  splice(start, deleteCount, items) {
+    const count = deleteCount || 0;
+    this.setCursor(Math.trunc(start));
+    const removed = this.right.splice(this.right.length - count, Number.POSITIVE_INFINITY);
+    if (items) chunkedPush(this.left, items);
+    return removed.reverse();
+  }
+  /**
+   * Remove and return the highest-numbered item in the array, so
+   * `list[list.length - 1]`;
+   * Moves the cursor to `length`.
+   *
+   * @returns {T | undefined}
+   *   Item, optional.
+   */
+  pop() {
+    this.setCursor(Number.POSITIVE_INFINITY);
+    return this.left.pop();
+  }
+  /**
+   * Inserts a single item to the high-numbered side of the array;
+   * moves the cursor to `length`.
+   *
+   * @param {T} item
+   *   Item.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  push(item) {
+    this.setCursor(Number.POSITIVE_INFINITY);
+    this.left.push(item);
+  }
+  /**
+   * Inserts many items to the high-numbered side of the array.
+   * Moves the cursor to `length`.
+   *
+   * @param {Array<T>} items
+   *   Items.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  pushMany(items) {
+    this.setCursor(Number.POSITIVE_INFINITY);
+    chunkedPush(this.left, items);
+  }
+  /**
+   * Inserts a single item to the low-numbered side of the array;
+   * Moves the cursor to `0`.
+   *
+   * @param {T} item
+   *   Item.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  unshift(item) {
+    this.setCursor(0);
+    this.right.push(item);
+  }
+  /**
+   * Inserts many items to the low-numbered side of the array;
+   * moves the cursor to `0`.
+   *
+   * @param {Array<T>} items
+   *   Items.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  unshiftMany(items) {
+    this.setCursor(0);
+    chunkedPush(this.right, items.reverse());
+  }
+  /**
+   * Move the cursor to a specific position in the array. Requires
+   * time proportional to the distance moved.
+   *
+   * If `n < 0`, the cursor will end up at the beginning.
+   * If `n > length`, the cursor will end up at the end.
+   *
+   * @param {number} n
+   *   Position.
+   * @return {undefined}
+   *   Nothing.
+   */
+  setCursor(n) {
+    if (n === this.left.length || n > this.left.length && this.right.length === 0 || n < 0 && this.left.length === 0) return;
+    if (n < this.left.length) {
+      const removed = this.left.splice(n, Number.POSITIVE_INFINITY);
+      chunkedPush(this.right, removed.reverse());
+    } else {
+      const removed = this.right.splice(this.left.length + this.right.length - n, Number.POSITIVE_INFINITY);
+      chunkedPush(this.left, removed.reverse());
+    }
+  }
+};
+function chunkedPush(list2, right) {
+  let chunkStart = 0;
+  if (right.length < 1e4) {
+    list2.push(...right);
+  } else {
+    while (chunkStart < right.length) {
+      list2.push(...right.slice(chunkStart, chunkStart + 1e4));
+      chunkStart += 1e4;
+    }
+  }
+}
+
+// node_modules/micromark-util-subtokenize/index.js
+function subtokenize(eventsArray) {
+  const jumps = {};
+  let index2 = -1;
+  let event;
+  let lineIndex;
+  let otherIndex;
+  let otherEvent;
+  let parameters;
+  let subevents;
+  let more;
+  const events = new SpliceBuffer(eventsArray);
+  while (++index2 < events.length) {
+    while (index2 in jumps) {
+      index2 = jumps[index2];
+    }
+    event = events.get(index2);
+    if (index2 && event[1].type === "chunkFlow" && events.get(index2 - 1)[1].type === "listItemPrefix") {
+      subevents = event[1]._tokenizer.events;
+      otherIndex = 0;
+      if (otherIndex < subevents.length && subevents[otherIndex][1].type === "lineEndingBlank") {
+        otherIndex += 2;
+      }
+      if (otherIndex < subevents.length && subevents[otherIndex][1].type === "content") {
+        while (++otherIndex < subevents.length) {
+          if (subevents[otherIndex][1].type === "content") {
+            break;
+          }
+          if (subevents[otherIndex][1].type === "chunkText") {
+            subevents[otherIndex][1]._isInFirstContentOfListItem = true;
+            otherIndex++;
+          }
+        }
+      }
+    }
+    if (event[0] === "enter") {
+      if (event[1].contentType) {
+        Object.assign(jumps, subcontent(events, index2));
+        index2 = jumps[index2];
+        more = true;
+      }
+    } else if (event[1]._container) {
+      otherIndex = index2;
+      lineIndex = void 0;
+      while (otherIndex--) {
+        otherEvent = events.get(otherIndex);
+        if (otherEvent[1].type === "lineEnding" || otherEvent[1].type === "lineEndingBlank") {
+          if (otherEvent[0] === "enter") {
+            if (lineIndex) {
+              events.get(lineIndex)[1].type = "lineEndingBlank";
+            }
+            otherEvent[1].type = "lineEnding";
+            lineIndex = otherIndex;
+          }
+        } else if (otherEvent[1].type === "linePrefix" || otherEvent[1].type === "listItemIndent") {
+        } else {
+          break;
+        }
+      }
+      if (lineIndex) {
+        event[1].end = {
+          ...events.get(lineIndex)[1].start
+        };
+        parameters = events.slice(lineIndex, index2);
+        parameters.unshift(event);
+        events.splice(lineIndex, index2 - lineIndex + 1, parameters);
+      }
+    }
+  }
+  splice(eventsArray, 0, Number.POSITIVE_INFINITY, events.slice(0));
+  return !more;
+}
+function subcontent(events, eventIndex) {
+  const token = events.get(eventIndex)[1];
+  const context = events.get(eventIndex)[2];
+  let startPosition = eventIndex - 1;
+  const startPositions = [];
+  let tokenizer = token._tokenizer;
+  if (!tokenizer) {
+    tokenizer = context.parser[token.contentType](token.start);
+    if (token._contentTypeTextTrailing) {
+      tokenizer._contentTypeTextTrailing = true;
+    }
+  }
+  const childEvents = tokenizer.events;
+  const jumps = [];
+  const gaps = {};
+  let stream;
+  let previous2;
+  let index2 = -1;
+  let current = token;
+  let adjust = 0;
+  let start = 0;
+  const breaks = [start];
+  while (current) {
+    while (events.get(++startPosition)[1] !== current) {
+    }
+    startPositions.push(startPosition);
+    if (!current._tokenizer) {
+      stream = context.sliceStream(current);
+      if (!current.next) {
+        stream.push(null);
+      }
+      if (previous2) {
+        tokenizer.defineSkip(current.start);
+      }
+      if (current._isInFirstContentOfListItem) {
+        tokenizer._gfmTasklistFirstContentOfListItem = true;
+      }
+      tokenizer.write(stream);
+      if (current._isInFirstContentOfListItem) {
+        tokenizer._gfmTasklistFirstContentOfListItem = void 0;
+      }
+    }
+    previous2 = current;
+    current = current.next;
+  }
+  current = token;
+  while (++index2 < childEvents.length) {
+    if (
+      // Find a void token that includes a break.
+      childEvents[index2][0] === "exit" && childEvents[index2 - 1][0] === "enter" && childEvents[index2][1].type === childEvents[index2 - 1][1].type && childEvents[index2][1].start.line !== childEvents[index2][1].end.line
+    ) {
+      start = index2 + 1;
+      breaks.push(start);
+      current._tokenizer = void 0;
+      current.previous = void 0;
+      current = current.next;
+    }
+  }
+  tokenizer.events = [];
+  if (current) {
+    current._tokenizer = void 0;
+    current.previous = void 0;
+  } else {
+    breaks.pop();
+  }
+  index2 = breaks.length;
+  while (index2--) {
+    const slice = childEvents.slice(breaks[index2], breaks[index2 + 1]);
+    const start2 = startPositions.pop();
+    jumps.push([start2, start2 + slice.length - 1]);
+    events.splice(start2, 2, slice);
+  }
+  jumps.reverse();
+  index2 = -1;
+  while (++index2 < jumps.length) {
+    gaps[adjust + jumps[index2][0]] = adjust + jumps[index2][1];
+    adjust += jumps[index2][1] - jumps[index2][0] - 1;
+  }
+  return gaps;
+}
+
+// node_modules/micromark-core-commonmark/lib/content.js
+var content2 = {
+  resolve: resolveContent,
+  tokenize: tokenizeContent
+};
+var continuationConstruct = {
+  partial: true,
+  tokenize: tokenizeContinuation
+};
+function resolveContent(events) {
+  subtokenize(events);
+  return events;
+}
+function tokenizeContent(effects, ok) {
+  let previous2;
+  return chunkStart;
+  function chunkStart(code) {
+    effects.enter("content");
+    previous2 = effects.enter("chunkContent", {
+      contentType: "content"
+    });
+    return chunkInside(code);
+  }
+  function chunkInside(code) {
+    if (code === null) {
+      return contentEnd(code);
+    }
+    if (markdownLineEnding(code)) {
+      return effects.check(continuationConstruct, contentContinue, contentEnd)(code);
+    }
+    effects.consume(code);
+    return chunkInside;
+  }
+  function contentEnd(code) {
+    effects.exit("chunkContent");
+    effects.exit("content");
+    return ok(code);
+  }
+  function contentContinue(code) {
+    effects.consume(code);
+    effects.exit("chunkContent");
+    previous2.next = effects.enter("chunkContent", {
+      contentType: "content",
+      previous: previous2
+    });
+    previous2 = previous2.next;
+    return chunkInside;
+  }
+}
+function tokenizeContinuation(effects, ok, nok) {
+  const self = this;
+  return startLookahead;
+  function startLookahead(code) {
+    effects.exit("chunkContent");
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return factorySpace(effects, prefixed, "linePrefix");
+  }
+  function prefixed(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return nok(code);
+    }
+    const tail = self.events[self.events.length - 1];
+    if (!self.parser.constructs.disable.null.includes("codeIndented") && tail && tail[1].type === "linePrefix" && tail[2].sliceSerialize(tail[1], true).length >= 4) {
+      return ok(code);
+    }
+    return effects.interrupt(self.parser.constructs.flow, nok, ok)(code);
+  }
+}
+
+// node_modules/micromark-factory-destination/index.js
+function factoryDestination(effects, ok, nok, type, literalType, literalMarkerType, rawType, stringType, max) {
+  const limit = max || Number.POSITIVE_INFINITY;
+  let balance = 0;
+  return start;
+  function start(code) {
+    if (code === 60) {
+      effects.enter(type);
+      effects.enter(literalType);
+      effects.enter(literalMarkerType);
+      effects.consume(code);
+      effects.exit(literalMarkerType);
+      return enclosedBefore;
+    }
+    if (code === null || code === 32 || code === 41 || asciiControl(code)) {
+      return nok(code);
+    }
+    effects.enter(type);
+    effects.enter(rawType);
+    effects.enter(stringType);
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return raw(code);
+  }
+  function enclosedBefore(code) {
+    if (code === 62) {
+      effects.enter(literalMarkerType);
+      effects.consume(code);
+      effects.exit(literalMarkerType);
+      effects.exit(literalType);
+      effects.exit(type);
+      return ok;
+    }
+    effects.enter(stringType);
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return enclosed(code);
+  }
+  function enclosed(code) {
+    if (code === 62) {
+      effects.exit("chunkString");
+      effects.exit(stringType);
+      return enclosedBefore(code);
+    }
+    if (code === null || code === 60 || markdownLineEnding(code)) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return code === 92 ? enclosedEscape : enclosed;
+  }
+  function enclosedEscape(code) {
+    if (code === 60 || code === 62 || code === 92) {
+      effects.consume(code);
+      return enclosed;
+    }
+    return enclosed(code);
+  }
+  function raw(code) {
+    if (!balance && (code === null || code === 41 || markdownLineEndingOrSpace(code))) {
+      effects.exit("chunkString");
+      effects.exit(stringType);
+      effects.exit(rawType);
+      effects.exit(type);
+      return ok(code);
+    }
+    if (balance < limit && code === 40) {
+      effects.consume(code);
+      balance++;
+      return raw;
+    }
+    if (code === 41) {
+      effects.consume(code);
+      balance--;
+      return raw;
+    }
+    if (code === null || code === 32 || code === 40 || asciiControl(code)) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return code === 92 ? rawEscape : raw;
+  }
+  function rawEscape(code) {
+    if (code === 40 || code === 41 || code === 92) {
+      effects.consume(code);
+      return raw;
+    }
+    return raw(code);
+  }
+}
+
+// node_modules/micromark-factory-label/index.js
+function factoryLabel(effects, ok, nok, type, markerType, stringType) {
+  const self = this;
+  let size = 0;
+  let seen;
+  return start;
+  function start(code) {
+    effects.enter(type);
+    effects.enter(markerType);
+    effects.consume(code);
+    effects.exit(markerType);
+    effects.enter(stringType);
+    return atBreak;
+  }
+  function atBreak(code) {
+    if (size > 999 || code === null || code === 91 || code === 93 && !seen || // To do: remove in the future once we’ve switched from
+    // `micromark-extension-footnote` to `micromark-extension-gfm-footnote`,
+    // which doesn’t need this.
+    // Hidden footnotes hook.
+    /* c8 ignore next 3 */
+    code === 94 && !size && "_hiddenFootnoteSupport" in self.parser.constructs) {
+      return nok(code);
+    }
+    if (code === 93) {
+      effects.exit(stringType);
+      effects.enter(markerType);
+      effects.consume(code);
+      effects.exit(markerType);
+      effects.exit(type);
+      return ok;
+    }
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      return atBreak;
+    }
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return labelInside(code);
+  }
+  function labelInside(code) {
+    if (code === null || code === 91 || code === 93 || markdownLineEnding(code) || size++ > 999) {
+      effects.exit("chunkString");
+      return atBreak(code);
+    }
+    effects.consume(code);
+    if (!seen) seen = !markdownSpace(code);
+    return code === 92 ? labelEscape : labelInside;
+  }
+  function labelEscape(code) {
+    if (code === 91 || code === 92 || code === 93) {
+      effects.consume(code);
+      size++;
+      return labelInside;
+    }
+    return labelInside(code);
+  }
+}
+
+// node_modules/micromark-factory-title/index.js
+function factoryTitle(effects, ok, nok, type, markerType, stringType) {
+  let marker;
+  return start;
+  function start(code) {
+    if (code === 34 || code === 39 || code === 40) {
+      effects.enter(type);
+      effects.enter(markerType);
+      effects.consume(code);
+      effects.exit(markerType);
+      marker = code === 40 ? 41 : code;
+      return begin;
+    }
+    return nok(code);
+  }
+  function begin(code) {
+    if (code === marker) {
+      effects.enter(markerType);
+      effects.consume(code);
+      effects.exit(markerType);
+      effects.exit(type);
+      return ok;
+    }
+    effects.enter(stringType);
+    return atBreak(code);
+  }
+  function atBreak(code) {
+    if (code === marker) {
+      effects.exit(stringType);
+      return begin(marker);
+    }
+    if (code === null) {
+      return nok(code);
+    }
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      return factorySpace(effects, atBreak, "linePrefix");
+    }
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return inside(code);
+  }
+  function inside(code) {
+    if (code === marker || code === null || markdownLineEnding(code)) {
+      effects.exit("chunkString");
+      return atBreak(code);
+    }
+    effects.consume(code);
+    return code === 92 ? escape : inside;
+  }
+  function escape(code) {
+    if (code === marker || code === 92) {
+      effects.consume(code);
+      return inside;
+    }
+    return inside(code);
+  }
+}
+
+// node_modules/micromark-factory-whitespace/index.js
+function factoryWhitespace(effects, ok) {
+  let seen;
+  return start;
+  function start(code) {
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      seen = true;
+      return start;
+    }
+    if (markdownSpace(code)) {
+      return factorySpace(effects, start, seen ? "linePrefix" : "lineSuffix")(code);
+    }
+    return ok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/definition.js
+var definition = {
+  name: "definition",
+  tokenize: tokenizeDefinition
+};
+var titleBefore = {
+  partial: true,
+  tokenize: tokenizeTitleBefore
+};
+function tokenizeDefinition(effects, ok, nok) {
+  const self = this;
+  let identifier;
+  return start;
+  function start(code) {
+    effects.enter("definition");
+    return before(code);
+  }
+  function before(code) {
+    return factoryLabel.call(
+      self,
+      effects,
+      labelAfter,
+      // Note: we don’t need to reset the way `markdown-rs` does.
+      nok,
+      "definitionLabel",
+      "definitionLabelMarker",
+      "definitionLabelString"
+    )(code);
+  }
+  function labelAfter(code) {
+    identifier = normalizeIdentifier(self.sliceSerialize(self.events[self.events.length - 1][1]).slice(1, -1));
+    if (code === 58) {
+      effects.enter("definitionMarker");
+      effects.consume(code);
+      effects.exit("definitionMarker");
+      return markerAfter;
+    }
+    return nok(code);
+  }
+  function markerAfter(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, destinationBefore)(code) : destinationBefore(code);
+  }
+  function destinationBefore(code) {
+    return factoryDestination(
+      effects,
+      destinationAfter,
+      // Note: we don’t need to reset the way `markdown-rs` does.
+      nok,
+      "definitionDestination",
+      "definitionDestinationLiteral",
+      "definitionDestinationLiteralMarker",
+      "definitionDestinationRaw",
+      "definitionDestinationString"
+    )(code);
+  }
+  function destinationAfter(code) {
+    return effects.attempt(titleBefore, after, after)(code);
+  }
+  function after(code) {
+    return markdownSpace(code) ? factorySpace(effects, afterWhitespace, "whitespace")(code) : afterWhitespace(code);
+  }
+  function afterWhitespace(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("definition");
+      self.parser.defined.push(identifier);
+      return ok(code);
+    }
+    return nok(code);
+  }
+}
+function tokenizeTitleBefore(effects, ok, nok) {
+  return titleBefore2;
+  function titleBefore2(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, beforeMarker)(code) : nok(code);
+  }
+  function beforeMarker(code) {
+    return factoryTitle(effects, titleAfter, nok, "definitionTitle", "definitionTitleMarker", "definitionTitleString")(code);
+  }
+  function titleAfter(code) {
+    return markdownSpace(code) ? factorySpace(effects, titleAfterOptionalWhitespace, "whitespace")(code) : titleAfterOptionalWhitespace(code);
+  }
+  function titleAfterOptionalWhitespace(code) {
+    return code === null || markdownLineEnding(code) ? ok(code) : nok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/hard-break-escape.js
+var hardBreakEscape = {
+  name: "hardBreakEscape",
+  tokenize: tokenizeHardBreakEscape
+};
+function tokenizeHardBreakEscape(effects, ok, nok) {
+  return start;
+  function start(code) {
+    effects.enter("hardBreakEscape");
+    effects.consume(code);
+    return after;
+  }
+  function after(code) {
+    if (markdownLineEnding(code)) {
+      effects.exit("hardBreakEscape");
+      return ok(code);
+    }
+    return nok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/heading-atx.js
+var headingAtx = {
+  name: "headingAtx",
+  resolve: resolveHeadingAtx,
+  tokenize: tokenizeHeadingAtx
+};
+function resolveHeadingAtx(events, context) {
+  let contentEnd = events.length - 2;
+  let contentStart = 3;
+  if (events[contentStart][1].type === "whitespace") {
+    contentStart += 2;
+  }
+  if (contentEnd - 2 > contentStart && events[contentEnd][1].type === "whitespace") {
+    contentEnd -= 2;
+  }
+  if (events[contentEnd][1].type === "atxHeadingSequence" && (contentStart === contentEnd - 1 || contentEnd - 4 > contentStart && events[contentEnd - 2][1].type === "whitespace")) {
+    contentEnd -= contentStart + 1 === contentEnd ? 2 : 4;
+  }
+  if (contentEnd > contentStart) {
+    const content3 = {
+      type: "atxHeadingText",
+      start: events[contentStart][1].start,
+      end: events[contentEnd][1].end
+    };
+    const text3 = {
+      type: "chunkText",
+      start: events[contentStart][1].start,
+      end: events[contentEnd][1].end,
+      contentType: "text"
+    };
+    splice(events, contentStart, contentEnd - contentStart + 1, [["enter", content3, context], ["enter", text3, context], ["exit", text3, context], ["exit", content3, context]]);
+  }
+  return events;
+}
+function tokenizeHeadingAtx(effects, ok, nok) {
+  let size = 0;
+  return start;
+  function start(code) {
+    effects.enter("atxHeading");
+    return before(code);
+  }
+  function before(code) {
+    effects.enter("atxHeadingSequence");
+    return sequenceOpen(code);
+  }
+  function sequenceOpen(code) {
+    if (code === 35 && size++ < 6) {
+      effects.consume(code);
+      return sequenceOpen;
+    }
+    if (code === null || markdownLineEndingOrSpace(code)) {
+      effects.exit("atxHeadingSequence");
+      return atBreak(code);
+    }
+    return nok(code);
+  }
+  function atBreak(code) {
+    if (code === 35) {
+      effects.enter("atxHeadingSequence");
+      return sequenceFurther(code);
+    }
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("atxHeading");
+      return ok(code);
+    }
+    if (markdownSpace(code)) {
+      return factorySpace(effects, atBreak, "whitespace")(code);
+    }
+    effects.enter("atxHeadingText");
+    return data(code);
+  }
+  function sequenceFurther(code) {
+    if (code === 35) {
+      effects.consume(code);
+      return sequenceFurther;
+    }
+    effects.exit("atxHeadingSequence");
+    return atBreak(code);
+  }
+  function data(code) {
+    if (code === null || code === 35 || markdownLineEndingOrSpace(code)) {
+      effects.exit("atxHeadingText");
+      return atBreak(code);
+    }
+    effects.consume(code);
+    return data;
+  }
+}
+
+// node_modules/micromark-util-html-tag-name/index.js
+var htmlBlockNames = [
+  "address",
+  "article",
+  "aside",
+  "base",
+  "basefont",
+  "blockquote",
+  "body",
+  "caption",
+  "center",
+  "col",
+  "colgroup",
+  "dd",
+  "details",
+  "dialog",
+  "dir",
+  "div",
+  "dl",
+  "dt",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "frame",
+  "frameset",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "head",
+  "header",
+  "hr",
+  "html",
+  "iframe",
+  "legend",
+  "li",
+  "link",
+  "main",
+  "menu",
+  "menuitem",
+  "nav",
+  "noframes",
+  "ol",
+  "optgroup",
+  "option",
+  "p",
+  "param",
+  "search",
+  "section",
+  "summary",
+  "table",
+  "tbody",
+  "td",
+  "tfoot",
+  "th",
+  "thead",
+  "title",
+  "tr",
+  "track",
+  "ul"
+];
+var htmlRawNames = ["pre", "script", "style", "textarea"];
+
+// node_modules/micromark-core-commonmark/lib/html-flow.js
+var htmlFlow = {
+  concrete: true,
+  name: "htmlFlow",
+  resolveTo: resolveToHtmlFlow,
+  tokenize: tokenizeHtmlFlow
+};
+var blankLineBefore = {
+  partial: true,
+  tokenize: tokenizeBlankLineBefore
+};
+function resolveToHtmlFlow(events) {
+  let index2 = events.length;
+  while (index2--) {
+    if (events[index2][0] === "enter" && events[index2][1].type === "htmlFlow") {
+      break;
+    }
+  }
+  if (index2 > 1 && events[index2 - 2][1].type === "linePrefix") {
+    events[index2][1].start = events[index2 - 2][1].start;
+    events[index2 + 1][1].start = events[index2 - 2][1].start;
+    events.splice(index2 - 2, 2);
+  }
+  return events;
+}
+function tokenizeHtmlFlow(effects, ok, nok) {
+  const self = this;
+  let marker;
+  let closingTag;
+  let buffer;
+  let index2;
+  let markerB;
+  return start;
+  function start(code) {
+    return before(code);
+  }
+  function before(code) {
+    effects.enter("htmlFlow");
+    effects.enter("htmlFlowData");
+    effects.consume(code);
+    return open2;
+  }
+  function open2(code) {
+    if (code === 33) {
+      effects.consume(code);
+      return declarationOpen;
+    }
+    if (code === 47) {
+      effects.consume(code);
+      closingTag = true;
+      return tagCloseStart;
+    }
+    if (code === 63) {
+      effects.consume(code);
+      marker = 3;
+      return self.interrupt ? ok : continuationDeclarationInside;
+    }
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      buffer = String.fromCharCode(code);
+      return tagName;
+    }
+    return nok(code);
+  }
+  function declarationOpen(code) {
+    if (code === 45) {
+      effects.consume(code);
+      marker = 2;
+      return commentOpenInside;
+    }
+    if (code === 91) {
+      effects.consume(code);
+      marker = 5;
+      index2 = 0;
+      return cdataOpenInside;
+    }
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      marker = 4;
+      return self.interrupt ? ok : continuationDeclarationInside;
+    }
+    return nok(code);
+  }
+  function commentOpenInside(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return self.interrupt ? ok : continuationDeclarationInside;
+    }
+    return nok(code);
+  }
+  function cdataOpenInside(code) {
+    const value = "CDATA[";
+    if (code === value.charCodeAt(index2++)) {
+      effects.consume(code);
+      if (index2 === value.length) {
+        return self.interrupt ? ok : continuation;
+      }
+      return cdataOpenInside;
+    }
+    return nok(code);
+  }
+  function tagCloseStart(code) {
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      buffer = String.fromCharCode(code);
+      return tagName;
+    }
+    return nok(code);
+  }
+  function tagName(code) {
+    if (code === null || code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
+      const slash = code === 47;
+      const name = buffer.toLowerCase();
+      if (!slash && !closingTag && htmlRawNames.includes(name)) {
+        marker = 1;
+        return self.interrupt ? ok(code) : continuation(code);
+      }
+      if (htmlBlockNames.includes(buffer.toLowerCase())) {
+        marker = 6;
+        if (slash) {
+          effects.consume(code);
+          return basicSelfClosing;
+        }
+        return self.interrupt ? ok(code) : continuation(code);
+      }
+      marker = 7;
+      return self.interrupt && !self.parser.lazy[self.now().line] ? nok(code) : closingTag ? completeClosingTagAfter(code) : completeAttributeNameBefore(code);
+    }
+    if (code === 45 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      buffer += String.fromCharCode(code);
+      return tagName;
+    }
+    return nok(code);
+  }
+  function basicSelfClosing(code) {
+    if (code === 62) {
+      effects.consume(code);
+      return self.interrupt ? ok : continuation;
+    }
+    return nok(code);
+  }
+  function completeClosingTagAfter(code) {
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeClosingTagAfter;
+    }
+    return completeEnd(code);
+  }
+  function completeAttributeNameBefore(code) {
+    if (code === 47) {
+      effects.consume(code);
+      return completeEnd;
+    }
+    if (code === 58 || code === 95 || asciiAlpha(code)) {
+      effects.consume(code);
+      return completeAttributeName;
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeAttributeNameBefore;
+    }
+    return completeEnd(code);
+  }
+  function completeAttributeName(code) {
+    if (code === 45 || code === 46 || code === 58 || code === 95 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      return completeAttributeName;
+    }
+    return completeAttributeNameAfter(code);
+  }
+  function completeAttributeNameAfter(code) {
+    if (code === 61) {
+      effects.consume(code);
+      return completeAttributeValueBefore;
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeAttributeNameAfter;
+    }
+    return completeAttributeNameBefore(code);
+  }
+  function completeAttributeValueBefore(code) {
+    if (code === null || code === 60 || code === 61 || code === 62 || code === 96) {
+      return nok(code);
+    }
+    if (code === 34 || code === 39) {
+      effects.consume(code);
+      markerB = code;
+      return completeAttributeValueQuoted;
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeAttributeValueBefore;
+    }
+    return completeAttributeValueUnquoted(code);
+  }
+  function completeAttributeValueQuoted(code) {
+    if (code === markerB) {
+      effects.consume(code);
+      markerB = null;
+      return completeAttributeValueQuotedAfter;
+    }
+    if (code === null || markdownLineEnding(code)) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return completeAttributeValueQuoted;
+  }
+  function completeAttributeValueUnquoted(code) {
+    if (code === null || code === 34 || code === 39 || code === 47 || code === 60 || code === 61 || code === 62 || code === 96 || markdownLineEndingOrSpace(code)) {
+      return completeAttributeNameAfter(code);
+    }
+    effects.consume(code);
+    return completeAttributeValueUnquoted;
+  }
+  function completeAttributeValueQuotedAfter(code) {
+    if (code === 47 || code === 62 || markdownSpace(code)) {
+      return completeAttributeNameBefore(code);
+    }
+    return nok(code);
+  }
+  function completeEnd(code) {
+    if (code === 62) {
+      effects.consume(code);
+      return completeAfter;
+    }
+    return nok(code);
+  }
+  function completeAfter(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return continuation(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeAfter;
+    }
+    return nok(code);
+  }
+  function continuation(code) {
+    if (code === 45 && marker === 2) {
+      effects.consume(code);
+      return continuationCommentInside;
+    }
+    if (code === 60 && marker === 1) {
+      effects.consume(code);
+      return continuationRawTagOpen;
+    }
+    if (code === 62 && marker === 4) {
+      effects.consume(code);
+      return continuationClose;
+    }
+    if (code === 63 && marker === 3) {
+      effects.consume(code);
+      return continuationDeclarationInside;
+    }
+    if (code === 93 && marker === 5) {
+      effects.consume(code);
+      return continuationCdataInside;
+    }
+    if (markdownLineEnding(code) && (marker === 6 || marker === 7)) {
+      effects.exit("htmlFlowData");
+      return effects.check(blankLineBefore, continuationAfter, continuationStart)(code);
+    }
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("htmlFlowData");
+      return continuationStart(code);
+    }
+    effects.consume(code);
+    return continuation;
+  }
+  function continuationStart(code) {
+    return effects.check(nonLazyContinuation, continuationStartNonLazy, continuationAfter)(code);
+  }
+  function continuationStartNonLazy(code) {
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return continuationBefore;
+  }
+  function continuationBefore(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return continuationStart(code);
+    }
+    effects.enter("htmlFlowData");
+    return continuation(code);
+  }
+  function continuationCommentInside(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return continuationDeclarationInside;
+    }
+    return continuation(code);
+  }
+  function continuationRawTagOpen(code) {
+    if (code === 47) {
+      effects.consume(code);
+      buffer = "";
+      return continuationRawEndTag;
+    }
+    return continuation(code);
+  }
+  function continuationRawEndTag(code) {
+    if (code === 62) {
+      const name = buffer.toLowerCase();
+      if (htmlRawNames.includes(name)) {
+        effects.consume(code);
+        return continuationClose;
+      }
+      return continuation(code);
+    }
+    if (asciiAlpha(code) && buffer.length < 8) {
+      effects.consume(code);
+      buffer += String.fromCharCode(code);
+      return continuationRawEndTag;
+    }
+    return continuation(code);
+  }
+  function continuationCdataInside(code) {
+    if (code === 93) {
+      effects.consume(code);
+      return continuationDeclarationInside;
+    }
+    return continuation(code);
+  }
+  function continuationDeclarationInside(code) {
+    if (code === 62) {
+      effects.consume(code);
+      return continuationClose;
+    }
+    if (code === 45 && marker === 2) {
+      effects.consume(code);
+      return continuationDeclarationInside;
+    }
+    return continuation(code);
+  }
+  function continuationClose(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("htmlFlowData");
+      return continuationAfter(code);
+    }
+    effects.consume(code);
+    return continuationClose;
+  }
+  function continuationAfter(code) {
+    effects.exit("htmlFlow");
+    return ok(code);
+  }
+}
+function tokenizeBlankLineBefore(effects, ok, nok) {
+  return start;
+  function start(code) {
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return effects.attempt(blankLine, ok, nok);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/html-text.js
+var htmlText = {
+  name: "htmlText",
+  tokenize: tokenizeHtmlText
+};
+function tokenizeHtmlText(effects, ok, nok) {
+  const self = this;
+  let marker;
+  let index2;
+  let returnState;
+  return start;
+  function start(code) {
+    effects.enter("htmlText");
+    effects.enter("htmlTextData");
+    effects.consume(code);
+    return open2;
+  }
+  function open2(code) {
+    if (code === 33) {
+      effects.consume(code);
+      return declarationOpen;
+    }
+    if (code === 47) {
+      effects.consume(code);
+      return tagCloseStart;
+    }
+    if (code === 63) {
+      effects.consume(code);
+      return instruction;
+    }
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      return tagOpen;
+    }
+    return nok(code);
+  }
+  function declarationOpen(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return commentOpenInside;
+    }
+    if (code === 91) {
+      effects.consume(code);
+      index2 = 0;
+      return cdataOpenInside;
+    }
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      return declaration;
+    }
+    return nok(code);
+  }
+  function commentOpenInside(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return commentEnd;
+    }
+    return nok(code);
+  }
+  function comment(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    if (code === 45) {
+      effects.consume(code);
+      return commentClose;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = comment;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return comment;
+  }
+  function commentClose(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return commentEnd;
+    }
+    return comment(code);
+  }
+  function commentEnd(code) {
+    return code === 62 ? end(code) : code === 45 ? commentClose(code) : comment(code);
+  }
+  function cdataOpenInside(code) {
+    const value = "CDATA[";
+    if (code === value.charCodeAt(index2++)) {
+      effects.consume(code);
+      return index2 === value.length ? cdata : cdataOpenInside;
+    }
+    return nok(code);
+  }
+  function cdata(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    if (code === 93) {
+      effects.consume(code);
+      return cdataClose;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = cdata;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return cdata;
+  }
+  function cdataClose(code) {
+    if (code === 93) {
+      effects.consume(code);
+      return cdataEnd;
+    }
+    return cdata(code);
+  }
+  function cdataEnd(code) {
+    if (code === 62) {
+      return end(code);
+    }
+    if (code === 93) {
+      effects.consume(code);
+      return cdataEnd;
+    }
+    return cdata(code);
+  }
+  function declaration(code) {
+    if (code === null || code === 62) {
+      return end(code);
+    }
+    if (markdownLineEnding(code)) {
+      returnState = declaration;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return declaration;
+  }
+  function instruction(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    if (code === 63) {
+      effects.consume(code);
+      return instructionClose;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = instruction;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return instruction;
+  }
+  function instructionClose(code) {
+    return code === 62 ? end(code) : instruction(code);
+  }
+  function tagCloseStart(code) {
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      return tagClose;
+    }
+    return nok(code);
+  }
+  function tagClose(code) {
+    if (code === 45 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      return tagClose;
+    }
+    return tagCloseBetween(code);
+  }
+  function tagCloseBetween(code) {
+    if (markdownLineEnding(code)) {
+      returnState = tagCloseBetween;
+      return lineEndingBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return tagCloseBetween;
+    }
+    return end(code);
+  }
+  function tagOpen(code) {
+    if (code === 45 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      return tagOpen;
+    }
+    if (code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
+      return tagOpenBetween(code);
+    }
+    return nok(code);
+  }
+  function tagOpenBetween(code) {
+    if (code === 47) {
+      effects.consume(code);
+      return end;
+    }
+    if (code === 58 || code === 95 || asciiAlpha(code)) {
+      effects.consume(code);
+      return tagOpenAttributeName;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = tagOpenBetween;
+      return lineEndingBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return tagOpenBetween;
+    }
+    return end(code);
+  }
+  function tagOpenAttributeName(code) {
+    if (code === 45 || code === 46 || code === 58 || code === 95 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      return tagOpenAttributeName;
+    }
+    return tagOpenAttributeNameAfter(code);
+  }
+  function tagOpenAttributeNameAfter(code) {
+    if (code === 61) {
+      effects.consume(code);
+      return tagOpenAttributeValueBefore;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = tagOpenAttributeNameAfter;
+      return lineEndingBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return tagOpenAttributeNameAfter;
+    }
+    return tagOpenBetween(code);
+  }
+  function tagOpenAttributeValueBefore(code) {
+    if (code === null || code === 60 || code === 61 || code === 62 || code === 96) {
+      return nok(code);
+    }
+    if (code === 34 || code === 39) {
+      effects.consume(code);
+      marker = code;
+      return tagOpenAttributeValueQuoted;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = tagOpenAttributeValueBefore;
+      return lineEndingBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return tagOpenAttributeValueBefore;
+    }
+    effects.consume(code);
+    return tagOpenAttributeValueUnquoted;
+  }
+  function tagOpenAttributeValueQuoted(code) {
+    if (code === marker) {
+      effects.consume(code);
+      marker = void 0;
+      return tagOpenAttributeValueQuotedAfter;
+    }
+    if (code === null) {
+      return nok(code);
+    }
+    if (markdownLineEnding(code)) {
+      returnState = tagOpenAttributeValueQuoted;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return tagOpenAttributeValueQuoted;
+  }
+  function tagOpenAttributeValueUnquoted(code) {
+    if (code === null || code === 34 || code === 39 || code === 60 || code === 61 || code === 96) {
+      return nok(code);
+    }
+    if (code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
+      return tagOpenBetween(code);
+    }
+    effects.consume(code);
+    return tagOpenAttributeValueUnquoted;
+  }
+  function tagOpenAttributeValueQuotedAfter(code) {
+    if (code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
+      return tagOpenBetween(code);
+    }
+    return nok(code);
+  }
+  function end(code) {
+    if (code === 62) {
+      effects.consume(code);
+      effects.exit("htmlTextData");
+      effects.exit("htmlText");
+      return ok;
+    }
+    return nok(code);
+  }
+  function lineEndingBefore(code) {
+    effects.exit("htmlTextData");
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return lineEndingAfter;
+  }
+  function lineEndingAfter(code) {
+    return markdownSpace(code) ? factorySpace(effects, lineEndingAfterPrefix, "linePrefix", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4)(code) : lineEndingAfterPrefix(code);
+  }
+  function lineEndingAfterPrefix(code) {
+    effects.enter("htmlTextData");
+    return returnState(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/label-end.js
+var labelEnd = {
+  name: "labelEnd",
+  resolveAll: resolveAllLabelEnd,
+  resolveTo: resolveToLabelEnd,
+  tokenize: tokenizeLabelEnd
+};
+var resourceConstruct = {
+  tokenize: tokenizeResource
+};
+var referenceFullConstruct = {
+  tokenize: tokenizeReferenceFull
+};
+var referenceCollapsedConstruct = {
+  tokenize: tokenizeReferenceCollapsed
+};
+function resolveAllLabelEnd(events) {
+  let index2 = -1;
+  const newEvents = [];
+  while (++index2 < events.length) {
+    const token = events[index2][1];
+    newEvents.push(events[index2]);
+    if (token.type === "labelImage" || token.type === "labelLink" || token.type === "labelEnd") {
+      const offset = token.type === "labelImage" ? 4 : 2;
+      token.type = "data";
+      index2 += offset;
+    }
+  }
+  if (events.length !== newEvents.length) {
+    splice(events, 0, events.length, newEvents);
+  }
+  return events;
+}
+function resolveToLabelEnd(events, context) {
+  let index2 = events.length;
+  let offset = 0;
+  let open2;
+  let close;
+  let media;
+  while (index2--) {
+    const token = events[index2][1];
+    if (open2) {
+      if (token.type === "link" || token.type === "labelLink" && token._inactive) {
+        break;
+      }
+      if (events[index2][0] === "enter" && token.type === "labelLink") {
+        token._inactive = true;
+      }
+    } else if (close) {
+      if (events[index2][0] === "enter" && (token.type === "labelImage" || token.type === "labelLink") && !token._balanced) {
+        open2 = index2;
+        if (token.type !== "labelLink") {
+          offset = 2;
+          break;
+        }
+      }
+    } else if (token.type === "labelEnd") {
+      close = index2;
+    }
+  }
+  const group = {
+    type: events[open2][1].type === "labelLink" ? "link" : "image",
+    start: {
+      ...events[open2][1].start
+    },
+    end: {
+      ...events[events.length - 1][1].end
+    }
+  };
+  const label = {
+    type: "label",
+    start: {
+      ...events[open2][1].start
+    },
+    end: {
+      ...events[close][1].end
+    }
+  };
+  const text3 = {
+    type: "labelText",
+    start: {
+      ...events[open2 + offset + 2][1].end
+    },
+    end: {
+      ...events[close - 2][1].start
+    }
+  };
+  media = [["enter", group, context], ["enter", label, context]];
+  media = push(media, events.slice(open2 + 1, open2 + offset + 3));
+  media = push(media, [["enter", text3, context]]);
+  media = push(media, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open2 + offset + 4, close - 3), context));
+  media = push(media, [["exit", text3, context], events[close - 2], events[close - 1], ["exit", label, context]]);
+  media = push(media, events.slice(close + 1));
+  media = push(media, [["exit", group, context]]);
+  splice(events, open2, events.length, media);
+  return events;
+}
+function tokenizeLabelEnd(effects, ok, nok) {
+  const self = this;
+  const labelStarts = self._labelStarts;
+  let labelStart;
+  let defined;
+  if (labelStarts) {
+    while (labelStarts.length > 0 && labelStarts[labelStarts.length - 1]._balanced) {
+      labelStarts.pop();
+    }
+    labelStart = labelStarts[labelStarts.length - 1];
+  }
+  return start;
+  function start(code) {
+    if (!labelStart) {
+      return nok(code);
+    }
+    if (labelStart._inactive) {
+      return labelEndNok(code);
+    }
+    defined = self.parser.defined.includes(normalizeIdentifier(self.sliceSerialize({
+      start: labelStart.end,
+      end: self.now()
+    })));
+    effects.enter("labelEnd");
+    effects.enter("labelMarker");
+    effects.consume(code);
+    effects.exit("labelMarker");
+    effects.exit("labelEnd");
+    return after;
+  }
+  function after(code) {
+    if (code === 40) {
+      return effects.attempt(resourceConstruct, labelEndOk, defined ? labelEndOk : labelEndNok)(code);
+    }
+    if (code === 91) {
+      return effects.attempt(referenceFullConstruct, labelEndOk, defined ? referenceNotFull : labelEndNok)(code);
+    }
+    return defined ? labelEndOk(code) : labelEndNok(code);
+  }
+  function referenceNotFull(code) {
+    return effects.attempt(referenceCollapsedConstruct, labelEndOk, labelEndNok)(code);
+  }
+  function labelEndOk(code) {
+    labelStarts.pop();
+    return ok(code);
+  }
+  function labelEndNok(code) {
+    labelStart._balanced = true;
+    return nok(code);
+  }
+}
+function tokenizeResource(effects, ok, nok) {
+  return resourceStart;
+  function resourceStart(code) {
+    effects.enter("resource");
+    effects.enter("resourceMarker");
+    effects.consume(code);
+    effects.exit("resourceMarker");
+    return resourceBefore;
+  }
+  function resourceBefore(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, resourceOpen)(code) : resourceOpen(code);
+  }
+  function resourceOpen(code) {
+    if (code === 41) {
+      return resourceEnd(code);
+    }
+    return factoryDestination(effects, resourceDestinationAfter, resourceDestinationMissing, "resourceDestination", "resourceDestinationLiteral", "resourceDestinationLiteralMarker", "resourceDestinationRaw", "resourceDestinationString", 32)(code);
+  }
+  function resourceDestinationAfter(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, resourceBetween)(code) : resourceEnd(code);
+  }
+  function resourceDestinationMissing(code) {
+    return nok(code);
+  }
+  function resourceBetween(code) {
+    if (code === 34 || code === 39 || code === 40) {
+      return factoryTitle(effects, resourceTitleAfter, nok, "resourceTitle", "resourceTitleMarker", "resourceTitleString")(code);
+    }
+    return resourceEnd(code);
+  }
+  function resourceTitleAfter(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, resourceEnd)(code) : resourceEnd(code);
+  }
+  function resourceEnd(code) {
+    if (code === 41) {
+      effects.enter("resourceMarker");
+      effects.consume(code);
+      effects.exit("resourceMarker");
+      effects.exit("resource");
+      return ok;
+    }
+    return nok(code);
+  }
+}
+function tokenizeReferenceFull(effects, ok, nok) {
+  const self = this;
+  return referenceFull;
+  function referenceFull(code) {
+    return factoryLabel.call(self, effects, referenceFullAfter, referenceFullMissing, "reference", "referenceMarker", "referenceString")(code);
+  }
+  function referenceFullAfter(code) {
+    return self.parser.defined.includes(normalizeIdentifier(self.sliceSerialize(self.events[self.events.length - 1][1]).slice(1, -1))) ? ok(code) : nok(code);
+  }
+  function referenceFullMissing(code) {
+    return nok(code);
+  }
+}
+function tokenizeReferenceCollapsed(effects, ok, nok) {
+  return referenceCollapsedStart;
+  function referenceCollapsedStart(code) {
+    effects.enter("reference");
+    effects.enter("referenceMarker");
+    effects.consume(code);
+    effects.exit("referenceMarker");
+    return referenceCollapsedOpen;
+  }
+  function referenceCollapsedOpen(code) {
+    if (code === 93) {
+      effects.enter("referenceMarker");
+      effects.consume(code);
+      effects.exit("referenceMarker");
+      effects.exit("reference");
+      return ok;
+    }
+    return nok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/label-start-image.js
+var labelStartImage = {
+  name: "labelStartImage",
+  resolveAll: labelEnd.resolveAll,
+  tokenize: tokenizeLabelStartImage
+};
+function tokenizeLabelStartImage(effects, ok, nok) {
+  const self = this;
+  let labelImage;
+  return start;
+  function start(code) {
+    effects.enter("labelImage");
+    effects.enter("labelImageMarker");
+    effects.consume(code);
+    effects.exit("labelImageMarker");
+    return open2;
+  }
+  function open2(code) {
+    if (code === 91) {
+      effects.enter("labelMarker");
+      effects.consume(code);
+      effects.exit("labelMarker");
+      labelImage = effects.exit("labelImage");
+      return after;
+    }
+    return nok(code);
+  }
+  function after(code) {
+    if (code === 94 && "_hiddenFootnoteSupport" in self.parser.constructs) {
+      return nok(code);
+    }
+    self._labelStarts = self._labelStarts || [];
+    self._labelStarts.push(labelImage);
+    return ok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/label-start-link.js
+var labelStartLink = {
+  name: "labelStartLink",
+  resolveAll: labelEnd.resolveAll,
+  tokenize: tokenizeLabelStartLink
+};
+function tokenizeLabelStartLink(effects, ok, nok) {
+  const self = this;
+  let labelLink;
+  return start;
+  function start(code) {
+    effects.enter("labelLink");
+    effects.enter("labelMarker");
+    effects.consume(code);
+    effects.exit("labelMarker");
+    labelLink = effects.exit("labelLink");
+    return after;
+  }
+  function after(code) {
+    if (code === 94 && "_hiddenFootnoteSupport" in self.parser.constructs) {
+      return nok(code);
+    }
+    self._labelStarts = self._labelStarts || [];
+    self._labelStarts.push(labelLink);
+    return ok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/line-ending.js
+var lineEnding = {
+  name: "lineEnding",
+  tokenize: tokenizeLineEnding
+};
+function tokenizeLineEnding(effects, ok) {
+  return start;
+  function start(code) {
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return factorySpace(effects, ok, "linePrefix");
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/thematic-break.js
+var thematicBreak = {
+  name: "thematicBreak",
+  tokenize: tokenizeThematicBreak
+};
+function tokenizeThematicBreak(effects, ok, nok) {
+  let size = 0;
+  let marker;
+  return start;
+  function start(code) {
+    effects.enter("thematicBreak");
+    return before(code);
+  }
+  function before(code) {
+    marker = code;
+    return atBreak(code);
+  }
+  function atBreak(code) {
+    if (code === marker) {
+      effects.enter("thematicBreakSequence");
+      return sequence(code);
+    }
+    if (size >= 3 && (code === null || markdownLineEnding(code))) {
+      effects.exit("thematicBreak");
+      return ok(code);
+    }
+    return nok(code);
+  }
+  function sequence(code) {
+    if (code === marker) {
+      effects.consume(code);
+      size++;
+      return sequence;
+    }
+    effects.exit("thematicBreakSequence");
+    return markdownSpace(code) ? factorySpace(effects, atBreak, "whitespace")(code) : atBreak(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/list.js
+var list = {
+  continuation: {
+    tokenize: tokenizeListContinuation
+  },
+  exit: tokenizeListEnd,
+  name: "list",
+  tokenize: tokenizeListStart
+};
+var listItemPrefixWhitespaceConstruct = {
+  partial: true,
+  tokenize: tokenizeListItemPrefixWhitespace
+};
+var indentConstruct = {
+  partial: true,
+  tokenize: tokenizeIndent
+};
+function tokenizeListStart(effects, ok, nok) {
+  const self = this;
+  const tail = self.events[self.events.length - 1];
+  let initialSize = tail && tail[1].type === "linePrefix" ? tail[2].sliceSerialize(tail[1], true).length : 0;
+  let size = 0;
+  return start;
+  function start(code) {
+    const kind = self.containerState.type || (code === 42 || code === 43 || code === 45 ? "listUnordered" : "listOrdered");
+    if (kind === "listUnordered" ? !self.containerState.marker || code === self.containerState.marker : asciiDigit(code)) {
+      if (!self.containerState.type) {
+        self.containerState.type = kind;
+        effects.enter(kind, {
+          _container: true
+        });
+      }
+      if (kind === "listUnordered") {
+        effects.enter("listItemPrefix");
+        return code === 42 || code === 45 ? effects.check(thematicBreak, nok, atMarker)(code) : atMarker(code);
+      }
+      if (!self.interrupt || code === 49) {
+        effects.enter("listItemPrefix");
+        effects.enter("listItemValue");
+        return inside(code);
+      }
+    }
+    return nok(code);
+  }
+  function inside(code) {
+    if (asciiDigit(code) && ++size < 10) {
+      effects.consume(code);
+      return inside;
+    }
+    if ((!self.interrupt || size < 2) && (self.containerState.marker ? code === self.containerState.marker : code === 41 || code === 46)) {
+      effects.exit("listItemValue");
+      return atMarker(code);
+    }
+    return nok(code);
+  }
+  function atMarker(code) {
+    effects.enter("listItemMarker");
+    effects.consume(code);
+    effects.exit("listItemMarker");
+    self.containerState.marker = self.containerState.marker || code;
+    return effects.check(
+      blankLine,
+      // Can’t be empty when interrupting.
+      self.interrupt ? nok : onBlank,
+      effects.attempt(listItemPrefixWhitespaceConstruct, endOfPrefix, otherPrefix)
+    );
+  }
+  function onBlank(code) {
+    self.containerState.initialBlankLine = true;
+    initialSize++;
+    return endOfPrefix(code);
+  }
+  function otherPrefix(code) {
+    if (markdownSpace(code)) {
+      effects.enter("listItemPrefixWhitespace");
+      effects.consume(code);
+      effects.exit("listItemPrefixWhitespace");
+      return endOfPrefix;
+    }
+    return nok(code);
+  }
+  function endOfPrefix(code) {
+    self.containerState.size = initialSize + self.sliceSerialize(effects.exit("listItemPrefix"), true).length;
+    return ok(code);
+  }
+}
+function tokenizeListContinuation(effects, ok, nok) {
+  const self = this;
+  self.containerState._closeFlow = void 0;
+  return effects.check(blankLine, onBlank, notBlank);
+  function onBlank(code) {
+    self.containerState.furtherBlankLines = self.containerState.furtherBlankLines || self.containerState.initialBlankLine;
+    return factorySpace(effects, ok, "listItemIndent", self.containerState.size + 1)(code);
+  }
+  function notBlank(code) {
+    if (self.containerState.furtherBlankLines || !markdownSpace(code)) {
+      self.containerState.furtherBlankLines = void 0;
+      self.containerState.initialBlankLine = void 0;
+      return notInCurrentItem(code);
+    }
+    self.containerState.furtherBlankLines = void 0;
+    self.containerState.initialBlankLine = void 0;
+    return effects.attempt(indentConstruct, ok, notInCurrentItem)(code);
+  }
+  function notInCurrentItem(code) {
+    self.containerState._closeFlow = true;
+    self.interrupt = void 0;
+    return factorySpace(effects, effects.attempt(list, ok, nok), "linePrefix", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4)(code);
+  }
+}
+function tokenizeIndent(effects, ok, nok) {
+  const self = this;
+  return factorySpace(effects, afterPrefix, "listItemIndent", self.containerState.size + 1);
+  function afterPrefix(code) {
+    const tail = self.events[self.events.length - 1];
+    return tail && tail[1].type === "listItemIndent" && tail[2].sliceSerialize(tail[1], true).length === self.containerState.size ? ok(code) : nok(code);
+  }
+}
+function tokenizeListEnd(effects) {
+  effects.exit(this.containerState.type);
+}
+function tokenizeListItemPrefixWhitespace(effects, ok, nok) {
+  const self = this;
+  return factorySpace(effects, afterPrefix, "listItemPrefixWhitespace", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4 + 1);
+  function afterPrefix(code) {
+    const tail = self.events[self.events.length - 1];
+    return !markdownSpace(code) && tail && tail[1].type === "listItemPrefixWhitespace" ? ok(code) : nok(code);
+  }
+}
+
+// node_modules/micromark-core-commonmark/lib/setext-underline.js
+var setextUnderline = {
+  name: "setextUnderline",
+  resolveTo: resolveToSetextUnderline,
+  tokenize: tokenizeSetextUnderline
+};
+function resolveToSetextUnderline(events, context) {
+  const editMap = new EditMap();
+  let index2 = events.length;
+  let content3;
+  let text3;
+  let definition2;
+  while (index2--) {
+    if (events[index2][0] === "enter") {
+      if (events[index2][1].type === "content") {
+        content3 = index2;
+        break;
+      }
+      if (events[index2][1].type === "paragraph") {
+        text3 = index2;
+      }
+    } else {
+      if (events[index2][1].type === "content") {
+        editMap.add(index2, 1, []);
+      }
+      if (!definition2 && events[index2][1].type === "definition") {
+        definition2 = index2;
+      }
+    }
+  }
+  const heading = {
+    type: "setextHeading",
+    start: {
+      ...events[content3][1].start
+    },
+    end: {
+      ...events[events.length - 1][1].end
+    }
+  };
+  events[text3][1].type = "setextHeadingText";
+  if (definition2) {
+    editMap.add(text3, 0, [["enter", heading, context]]);
+    editMap.add(definition2 + 1, 0, [["exit", events[content3][1], context]]);
+    events[content3][1].end = {
+      ...events[definition2][1].end
+    };
+  } else {
+    events[content3][1] = heading;
+  }
+  editMap.add(events.length, 0, [["exit", heading, context]]);
+  editMap.consume(events);
+  return events;
+}
+function tokenizeSetextUnderline(effects, ok, nok) {
+  const self = this;
+  let marker;
+  return start;
+  function start(code) {
+    let index2 = self.events.length;
+    let paragraph;
+    while (index2--) {
+      if (self.events[index2][1].type !== "lineEnding" && self.events[index2][1].type !== "linePrefix" && self.events[index2][1].type !== "content") {
+        paragraph = self.events[index2][1].type === "paragraph";
+        break;
+      }
+    }
+    if (!self.parser.lazy[self.now().line] && (self.interrupt || paragraph)) {
+      effects.enter("setextHeadingLine");
+      marker = code;
+      return before(code);
+    }
+    return nok(code);
+  }
+  function before(code) {
+    effects.enter("setextHeadingLineSequence");
+    return inside(code);
+  }
+  function inside(code) {
+    if (code === marker) {
+      effects.consume(code);
+      return inside;
+    }
+    effects.exit("setextHeadingLineSequence");
+    return markdownSpace(code) ? factorySpace(effects, after, "lineSuffix")(code) : after(code);
+  }
+  function after(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("setextHeadingLine");
+      return ok(code);
+    }
+    return nok(code);
+  }
+}
+
+// node_modules/micromark/lib/initialize/flow.js
+var flow = {
+  tokenize: initializeFlow
+};
+function initializeFlow(effects) {
+  const self = this;
+  const initial = effects.attempt(
+    // Try to parse a blank line.
+    blankLine,
+    atBlankEnding,
+    // Try to parse initial flow (essentially, only code).
+    effects.attempt(this.parser.constructs.flowInitial, afterConstruct, factorySpace(effects, effects.attempt(this.parser.constructs.flow, afterConstruct, effects.attempt(content2, afterConstruct)), "linePrefix"))
+  );
+  return initial;
+  function atBlankEnding(code) {
+    if (code === null) {
+      effects.consume(code);
+      return;
+    }
+    effects.enter("lineEndingBlank");
+    effects.consume(code);
+    effects.exit("lineEndingBlank");
+    self.currentConstruct = void 0;
+    return initial;
+  }
+  function afterConstruct(code) {
+    if (code === null) {
+      effects.consume(code);
+      return;
+    }
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    self.currentConstruct = void 0;
+    return initial;
+  }
+}
+
+// node_modules/micromark/lib/initialize/text.js
+var resolver = {
+  resolveAll: createResolver()
+};
+var string = initializeFactory("string");
+var text = initializeFactory("text");
+function initializeFactory(field) {
+  return {
+    resolveAll: createResolver(field === "text" ? resolveAllLineSuffixes : void 0),
+    tokenize: initializeText
+  };
+  function initializeText(effects) {
+    const self = this;
+    const constructs2 = this.parser.constructs[field];
+    const text3 = effects.attempt(constructs2, start, notText);
+    return start;
+    function start(code) {
+      return atBreak(code) ? text3(code) : notText(code);
+    }
+    function notText(code) {
+      if (code === null) {
+        effects.consume(code);
+        return;
+      }
+      effects.enter("data");
+      effects.consume(code);
+      return data;
+    }
+    function data(code) {
+      if (atBreak(code)) {
+        effects.exit("data");
+        return text3(code);
+      }
+      effects.consume(code);
+      return data;
+    }
+    function atBreak(code) {
+      if (code === null) {
+        return true;
+      }
+      const list2 = constructs2[code];
+      let index2 = -1;
+      if (list2) {
+        while (++index2 < list2.length) {
+          const item = list2[index2];
+          if (!item.previous || item.previous.call(self, self.previous)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+  }
+}
+function createResolver(extraResolver) {
+  return resolveAllText;
+  function resolveAllText(events, context) {
+    let index2 = -1;
+    let enter;
+    while (++index2 <= events.length) {
+      if (enter === void 0) {
+        if (events[index2] && events[index2][1].type === "data") {
+          enter = index2;
+          index2++;
+        }
+      } else if (!events[index2] || events[index2][1].type !== "data") {
+        if (index2 !== enter + 2) {
+          events[enter][1].end = events[index2 - 1][1].end;
+          events.splice(enter + 2, index2 - enter - 2);
+          index2 = enter + 2;
+        }
+        enter = void 0;
+      }
+    }
+    return extraResolver ? extraResolver(events, context) : events;
+  }
+}
+function resolveAllLineSuffixes(events, context) {
+  const editMap = new EditMap();
+  let eventIndex = 0;
+  while (++eventIndex <= events.length) {
+    if ((eventIndex === events.length || events[eventIndex][1].type === "lineEnding") && events[eventIndex - 1][1].type === "data") {
+      const data = events[eventIndex - 1][1];
+      const chunks = context.sliceStream(data);
+      let index2 = chunks.length;
+      let bufferIndex = -1;
+      let size = 0;
+      let tabs;
+      while (index2--) {
+        const chunk = chunks[index2];
+        if (typeof chunk === "string") {
+          bufferIndex = chunk.length;
+          while (chunk.charCodeAt(bufferIndex - 1) === 32) {
+            size++;
+            bufferIndex--;
+          }
+          if (bufferIndex) {
+            break;
+          }
+          bufferIndex = -1;
+        } else if (chunk === -2) {
+          tabs = true;
+          size++;
+        } else if (chunk === -1) {
+        } else {
+          index2++;
+          break;
+        }
+      }
+      if (context._contentTypeTextTrailing && eventIndex === events.length) {
+        size = 0;
+      }
+      if (size) {
+        const token = {
+          type: eventIndex === events.length || tabs || size < 2 ? "lineSuffix" : "hardBreakTrailing",
+          start: {
+            _bufferIndex: index2 ? bufferIndex : data.start._bufferIndex + bufferIndex,
+            _index: data.start._index + index2,
+            line: data.end.line,
+            column: data.end.column - size,
+            offset: data.end.offset - size
+          },
+          end: {
+            ...data.end
+          }
+        };
+        data.end = {
+          ...token.start
+        };
+        if (data.start.offset === data.end.offset) {
+          Object.assign(data, token);
+        } else {
+          editMap.add(eventIndex, 0, [["enter", token, context], ["exit", token, context]]);
+        }
+      }
+      eventIndex++;
+    }
+  }
+  editMap.consume(events);
+  return events;
+}
+
+// node_modules/micromark/lib/constructs.js
+var constructs_exports = {};
+__export(constructs_exports, {
+  attentionMarkers: () => attentionMarkers,
+  contentInitial: () => contentInitial,
+  disable: () => disable,
+  document: () => document3,
+  flow: () => flow2,
+  flowInitial: () => flowInitial,
+  insideSpan: () => insideSpan,
+  string: () => string2,
+  text: () => text2
+});
+var document3 = {
+  [42]: list,
+  [43]: list,
+  [45]: list,
+  [48]: list,
+  [49]: list,
+  [50]: list,
+  [51]: list,
+  [52]: list,
+  [53]: list,
+  [54]: list,
+  [55]: list,
+  [56]: list,
+  [57]: list,
+  [62]: blockQuote
+};
+var contentInitial = {
+  [91]: definition
+};
+var flowInitial = {
+  [-2]: codeIndented,
+  [-1]: codeIndented,
+  [32]: codeIndented
+};
+var flow2 = {
+  [35]: headingAtx,
+  [42]: thematicBreak,
+  [45]: [setextUnderline, thematicBreak],
+  [60]: htmlFlow,
+  [61]: setextUnderline,
+  [95]: thematicBreak,
+  [96]: codeFenced,
+  [126]: codeFenced
+};
+var string2 = {
+  [38]: characterReference,
+  [92]: characterEscape
+};
+var text2 = {
+  [-5]: lineEnding,
+  [-4]: lineEnding,
+  [-3]: lineEnding,
+  [33]: labelStartImage,
+  [38]: characterReference,
+  [42]: attention,
+  [60]: [autolink, htmlText],
+  [91]: labelStartLink,
+  [92]: [hardBreakEscape, characterEscape],
+  [93]: labelEnd,
+  [95]: attention,
+  [96]: codeText
+};
+var insideSpan = {
+  null: [attention, resolver]
+};
+var attentionMarkers = {
+  null: [42, 95]
+};
+var disable = {
+  null: []
+};
+
+// node_modules/micromark/lib/create-tokenizer.js
+function createTokenizer(parser, initialize, from) {
+  let point3 = {
+    _bufferIndex: -1,
+    _index: 0,
+    line: from && from.line || 1,
+    column: from && from.column || 1,
+    offset: from && from.offset || 0
+  };
+  const columnStart = {};
+  const resolveAllConstructs = [];
+  let chunks = [];
+  let stack = [];
+  let consumed = true;
+  const effects = {
+    attempt: constructFactory(onsuccessfulconstruct),
+    check: constructFactory(onsuccessfulcheck),
+    consume,
+    enter,
+    exit: exit2,
+    interrupt: constructFactory(onsuccessfulcheck, {
+      interrupt: true
+    })
+  };
+  const context = {
+    code: null,
+    containerState: {},
+    defineSkip,
+    events: [],
+    now,
+    parser,
+    previous: null,
+    sliceSerialize,
+    sliceStream,
+    write
+  };
+  let state = initialize.tokenize.call(context, effects);
+  let expectedCode;
+  if (initialize.resolveAll) {
+    resolveAllConstructs.push(initialize);
+  }
+  return context;
+  function write(slice) {
+    chunks = push(chunks, slice);
+    main();
+    if (chunks[chunks.length - 1] !== null) {
+      return [];
+    }
+    addResult(initialize, 0);
+    context.events = resolveAll(resolveAllConstructs, context.events, context);
+    return context.events;
+  }
+  function sliceSerialize(token, expandTabs) {
+    return serializeChunks(sliceStream(token), expandTabs);
+  }
+  function sliceStream(token) {
+    return sliceChunks(chunks, token);
+  }
+  function now() {
+    const {
+      _bufferIndex,
+      _index,
+      line,
+      column,
+      offset
+    } = point3;
+    return {
+      _bufferIndex,
+      _index,
+      line,
+      column,
+      offset
+    };
+  }
+  function defineSkip(value) {
+    columnStart[value.line] = value.column;
+    accountForPotentialSkip();
+  }
+  function main() {
+    while (point3._index < chunks.length) {
+      const chunk = chunks[point3._index];
+      if (typeof chunk === "string") {
+        const chunkIndex = point3._index;
+        if (point3._bufferIndex < 0) {
+          point3._bufferIndex = 0;
+        }
+        while (point3._index === chunkIndex && point3._bufferIndex < chunk.length) {
+          go(chunk.charCodeAt(point3._bufferIndex));
+        }
+      } else {
+        go(chunk);
+      }
+    }
+  }
+  function go(code) {
+    consumed = void 0;
+    expectedCode = code;
+    state = state(code);
+  }
+  function consume(code) {
+    if (markdownLineEnding(code)) {
+      point3.line++;
+      point3.column = 1;
+      point3.offset += code === -3 ? 2 : 1;
+      accountForPotentialSkip();
+    } else if (code !== -1) {
+      point3.column++;
+      point3.offset++;
+    }
+    if (point3._bufferIndex < 0) {
+      point3._index++;
+    } else {
+      point3._bufferIndex++;
+      if (point3._bufferIndex === // Points w/ non-negative `_bufferIndex` reference
+      // strings.
+      /** @type {string} */
+      chunks[point3._index].length) {
+        point3._bufferIndex = -1;
+        point3._index++;
+      }
+    }
+    context.previous = code;
+    consumed = true;
+  }
+  function enter(type, fields) {
+    const token = fields || {};
+    token.type = type;
+    token.start = now();
+    context.events.push(["enter", token, context]);
+    stack.push(token);
+    return token;
+  }
+  function exit2(type) {
+    const token = stack.pop();
+    token.end = now();
+    context.events.push(["exit", token, context]);
+    return token;
+  }
+  function onsuccessfulconstruct(construct, info2) {
+    addResult(construct, info2.from);
+  }
+  function onsuccessfulcheck(_, info2) {
+    info2.restore();
+  }
+  function constructFactory(onreturn, fields) {
+    return hook;
+    function hook(constructs2, returnState, bogusState) {
+      let listOfConstructs;
+      let constructIndex;
+      let currentConstruct;
+      let info2;
+      return Array.isArray(constructs2) ? (
+        /* c8 ignore next 1 */
+        handleListOfConstructs(constructs2)
+      ) : "tokenize" in constructs2 ? (
+        // Looks like a construct.
+        handleListOfConstructs([
+          /** @type {Construct} */
+          constructs2
+        ])
+      ) : handleMapOfConstructs(constructs2);
+      function handleMapOfConstructs(map) {
+        return start;
+        function start(code) {
+          const left = code !== null && map[code];
+          const all2 = code !== null && map.null;
+          const list2 = [
+            // To do: add more extension tests.
+            /* c8 ignore next 2 */
+            ...Array.isArray(left) ? left : left ? [left] : [],
+            ...Array.isArray(all2) ? all2 : all2 ? [all2] : []
+          ];
+          return handleListOfConstructs(list2)(code);
+        }
+      }
+      function handleListOfConstructs(list2) {
+        listOfConstructs = list2;
+        constructIndex = 0;
+        if (list2.length === 0) {
+          return bogusState;
+        }
+        return handleConstruct(list2[constructIndex]);
+      }
+      function handleConstruct(construct) {
+        return start;
+        function start(code) {
+          info2 = store();
+          currentConstruct = construct;
+          if (!construct.partial) {
+            context.currentConstruct = construct;
+          }
+          if (construct.name && context.parser.constructs.disable.null.includes(construct.name)) {
+            return nok(code);
+          }
+          return construct.tokenize.call(
+            // If we do have fields, create an object w/ `context` as its
+            // prototype.
+            // This allows a “live binding”, which is needed for `interrupt`.
+            fields ? Object.assign(Object.create(context), fields) : context,
+            effects,
+            ok,
+            nok
+          )(code);
+        }
+      }
+      function ok(code) {
+        consumed = true;
+        onreturn(currentConstruct, info2);
+        return returnState;
+      }
+      function nok(code) {
+        consumed = true;
+        info2.restore();
+        if (++constructIndex < listOfConstructs.length) {
+          return handleConstruct(listOfConstructs[constructIndex]);
+        }
+        return bogusState;
+      }
+    }
+  }
+  function addResult(construct, from2) {
+    if (construct.resolveAll && !resolveAllConstructs.includes(construct)) {
+      resolveAllConstructs.push(construct);
+    }
+    if (construct.resolve) {
+      splice(context.events, from2, context.events.length - from2, construct.resolve(context.events.slice(from2), context));
+    }
+    if (construct.resolveTo) {
+      context.events = construct.resolveTo(context.events, context);
+    }
+  }
+  function store() {
+    const startPoint = now();
+    const startPrevious = context.previous;
+    const startCurrentConstruct = context.currentConstruct;
+    const startEventsIndex = context.events.length;
+    const startStack = Array.from(stack);
+    return {
+      from: startEventsIndex,
+      restore
+    };
+    function restore() {
+      point3 = startPoint;
+      context.previous = startPrevious;
+      context.currentConstruct = startCurrentConstruct;
+      context.events.length = startEventsIndex;
+      stack = startStack;
+      accountForPotentialSkip();
+    }
+  }
+  function accountForPotentialSkip() {
+    if (point3.line in columnStart && point3.column < 2) {
+      point3.column = columnStart[point3.line];
+      point3.offset += columnStart[point3.line] - 1;
+    }
+  }
+}
+function sliceChunks(chunks, token) {
+  const startIndex = token.start._index;
+  const startBufferIndex = token.start._bufferIndex;
+  const endIndex = token.end._index;
+  const endBufferIndex = token.end._bufferIndex;
+  let view;
+  if (startIndex === endIndex) {
+    view = [chunks[startIndex].slice(startBufferIndex, endBufferIndex)];
+  } else {
+    view = chunks.slice(startIndex, endIndex);
+    if (startBufferIndex > -1) {
+      const head = view[0];
+      if (typeof head === "string") {
+        view[0] = head.slice(startBufferIndex);
+      } else {
+        view.shift();
+      }
+    }
+    if (endBufferIndex > 0) {
+      view.push(chunks[endIndex].slice(0, endBufferIndex));
+    }
+  }
+  return view;
+}
+function serializeChunks(chunks, expandTabs) {
+  let index2 = -1;
+  const result = [];
+  let atTab;
+  while (++index2 < chunks.length) {
+    const chunk = chunks[index2];
+    let value;
+    if (typeof chunk === "string") {
+      value = chunk;
+    } else {
+      switch (chunk) {
+        case -5: {
+          value = "\r";
+          break;
+        }
+        case -4: {
+          value = "\n";
+          break;
+        }
+        case -3: {
+          value = "\r\n";
+          break;
+        }
+        case -2: {
+          value = expandTabs ? " " : "	";
+          break;
+        }
+        case -1: {
+          if (!expandTabs && atTab) {
+            continue;
+          }
+          value = " ";
+          break;
+        }
+        default: {
+          value = String.fromCharCode(chunk);
+        }
+      }
+    }
+    atTab = chunk === -2;
+    result.push(value);
+  }
+  return result.join("");
+}
+
+// node_modules/micromark/lib/parse.js
+function parse2(options) {
+  const settings = options || {};
+  const constructs2 = (
+    /** @type {FullNormalizedExtension} */
+    combineExtensions([constructs_exports, ...settings.extensions || []])
+  );
+  const parser = {
+    constructs: constructs2,
+    content: create(content),
+    defined: [],
+    document: create(document2),
+    flow: create(flow),
+    lazy: {},
+    string: create(string),
+    text: create(text)
+  };
+  return parser;
+  function create(initial) {
+    return creator;
+    function creator(from) {
+      return createTokenizer(parser, initial, from);
+    }
+  }
+}
+
+// node_modules/micromark/lib/postprocess.js
+function postprocess(events) {
+  while (!subtokenize(events)) {
+  }
+  return events;
+}
+
+// node_modules/micromark/lib/preprocess.js
+var search = /[\0\t\n\r]/g;
+function preprocess() {
+  let column = 1;
+  let buffer = "";
+  let start = true;
+  let atCarriageReturn;
+  return preprocessor;
+  function preprocessor(value, encoding, end) {
+    value = buffer + (typeof value === "string" ? value.toString() : new TextDecoder(encoding || void 0).decode(value));
+    const chunks = [];
+    let startPosition = 0;
+    buffer = "";
+    if (start) {
+      if (value.charCodeAt(0) === 65279) {
+        startPosition++;
+      }
+      start = void 0;
+    }
+    while (startPosition < value.length) {
+      search.lastIndex = startPosition;
+      const match = search.exec(value);
+      const endPosition = match && match.index !== void 0 ? match.index : value.length;
+      const code = value.charCodeAt(endPosition);
+      if (!match) {
+        buffer = value.slice(startPosition);
+        break;
+      }
+      if (code === 10 && startPosition === endPosition && atCarriageReturn) {
+        chunks.push(-3);
+        atCarriageReturn = void 0;
+      } else {
+        if (atCarriageReturn) {
+          chunks.push(-5);
+          atCarriageReturn = void 0;
+        }
+        if (startPosition < endPosition) {
+          chunks.push(value.slice(startPosition, endPosition));
+          column += endPosition - startPosition;
+        }
+        switch (code) {
+          case 0: {
+            chunks.push(65533);
+            column++;
+            break;
+          }
+          case 9: {
+            const next = Math.ceil(column / 4) * 4;
+            chunks.push(-2);
+            while (column++ < next) {
+              chunks.push(-1);
+            }
+            break;
+          }
+          case 10: {
+            chunks.push(-4);
+            column = 1;
+            break;
+          }
+          default: {
+            atCarriageReturn = true;
+            column = 1;
+          }
+        }
+      }
+      startPosition = endPosition + 1;
+    }
+    if (end) {
+      if (atCarriageReturn) {
+        chunks.push(-5);
+      }
+      if (buffer) {
+        chunks.push(buffer);
+      }
+      chunks.push(null);
+    }
+    return chunks;
+  }
+}
+
+// node_modules/micromark-util-decode-string/index.js
+var characterEscapeOrReference = /\\([!-/:-@[-`{-~])|&(#(?:\d{1,7}|x[\da-f]{1,6})|[\da-z]{1,31});/gi;
+function decodeString(value) {
+  return value.replace(characterEscapeOrReference, decode);
+}
+function decode($0, $1, $2) {
+  if ($1) {
+    return $1;
+  }
+  const head = $2.charCodeAt(0);
+  if (head === 35) {
+    const head2 = $2.charCodeAt(1);
+    const hex = head2 === 120 || head2 === 88;
+    return decodeNumericCharacterReference($2.slice(hex ? 2 : 1), hex ? 16 : 10);
+  }
+  return decodeNamedCharacterReference($2) || $0;
+}
+
+// node_modules/unist-util-stringify-position/lib/index.js
+function stringifyPosition(value) {
+  if (!value || typeof value !== "object") {
+    return "";
+  }
+  if ("position" in value || "type" in value) {
+    return position(value.position);
+  }
+  if ("start" in value || "end" in value) {
+    return position(value);
+  }
+  if ("line" in value || "column" in value) {
+    return point(value);
+  }
+  return "";
+}
+function point(point3) {
+  return index(point3 && point3.line) + ":" + index(point3 && point3.column);
+}
+function position(pos) {
+  return point(pos && pos.start) + "-" + point(pos && pos.end);
+}
+function index(value) {
+  return value && typeof value === "number" ? value : 1;
+}
+
+// node_modules/mdast-util-from-markdown/lib/index.js
+var own3 = {}.hasOwnProperty;
+function fromMarkdown(value, encoding, options) {
+  if (encoding && typeof encoding === "object") {
+    options = encoding;
+    encoding = void 0;
+  }
+  return compiler(options)(postprocess(parse2(options).document().write(preprocess()(value, encoding, true))));
+}
+function compiler(options) {
+  const config = {
+    transforms: [],
+    canContainEols: ["emphasis", "fragment", "heading", "paragraph", "strong"],
+    enter: {
+      autolink: opener(link),
+      autolinkProtocol: onenterdata,
+      autolinkEmail: onenterdata,
+      atxHeading: opener(heading),
+      blockQuote: opener(blockQuote2),
+      characterEscape: onenterdata,
+      characterReference: onenterdata,
+      codeFenced: opener(codeFlow),
+      codeFencedFenceInfo: buffer,
+      codeFencedFenceMeta: buffer,
+      codeIndented: opener(codeFlow, buffer),
+      codeText: opener(codeText2, buffer),
+      codeTextData: onenterdata,
+      data: onenterdata,
+      codeFlowValue: onenterdata,
+      definition: opener(definition2),
+      definitionDestinationString: buffer,
+      definitionLabelString: buffer,
+      definitionTitleString: buffer,
+      emphasis: opener(emphasis),
+      hardBreakEscape: opener(hardBreak),
+      hardBreakTrailing: opener(hardBreak),
+      htmlFlow: opener(html, buffer),
+      htmlFlowData: onenterdata,
+      htmlText: opener(html, buffer),
+      htmlTextData: onenterdata,
+      image: opener(image),
+      label: buffer,
+      link: opener(link),
+      listItem: opener(listItem),
+      listItemValue: onenterlistitemvalue,
+      listOrdered: opener(list2, onenterlistordered),
+      listUnordered: opener(list2),
+      paragraph: opener(paragraph),
+      reference: onenterreference,
+      referenceString: buffer,
+      resourceDestinationString: buffer,
+      resourceTitleString: buffer,
+      setextHeading: opener(heading),
+      strong: opener(strong),
+      thematicBreak: opener(thematicBreak2)
+    },
+    exit: {
+      atxHeading: closer(),
+      atxHeadingSequence: onexitatxheadingsequence,
+      autolink: closer(),
+      autolinkEmail: onexitautolinkemail,
+      autolinkProtocol: onexitautolinkprotocol,
+      blockQuote: closer(),
+      characterEscapeValue: onexitdata,
+      characterReferenceMarkerHexadecimal: onexitcharacterreferencemarker,
+      characterReferenceMarkerNumeric: onexitcharacterreferencemarker,
+      characterReferenceValue: onexitcharacterreferencevalue,
+      characterReference: onexitcharacterreference,
+      codeFenced: closer(onexitcodefenced),
+      codeFencedFence: onexitcodefencedfence,
+      codeFencedFenceInfo: onexitcodefencedfenceinfo,
+      codeFencedFenceMeta: onexitcodefencedfencemeta,
+      codeFlowValue: onexitdata,
+      codeIndented: closer(onexitcodeindented),
+      codeText: closer(onexitcodetext),
+      codeTextData: onexitdata,
+      data: onexitdata,
+      definition: closer(),
+      definitionDestinationString: onexitdefinitiondestinationstring,
+      definitionLabelString: onexitdefinitionlabelstring,
+      definitionTitleString: onexitdefinitiontitlestring,
+      emphasis: closer(),
+      hardBreakEscape: closer(onexithardbreak),
+      hardBreakTrailing: closer(onexithardbreak),
+      htmlFlow: closer(onexithtmlflow),
+      htmlFlowData: onexitdata,
+      htmlText: closer(onexithtmltext),
+      htmlTextData: onexitdata,
+      image: closer(onexitimage),
+      label: onexitlabel,
+      labelText: onexitlabeltext,
+      lineEnding: onexitlineending,
+      link: closer(onexitlink),
+      listItem: closer(),
+      listOrdered: closer(),
+      listUnordered: closer(),
+      paragraph: closer(),
+      referenceString: onexitreferencestring,
+      resourceDestinationString: onexitresourcedestinationstring,
+      resourceTitleString: onexitresourcetitlestring,
+      resource: onexitresource,
+      setextHeading: closer(onexitsetextheading),
+      setextHeadingLineSequence: onexitsetextheadinglinesequence,
+      setextHeadingText: onexitsetextheadingtext,
+      strong: closer(),
+      thematicBreak: closer()
+    }
+  };
+  configure(config, (options || {}).mdastExtensions || []);
+  const data = {};
+  return compile;
+  function compile(events) {
+    let tree = {
+      type: "root",
+      children: []
+    };
+    const context = {
+      stack: [tree],
+      tokenStack: [],
+      config,
+      enter,
+      exit: exit2,
+      buffer,
+      resume,
+      data
+    };
+    const listStack = [];
+    let index2 = -1;
+    while (++index2 < events.length) {
+      if (events[index2][1].type === "listOrdered" || events[index2][1].type === "listUnordered") {
+        if (events[index2][0] === "enter") {
+          listStack.push(index2);
+        } else {
+          const tail = listStack.pop();
+          index2 = prepareList(events, tail, index2);
+        }
+      }
+    }
+    index2 = -1;
+    while (++index2 < events.length) {
+      const handler = config[events[index2][0]];
+      if (own3.call(handler, events[index2][1].type)) {
+        handler[events[index2][1].type].call(Object.assign({
+          sliceSerialize: events[index2][2].sliceSerialize
+        }, context), events[index2][1]);
+      }
+    }
+    if (context.tokenStack.length > 0) {
+      const tail = context.tokenStack[context.tokenStack.length - 1];
+      const handler = tail[1] || defaultOnError;
+      handler.call(context, void 0, tail[0]);
+    }
+    tree.position = {
+      start: point2(events.length > 0 ? events[0][1].start : {
+        line: 1,
+        column: 1,
+        offset: 0
+      }),
+      end: point2(events.length > 0 ? events[events.length - 2][1].end : {
+        line: 1,
+        column: 1,
+        offset: 0
+      })
+    };
+    index2 = -1;
+    while (++index2 < config.transforms.length) {
+      tree = config.transforms[index2](tree) || tree;
+    }
+    return tree;
+  }
+  function prepareList(events, start, length) {
+    let index2 = start - 1;
+    let containerBalance = -1;
+    let listSpread = false;
+    let listItem2;
+    let lineIndex;
+    let firstBlankLineIndex;
+    let atMarker;
+    while (++index2 <= length) {
+      const event = events[index2];
+      switch (event[1].type) {
+        case "listUnordered":
+        case "listOrdered":
+        case "blockQuote": {
+          if (event[0] === "enter") {
+            containerBalance++;
+          } else {
+            containerBalance--;
+          }
+          atMarker = void 0;
+          break;
+        }
+        case "lineEndingBlank": {
+          if (event[0] === "enter") {
+            if (listItem2 && !atMarker && !containerBalance && !firstBlankLineIndex) {
+              firstBlankLineIndex = index2;
+            }
+            atMarker = void 0;
+          }
+          break;
+        }
+        case "linePrefix":
+        case "listItemValue":
+        case "listItemMarker":
+        case "listItemPrefix":
+        case "listItemPrefixWhitespace": {
+          break;
+        }
+        default: {
+          atMarker = void 0;
+        }
+      }
+      if (!containerBalance && event[0] === "enter" && event[1].type === "listItemPrefix" || containerBalance === -1 && event[0] === "exit" && (event[1].type === "listUnordered" || event[1].type === "listOrdered")) {
+        if (listItem2) {
+          let tailIndex = index2;
+          lineIndex = void 0;
+          while (tailIndex--) {
+            const tailEvent = events[tailIndex];
+            if (tailEvent[1].type === "lineEnding" || tailEvent[1].type === "lineEndingBlank") {
+              if (tailEvent[0] === "exit") continue;
+              if (lineIndex) {
+                events[lineIndex][1].type = "lineEndingBlank";
+                listSpread = true;
+              }
+              tailEvent[1].type = "lineEnding";
+              lineIndex = tailIndex;
+            } else if (tailEvent[1].type === "linePrefix" || tailEvent[1].type === "blockQuotePrefix" || tailEvent[1].type === "blockQuotePrefixWhitespace" || tailEvent[1].type === "blockQuoteMarker" || tailEvent[1].type === "listItemIndent") {
+            } else {
+              break;
+            }
+          }
+          if (firstBlankLineIndex && (!lineIndex || firstBlankLineIndex < lineIndex)) {
+            listItem2._spread = true;
+          }
+          listItem2.end = Object.assign({}, lineIndex ? events[lineIndex][1].start : event[1].end);
+          events.splice(lineIndex || index2, 0, ["exit", listItem2, event[2]]);
+          index2++;
+          length++;
+        }
+        if (event[1].type === "listItemPrefix") {
+          const item = {
+            type: "listItem",
+            _spread: false,
+            start: Object.assign({}, event[1].start),
+            // @ts-expect-error: we’ll add `end` in a second.
+            end: void 0
+          };
+          listItem2 = item;
+          events.splice(index2, 0, ["enter", item, event[2]]);
+          index2++;
+          length++;
+          firstBlankLineIndex = void 0;
+          atMarker = true;
+        }
+      }
+    }
+    events[start][1]._spread = listSpread;
+    return length;
+  }
+  function opener(create, and) {
+    return open2;
+    function open2(token) {
+      enter.call(this, create(token), token);
+      if (and) and.call(this, token);
+    }
+  }
+  function buffer() {
+    this.stack.push({
+      type: "fragment",
+      children: []
+    });
+  }
+  function enter(node2, token, errorHandler) {
+    const parent = this.stack[this.stack.length - 1];
+    const siblings = parent.children;
+    siblings.push(node2);
+    this.stack.push(node2);
+    this.tokenStack.push([token, errorHandler || void 0]);
+    node2.position = {
+      start: point2(token.start),
+      // @ts-expect-error: `end` will be patched later.
+      end: void 0
+    };
+  }
+  function closer(and) {
+    return close;
+    function close(token) {
+      if (and) and.call(this, token);
+      exit2.call(this, token);
+    }
+  }
+  function exit2(token, onExitError) {
+    const node2 = this.stack.pop();
+    const open2 = this.tokenStack.pop();
+    if (!open2) {
+      throw new Error("Cannot close `" + token.type + "` (" + stringifyPosition({
+        start: token.start,
+        end: token.end
+      }) + "): it\u2019s not open");
+    } else if (open2[0].type !== token.type) {
+      if (onExitError) {
+        onExitError.call(this, token, open2[0]);
+      } else {
+        const handler = open2[1] || defaultOnError;
+        handler.call(this, token, open2[0]);
+      }
+    }
+    node2.position.end = point2(token.end);
+  }
+  function resume() {
+    return toString(this.stack.pop());
+  }
+  function onenterlistordered() {
+    this.data.expectingFirstListItemValue = true;
+  }
+  function onenterlistitemvalue(token) {
+    if (this.data.expectingFirstListItemValue) {
+      const ancestor = this.stack[this.stack.length - 2];
+      ancestor.start = Number.parseInt(this.sliceSerialize(token), 10);
+      this.data.expectingFirstListItemValue = void 0;
+    }
+  }
+  function onexitcodefencedfenceinfo() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.lang = data2;
+  }
+  function onexitcodefencedfencemeta() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.meta = data2;
+  }
+  function onexitcodefencedfence() {
+    if (this.data.flowCodeInside) return;
+    this.buffer();
+    this.data.flowCodeInside = true;
+  }
+  function onexitcodefenced() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2.replace(/^(\r?\n|\r)|(\r?\n|\r)$/g, "");
+    this.data.flowCodeInside = void 0;
+  }
+  function onexitcodeindented() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2.replace(/(\r?\n|\r)$/g, "");
+  }
+  function onexitdefinitionlabelstring(token) {
+    const label = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.label = label;
+    node2.identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
+  }
+  function onexitdefinitiontitlestring() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.title = data2;
+  }
+  function onexitdefinitiondestinationstring() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.url = data2;
+  }
+  function onexitatxheadingsequence(token) {
+    const node2 = this.stack[this.stack.length - 1];
+    if (!node2.depth) {
+      const depth = this.sliceSerialize(token).length;
+      node2.depth = depth;
+    }
+  }
+  function onexitsetextheadingtext() {
+    this.data.setextHeadingSlurpLineEnding = true;
+  }
+  function onexitsetextheadinglinesequence(token) {
+    const node2 = this.stack[this.stack.length - 1];
+    node2.depth = this.sliceSerialize(token).codePointAt(0) === 61 ? 1 : 2;
+  }
+  function onexitsetextheading() {
+    this.data.setextHeadingSlurpLineEnding = void 0;
+  }
+  function onenterdata(token) {
+    const node2 = this.stack[this.stack.length - 1];
+    const siblings = node2.children;
+    let tail = siblings[siblings.length - 1];
+    if (!tail || tail.type !== "text") {
+      tail = text3();
+      tail.position = {
+        start: point2(token.start),
+        // @ts-expect-error: we’ll add `end` later.
+        end: void 0
+      };
+      siblings.push(tail);
+    }
+    this.stack.push(tail);
+  }
+  function onexitdata(token) {
+    const tail = this.stack.pop();
+    tail.value += this.sliceSerialize(token);
+    tail.position.end = point2(token.end);
+  }
+  function onexitlineending(token) {
+    const context = this.stack[this.stack.length - 1];
+    if (this.data.atHardBreak) {
+      const tail = context.children[context.children.length - 1];
+      tail.position.end = point2(token.end);
+      this.data.atHardBreak = void 0;
+      return;
+    }
+    if (!this.data.setextHeadingSlurpLineEnding && config.canContainEols.includes(context.type)) {
+      onenterdata.call(this, token);
+      onexitdata.call(this, token);
+    }
+  }
+  function onexithardbreak() {
+    this.data.atHardBreak = true;
+  }
+  function onexithtmlflow() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2;
+  }
+  function onexithtmltext() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2;
+  }
+  function onexitcodetext() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2;
+  }
+  function onexitlink() {
+    const node2 = this.stack[this.stack.length - 1];
+    if (this.data.inReference) {
+      const referenceType = this.data.referenceType || "shortcut";
+      node2.type += "Reference";
+      node2.referenceType = referenceType;
+      delete node2.url;
+      delete node2.title;
+    } else {
+      delete node2.identifier;
+      delete node2.label;
+    }
+    this.data.referenceType = void 0;
+  }
+  function onexitimage() {
+    const node2 = this.stack[this.stack.length - 1];
+    if (this.data.inReference) {
+      const referenceType = this.data.referenceType || "shortcut";
+      node2.type += "Reference";
+      node2.referenceType = referenceType;
+      delete node2.url;
+      delete node2.title;
+    } else {
+      delete node2.identifier;
+      delete node2.label;
+    }
+    this.data.referenceType = void 0;
+  }
+  function onexitlabeltext(token) {
+    const string3 = this.sliceSerialize(token);
+    const ancestor = this.stack[this.stack.length - 2];
+    ancestor.label = decodeString(string3);
+    ancestor.identifier = normalizeIdentifier(string3).toLowerCase();
+  }
+  function onexitlabel() {
+    const fragment = this.stack[this.stack.length - 1];
+    const value = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    this.data.inReference = true;
+    if (node2.type === "link") {
+      const children = fragment.children;
+      node2.children = children;
+    } else {
+      node2.alt = value;
+    }
+  }
+  function onexitresourcedestinationstring() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.url = data2;
+  }
+  function onexitresourcetitlestring() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.title = data2;
+  }
+  function onexitresource() {
+    this.data.inReference = void 0;
+  }
+  function onenterreference() {
+    this.data.referenceType = "collapsed";
+  }
+  function onexitreferencestring(token) {
+    const label = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.label = label;
+    node2.identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
+    this.data.referenceType = "full";
+  }
+  function onexitcharacterreferencemarker(token) {
+    this.data.characterReferenceType = token.type;
+  }
+  function onexitcharacterreferencevalue(token) {
+    const data2 = this.sliceSerialize(token);
+    const type = this.data.characterReferenceType;
+    let value;
+    if (type) {
+      value = decodeNumericCharacterReference(data2, type === "characterReferenceMarkerNumeric" ? 10 : 16);
+      this.data.characterReferenceType = void 0;
+    } else {
+      const result = decodeNamedCharacterReference(data2);
+      value = result;
+    }
+    const tail = this.stack[this.stack.length - 1];
+    tail.value += value;
+  }
+  function onexitcharacterreference(token) {
+    const tail = this.stack.pop();
+    tail.position.end = point2(token.end);
+  }
+  function onexitautolinkprotocol(token) {
+    onexitdata.call(this, token);
+    const node2 = this.stack[this.stack.length - 1];
+    node2.url = this.sliceSerialize(token);
+  }
+  function onexitautolinkemail(token) {
+    onexitdata.call(this, token);
+    const node2 = this.stack[this.stack.length - 1];
+    node2.url = "mailto:" + this.sliceSerialize(token);
+  }
+  function blockQuote2() {
+    return {
+      type: "blockquote",
+      children: []
+    };
+  }
+  function codeFlow() {
+    return {
+      type: "code",
+      lang: null,
+      meta: null,
+      value: ""
+    };
+  }
+  function codeText2() {
+    return {
+      type: "inlineCode",
+      value: ""
+    };
+  }
+  function definition2() {
+    return {
+      type: "definition",
+      identifier: "",
+      label: null,
+      title: null,
+      url: ""
+    };
+  }
+  function emphasis() {
+    return {
+      type: "emphasis",
+      children: []
+    };
+  }
+  function heading() {
+    return {
+      type: "heading",
+      // @ts-expect-error `depth` will be set later.
+      depth: 0,
+      children: []
+    };
+  }
+  function hardBreak() {
+    return {
+      type: "break"
+    };
+  }
+  function html() {
+    return {
+      type: "html",
+      value: ""
+    };
+  }
+  function image() {
+    return {
+      type: "image",
+      title: null,
+      url: "",
+      alt: null
+    };
+  }
+  function link() {
+    return {
+      type: "link",
+      title: null,
+      url: "",
+      children: []
+    };
+  }
+  function list2(token) {
+    return {
+      type: "list",
+      ordered: token.type === "listOrdered",
+      start: null,
+      spread: token._spread,
+      children: []
+    };
+  }
+  function listItem(token) {
+    return {
+      type: "listItem",
+      spread: token._spread,
+      checked: null,
+      children: []
+    };
+  }
+  function paragraph() {
+    return {
+      type: "paragraph",
+      children: []
+    };
+  }
+  function strong() {
+    return {
+      type: "strong",
+      children: []
+    };
+  }
+  function text3() {
+    return {
+      type: "text",
+      value: ""
+    };
+  }
+  function thematicBreak2() {
+    return {
+      type: "thematicBreak"
+    };
+  }
+}
+function point2(d) {
+  return {
+    line: d.line,
+    column: d.column,
+    offset: d.offset
+  };
+}
+function configure(combined, extensions) {
+  let index2 = -1;
+  while (++index2 < extensions.length) {
+    const value = extensions[index2];
+    if (Array.isArray(value)) {
+      configure(combined, value);
+    } else {
+      extension(combined, value);
+    }
+  }
+}
+function extension(combined, extension2) {
+  let key;
+  for (key in extension2) {
+    if (own3.call(extension2, key)) {
+      switch (key) {
+        case "canContainEols": {
+          const right = extension2[key];
+          if (right) {
+            combined[key].push(...right);
+          }
+          break;
+        }
+        case "transforms": {
+          const right = extension2[key];
+          if (right) {
+            combined[key].push(...right);
+          }
+          break;
+        }
+        case "enter":
+        case "exit": {
+          const right = extension2[key];
+          if (right) {
+            Object.assign(combined[key], right);
+          }
+          break;
+        }
+      }
+    }
+  }
+}
+function defaultOnError(left, right) {
+  if (left) {
+    throw new Error("Cannot close `" + left.type + "` (" + stringifyPosition({
+      start: left.start,
+      end: left.end
+    }) + "): a different token (`" + right.type + "`, " + stringifyPosition({
+      start: right.start,
+      end: right.end
+    }) + ") is open");
+  } else {
+    throw new Error("Cannot close document, a token (`" + right.type + "`, " + stringifyPosition({
+      start: right.start,
+      end: right.end
+    }) + ") is still open");
+  }
+}
+
+// src/sync.ts
 var generatedHeader = `<callout icon="\u270F\uFE0F" color="gray_bg">
 	Edits must be made on GitHub.
 </callout>`;
 var legacyGeneratedHeaderPrefix = `<callout icon="\u26A0\uFE0F" color="yellow_bg">
 	Generated from \``;
 async function syncDocuments(api, documents, rootID, onSynced) {
-  const state = await prepareSync(api, documents, rootID, onSynced);
-  for (const document2 of documents) {
-    if (state.syncedSources.has(document2.sourcePath)) {
+  const state = await prepareSync(api, documents, rootID);
+  for (const document4 of documents) {
+    if (state.preparedSources.has(document4.sourcePath)) {
       continue;
     }
-    const directory = documentDirectory(document2);
-    const parent = await ensureDirectory(state, document2, directory);
-    if (state.syncedSources.has(document2.sourcePath)) {
+    const directory = documentDirectory(document4);
+    const parent = await ensureDirectory(state, document4, directory);
+    if (state.preparedSources.has(document4.sourcePath)) {
       continue;
     }
-    const ownerIDs = state.ownerIDsBySource.get(document2.sourcePath);
+    const ownerIDs = state.ownerIDsBySource.get(document4.sourcePath);
     if (!ownerIDs) {
-      throw new Error(`owners for ${document2.sourcePath} were not resolved`);
+      throw new Error(`owners for ${document4.sourcePath} were not resolved`);
     }
-    await syncPage(state, document2, parent.id, ownerIDs);
-    state.syncedSources.add(document2.sourcePath);
-    await state.onSynced?.(document2);
+    await preparePage(state, document4, parent.id, ownerIDs);
+    state.preparedSources.add(document4.sourcePath);
+  }
+  for (const page of state.pages) {
+    if (!state.activeSources.has(page.sourcePath)) {
+      continue;
+    }
+    const document4 = documents.find((candidate) => candidate.sourcePath === page.sourcePath);
+    await api.replacePage(page.id, document4 ? renderDocument(document4, state) : generatedHeader);
+  }
+  await resolveSectionLinks(state);
+  for (const page of state.pages) {
+    if (!state.activeSources.has(page.sourcePath)) {
+      continue;
+    }
+    const document4 = documents.find((candidate) => candidate.sourcePath === page.sourcePath);
+    const ownerIDs = state.ownerIDsBySource.get(page.sourcePath);
+    if (!ownerIDs) {
+      throw new Error(`owners for ${page.sourcePath} were not resolved`);
+    }
+    await api.publishPage(page, page.parentID, ownerIDs, document4?.tags ?? [], page.sourcePath);
+    page.ownerIDs = [...ownerIDs];
+    page.verified = true;
+    page.locked = true;
+    if (document4) {
+      await onSynced?.(document4);
+    }
   }
   await cleanRemovedPages(state);
 }
-async function prepareSync(api, documents, rootID, onSynced) {
+async function prepareSync(api, documents, rootID) {
   await api.prepareRoot(rootID);
   const pages = await api.wikiPages(rootID);
   const activeSources = /* @__PURE__ */ new Set();
   const ownerIDsBySource = /* @__PURE__ */ new Map();
   const indexByDirectory = /* @__PURE__ */ new Map();
-  for (const document2 of documents) {
-    if (activeSources.has(document2.sourcePath)) {
-      throw new Error(`Notion source ${document2.sourcePath} is configured more than once`);
+  for (const document4 of documents) {
+    if (activeSources.has(document4.sourcePath)) {
+      throw new Error(`Notion source ${document4.sourcePath} is configured more than once`);
     }
-    activeSources.add(document2.sourcePath);
-    ownerIDsBySource.set(document2.sourcePath, await api.ownerIDs(document2.owners));
-    if (isIndexDocument(document2.sourcePath)) {
-      const key = documentDirectory(document2);
+    activeSources.add(document4.sourcePath);
+    ownerIDsBySource.set(document4.sourcePath, await api.ownerIDs(document4.owners));
+    if (isIndexDocument(document4.sourcePath)) {
+      const key = documentDirectory(document4);
       if (indexByDirectory.has(key)) {
         throw new Error(`Notion directory ${key} has more than one index document`);
       }
-      indexByDirectory.set(key, document2);
+      indexByDirectory.set(key, document4);
     }
   }
   return {
@@ -30181,11 +37442,11 @@ async function prepareSync(api, documents, rootID, onSynced) {
     activeSources,
     directoryPages: /* @__PURE__ */ new Map(),
     indexByDirectory,
-    syncedSources: /* @__PURE__ */ new Set(),
-    ...onSynced ? { onSynced } : {}
+    preparedSources: /* @__PURE__ */ new Set(),
+    sectionLinksBySource: /* @__PURE__ */ new Map()
   };
 }
-async function ensureDirectory(state, document2, directory) {
+async function ensureDirectory(state, document4, directory) {
   if (directory === ".") {
     return rootPage(state.rootID);
   }
@@ -30194,70 +37455,58 @@ async function ensureDirectory(state, document2, directory) {
   if (existing) {
     return existing;
   }
-  const parent = await ensureDirectory(state, document2, import_node_path2.default.posix.dirname(directory));
-  const index = state.indexByDirectory.get(key);
-  const folder = index ?? folderDocument(document2, directory);
-  const ownerIDs = ownersForDirectory(state, document2, directory);
-  const page = await syncPage(state, folder, parent.id, ownerIDs);
+  const parent = await ensureDirectory(state, document4, import_node_path2.default.posix.dirname(directory));
+  const index2 = state.indexByDirectory.get(key);
+  const folder = index2 ?? folderDocument(document4, directory);
+  const ownerIDs = ownersForDirectory(state, document4, directory);
+  const page = await preparePage(state, folder, parent.id, ownerIDs);
   state.activeSources.add(folder.sourcePath);
   state.directoryPages.set(key, page);
-  if (index) {
-    state.syncedSources.add(index.sourcePath);
-    await state.onSynced?.(index);
+  if (index2) {
+    state.preparedSources.add(index2.sourcePath);
   }
   return page;
 }
-async function syncPage(state, document2, parentID, ownerIDs) {
-  let page = await findPage(state, document2);
-  const body = renderDocument(document2);
+async function preparePage(state, document4, parentID, ownerIDs) {
+  let page = await findPage(state, document4);
   if (page) {
-    if (page.title !== document2.title) {
-      await state.api.renamePage(page.id, document2.title);
-      page.title = document2.title;
+    if (page.title !== document4.title) {
+      await state.api.renamePage(page.id, document4.title);
+      page.title = document4.title;
     }
-    await state.api.replacePage(page.id, body);
   } else {
-    page = await state.api.createPage(state.rootID, document2.title, body);
+    page = await state.api.createPage(state.rootID, document4.title, generatedHeader);
     state.pages.push(page);
   }
-  await state.api.publishPage(
-    page,
-    parentID,
-    ownerIDs,
-    document2.tags,
-    document2.sourcePath
-  );
   page.parentID = parentID;
-  page.ownerIDs = [...ownerIDs];
-  page.sourcePath = document2.sourcePath;
-  page.verified = true;
-  page.locked = true;
+  page.sourcePath = document4.sourcePath;
+  state.ownerIDsBySource.set(document4.sourcePath, ownerIDs);
   return page;
 }
-async function findPage(state, document2) {
-  const sourceMatches = state.pages.filter((page) => page.sourcePath === document2.sourcePath);
+async function findPage(state, document4) {
+  const sourceMatches = state.pages.filter((page) => page.sourcePath === document4.sourcePath);
   if (sourceMatches.length > 1) {
-    throw new Error(`multiple pages claim source ${document2.sourcePath}`);
+    throw new Error(`multiple pages claim source ${document4.sourcePath}`);
   }
   if (sourceMatches[0]) {
     return sourceMatches[0];
   }
   let migrationMatch;
   let unmanagedTitleMatch = false;
-  const sourceMarker = `${legacyGeneratedHeaderPrefix}${document2.sourcePath}\`.`;
+  const sourceMarker = `${legacyGeneratedHeaderPrefix}${document4.sourcePath}\`.`;
   for (const page of state.pages.filter((candidate) => candidate.sourcePath === "")) {
     const markdown = await pageMarkdown(state, page.id);
     if (markdown.startsWith(sourceMarker)) {
       if (migrationMatch) {
-        throw new Error(`multiple pages claim source ${document2.sourcePath}`);
+        throw new Error(`multiple pages claim source ${document4.sourcePath}`);
       }
       migrationMatch = page;
-    } else if (page.title === document2.title && markdown.startsWith(generatedHeader)) {
+    } else if (page.title === document4.title && markdown.startsWith(generatedHeader)) {
       if (migrationMatch) {
-        throw new Error(`multiple legacy pages named ${JSON.stringify(document2.title)}`);
+        throw new Error(`multiple legacy pages named ${JSON.stringify(document4.title)}`);
       }
       migrationMatch = page;
-    } else if (page.title === document2.title && !generatedSourcePath(markdown)) {
+    } else if (page.title === document4.title && !generatedSourcePath(markdown)) {
       unmanagedTitleMatch = true;
     }
   }
@@ -30265,7 +37514,7 @@ async function findPage(state, document2) {
     return migrationMatch;
   }
   if (unmanagedTitleMatch) {
-    throw new Error(`refusing to replace unmanaged Notion page ${JSON.stringify(document2.title)}`);
+    throw new Error(`refusing to replace unmanaged Notion page ${JSON.stringify(document4.title)}`);
   }
   return void 0;
 }
@@ -30279,46 +37528,46 @@ async function cleanRemovedPages(state) {
 }
 function ownersForDirectory(state, folderDocument2, directory) {
   const ownerIDs = /* @__PURE__ */ new Set();
-  for (const document2 of state.documents) {
-    if (document2.repositoryBasePath !== folderDocument2.repositoryBasePath) {
+  for (const document4 of state.documents) {
+    if (document4.repositoryBasePath !== folderDocument2.repositoryBasePath) {
       continue;
     }
-    const parent = documentDirectory(document2);
+    const parent = documentDirectory(document4);
     if (parent !== directory && !parent.startsWith(`${directory}/`)) {
       continue;
     }
-    for (const ownerID of state.ownerIDsBySource.get(document2.sourcePath) ?? []) {
+    for (const ownerID of state.ownerIDsBySource.get(document4.sourcePath) ?? []) {
       ownerIDs.add(ownerID);
     }
   }
   return [...ownerIDs];
 }
-function folderDocument(document2, directory) {
+function folderDocument(document4, directory) {
   return {
-    ...document2,
-    sourcePath: `${import_node_path2.default.posix.join(document2.repositoryBasePath, directory)}/`,
+    ...document4,
+    sourcePath: `${import_node_path2.default.posix.join(document4.repositoryBasePath, directory)}/`,
     tags: [],
     title: directoryTitle(import_node_path2.default.posix.basename(directory)),
     body: ""
   };
 }
-function documentDirectory(document2) {
-  if (document2.repositoryBasePath === "") {
+function documentDirectory(document4) {
+  if (document4.repositoryBasePath === "") {
     return ".";
   }
-  const repositoryBasePath = import_node_path2.default.posix.normalize(document2.repositoryBasePath);
-  const sourcePath = import_node_path2.default.posix.normalize(document2.sourcePath);
+  const repositoryBasePath = import_node_path2.default.posix.normalize(document4.repositoryBasePath);
+  const sourcePath = import_node_path2.default.posix.normalize(document4.sourcePath);
   const relativePath = import_node_path2.default.posix.relative(repositoryBasePath, sourcePath);
   if (relativePath === "" || relativePath === ".." || relativePath.startsWith("../")) {
     throw new Error(
-      `${document2.sourcePath} is outside its repository base path ${document2.repositoryBasePath}`
+      `${document4.sourcePath} is outside its repository base path ${document4.repositoryBasePath}`
     );
   }
   return import_node_path2.default.posix.dirname(relativePath);
 }
 function isIndexDocument(sourcePath) {
-  const extension = import_node_path2.default.posix.extname(sourcePath);
-  const basename = import_node_path2.default.posix.basename(sourcePath, extension).toLowerCase();
+  const extension2 = import_node_path2.default.posix.extname(sourcePath);
+  const basename = import_node_path2.default.posix.basename(sourcePath, extension2).toLowerCase();
   return basename === "index" || basename === "readme";
 }
 function directoryTitle(directory) {
@@ -30336,10 +37585,118 @@ function rootPage(rootID) {
     locked: false
   };
 }
-function renderDocument(document2) {
+function renderDocument(document4, state) {
+  const edits = [];
+  const nodes = [];
+  function visit(node2) {
+    nodes.push(node2);
+    if ("children" in node2) {
+      node2.children.forEach(visit);
+    }
+  }
+  visit(fromMarkdown(document4.body));
+  const definitions = /* @__PURE__ */ new Map();
+  for (const node2 of nodes) {
+    if (node2.type === "definition" && !definitions.has(node2.identifier)) {
+      definitions.set(node2.identifier, node2);
+    }
+  }
+  for (const node2 of nodes) {
+    if (node2.type !== "link" && node2.type !== "linkReference") {
+      continue;
+    }
+    const destination = node2.type === "link" ? node2 : definitions.get(node2.identifier);
+    if (destination && !/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(destination.url)) {
+      const suffixStart = destination.url.search(/[?#]/);
+      const target = suffixStart < 0 ? destination.url : destination.url.slice(0, suffixStart);
+      const suffix = suffixStart < 0 ? "" : destination.url.slice(suffixStart);
+      let decodedTarget;
+      try {
+        decodedTarget = decodeURIComponent(target);
+      } catch {
+        decodedTarget = target;
+      }
+      const sourcePath = decodedTarget === "" ? document4.sourcePath : decodedTarget.startsWith("/") ? import_node_path2.default.posix.normalize(decodedTarget.slice(1)) : import_node_path2.default.posix.normalize(import_node_path2.default.posix.join(import_node_path2.default.posix.dirname(document4.sourcePath), decodedTarget));
+      const page = state.pages.find(
+        (candidate) => candidate.sourcePath === sourcePath && state.activeSources.has(sourcePath)
+      );
+      const url = page ? `https://www.notion.so/${page.id.replaceAll("-", "")}${suffix}` : `${state.api.repositorySourceURL(sourcePath)}${suffix}`;
+      if (page && new URL(url).hash !== "") {
+        const links = state.sectionLinksBySource.get(document4.sourcePath) ?? /* @__PURE__ */ new Map();
+        const fragment = new URL(url).hash.slice(1);
+        let decodedFragment;
+        try {
+          decodedFragment = decodeURIComponent(fragment);
+        } catch {
+          decodedFragment = fragment;
+        }
+        links.set(url, { pageID: page.id, fragment: decodedFragment });
+        state.sectionLinksBySource.set(document4.sourcePath, links);
+      }
+      const start = node2.position?.start.offset;
+      const end = node2.position?.end.offset;
+      const labelEnd2 = node2.children.at(-1)?.position?.end.offset;
+      if (start !== void 0 && end !== void 0) {
+        const closingBracket = document4.body.indexOf("]", labelEnd2 ?? start + 1);
+        const label = document4.body.slice(start, closingBracket + 1);
+        const title = destination.title ? ` ${JSON.stringify(destination.title)}` : "";
+        edits.push({
+          start,
+          end,
+          text: `${label}(${url}${title})`
+        });
+      }
+    }
+  }
+  let body = document4.body;
+  for (const edit of edits.sort((left, right) => right.start - left.start)) {
+    body = body.slice(0, edit.start) + edit.text + body.slice(edit.end);
+  }
   return `${generatedHeader}
 
-${document2.body}`;
+${body}`;
+}
+async function resolveSectionLinks(state) {
+  const headingURLsByPage = /* @__PURE__ */ new Map();
+  for (const links of state.sectionLinksBySource.values()) {
+    for (const { pageID } of links.values()) {
+      if (headingURLsByPage.has(pageID)) {
+        continue;
+      }
+      const page = state.pages.find((candidate) => candidate.id === pageID);
+      const document4 = state.documents.find((candidate) => candidate.sourcePath === page?.sourcePath);
+      const slugger = new BananaSlug();
+      const pageURL = `https://www.notion.so/${pageID.replaceAll("-", "")}`;
+      const headings = /* @__PURE__ */ new Map();
+      if (document4) {
+        headings.set(slugger.slug(document4.title), pageURL);
+      }
+      for (const heading of await state.api.pageHeadings(pageID)) {
+        headings.set(slugger.slug(heading.text), `${pageURL}#${heading.id.replaceAll("-", "")}`);
+      }
+      headingURLsByPage.set(pageID, headings);
+    }
+  }
+  for (const page of state.pages) {
+    const sectionLinks = state.sectionLinksBySource.get(page.sourcePath);
+    if (!sectionLinks) {
+      continue;
+    }
+    const replacements = /* @__PURE__ */ new Map();
+    for (const [url, { pageID, fragment }] of sectionLinks) {
+      const resolved = headingURLsByPage.get(pageID)?.get(fragment);
+      if (!resolved) {
+        console.warn(`Notion heading ${JSON.stringify(fragment)} was not found for ${url}; linking to the page`);
+      }
+      const target = new URL(resolved ?? url);
+      if (!resolved) {
+        target.hash = "";
+      }
+      target.search = new URL(url).search;
+      replacements.set(url, target.toString());
+    }
+    await state.api.rewritePageLinks(page.id, replacements);
+  }
 }
 function generatedSourcePath(markdown) {
   if (!markdown.startsWith(legacyGeneratedHeaderPrefix)) {
@@ -30374,22 +37731,22 @@ async function run() {
     repositoryRoot,
     config.repositoryBasePath
   )) {
-    const document2 = parseDocument(
+    const document4 = parseDocument(
       sourcePath,
       await (0, import_promises.readFile)(import_node_path3.default.join(repositoryRoot, sourcePath), "utf8")
     );
-    if (!document2) {
+    if (!document4) {
       continue;
     }
-    document2.repositoryBasePath = config.repositoryBasePath;
-    documents.push(document2);
+    document4.repositoryBasePath = config.repositoryBasePath;
+    documents.push(document4);
   }
   const notion = new WikiClient(token);
   await syncDocuments(
     notion,
     documents,
     config.rootPageID,
-    (document2) => info(`Synced ${document2.sourcePath} as ${JSON.stringify(document2.title)}.`)
+    (document4) => info(`Synced ${document4.sourcePath} as ${JSON.stringify(document4.title)}.`)
   );
   info(`Synced ${documents.length} Notion documents.`);
 }

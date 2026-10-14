@@ -1,11 +1,18 @@
 import {
   Client,
+  isFullBlock,
   isFullDataSource,
   isFullDatabase,
   isFullPage,
   isFullUser,
   iteratePaginatedAPI,
 } from "@notionhq/client";
+import type {
+  BlockObjectResponse,
+  RichTextItemRequest,
+  RichTextItemResponse,
+  UpdateBlockParameters,
+} from "@notionhq/client/build/src/api-endpoints.js";
 
 import type { NotionAPI, Page } from "./sync.js";
 
@@ -34,6 +41,7 @@ export class WikiClient implements NotionAPI {
   private readonly client: Client;
   private readonly roots = new Map<string, WikiRoot>();
   private readonly pageRoots = new Map<string, string>();
+  private readonly blocksByPage = new Map<string, BlockObjectResponse[]>();
   private readonly owners = new Map<string, string[]>();
   private ownersLoaded = false;
   private readonly sourceServer: string;
@@ -204,11 +212,95 @@ export class WikiClient implements NotionAPI {
   }
 
   async replacePage(pageID: string, body: string): Promise<void> {
+    this.blocksByPage.delete(pageID);
     await this.client.pages.updateMarkdown({
       page_id: pageID,
       type: "replace_content",
       replace_content: { new_str: body, allow_deleting_content: true },
     });
+  }
+
+  async pageHeadings(pageID: string): Promise<Array<{ id: string; text: string }>> {
+    const headings: Array<{ id: string; text: string }> = [];
+    for (const block of await this.pageBlocks(pageID)) {
+      let richText: RichTextItemResponse[];
+      switch (block.type) {
+        case "heading_1": richText = block.heading_1.rich_text; break;
+        case "heading_2": richText = block.heading_2.rich_text; break;
+        case "heading_3": richText = block.heading_3.rich_text; break;
+        case "heading_4": richText = block.heading_4.rich_text; break;
+        default: continue;
+      }
+      headings.push({ id: block.id, text: richText.map((item) => item.plain_text).join("") });
+    }
+    return headings;
+  }
+
+  async rewritePageLinks(pageID: string, links: Map<string, string>): Promise<void> {
+    for (const block of await this.pageBlocks(pageID)) {
+      let changed = false;
+      const rewrite = (items: RichTextItemResponse[]): RichTextItemRequest[] => items.map((item) => {
+        if (item.type === "text") {
+          const url = item.text.link ? links.get(item.text.link.url) : undefined;
+          changed ||= url !== undefined;
+          return { type: "text", annotations: item.annotations,
+            text: { ...item.text, ...(url ? { link: { url } } : {}) } };
+        }
+        if (item.type === "equation") {
+          return { type: "equation", equation: item.equation, annotations: item.annotations };
+        }
+        if (item.mention.type === "link_preview" || item.mention.type === "link_mention") {
+          return { type: "text", annotations: item.annotations,
+            text: { content: item.plain_text, link: item.href ? { url: item.href } : null } };
+        }
+        return { type: "mention", mention: item.mention, annotations: item.annotations };
+      });
+      let update: UpdateBlockParameters;
+      const block_id = block.id;
+      switch (block.type) {
+        case "heading_1": update = { block_id, heading_1: { rich_text: rewrite(block.heading_1.rich_text) } }; break;
+        case "heading_2": update = { block_id, heading_2: { rich_text: rewrite(block.heading_2.rich_text) } }; break;
+        case "heading_3": update = { block_id, heading_3: { rich_text: rewrite(block.heading_3.rich_text) } }; break;
+        case "heading_4": update = { block_id, heading_4: { rich_text: rewrite(block.heading_4.rich_text) } }; break;
+        case "paragraph": update = { block_id, paragraph: { rich_text: rewrite(block.paragraph.rich_text) } }; break;
+        case "bulleted_list_item": update = { block_id, bulleted_list_item: { rich_text: rewrite(block.bulleted_list_item.rich_text) } }; break;
+        case "numbered_list_item": update = { block_id, numbered_list_item: { rich_text: rewrite(block.numbered_list_item.rich_text) } }; break;
+        case "quote": update = { block_id, quote: { rich_text: rewrite(block.quote.rich_text) } }; break;
+        case "to_do": update = { block_id, to_do: { rich_text: rewrite(block.to_do.rich_text) } }; break;
+        case "toggle": update = { block_id, toggle: { rich_text: rewrite(block.toggle.rich_text) } }; break;
+        case "template": update = { block_id, template: { rich_text: rewrite(block.template.rich_text) } }; break;
+        case "callout": update = { block_id, callout: { rich_text: rewrite(block.callout.rich_text) } }; break;
+        case "table_row": update = { block_id, table_row: { cells: block.table_row.cells.map(rewrite) } }; break;
+        default: continue;
+      }
+      if (changed) {
+        await this.client.blocks.update(update);
+      }
+    }
+  }
+
+  private async pageBlocks(pageID: string): Promise<BlockObjectResponse[]> {
+    const cached = this.blocksByPage.get(pageID);
+    if (cached) {
+      return cached;
+    }
+    const blocks: BlockObjectResponse[] = [];
+    const visit = async (blockID: string): Promise<void> => {
+      for await (const block of iteratePaginatedAPI(this.client.blocks.children.list, {
+        block_id: blockID, page_size: 100,
+      })) {
+        if (!isFullBlock(block)) {
+          throw new Error(`Notion returned a partial block for ${blockID}`);
+        }
+        blocks.push(block);
+        if (block.has_children && block.type !== "child_page" && block.type !== "child_database") {
+          await visit(block.id);
+        }
+      }
+    };
+    await visit(pageID);
+    this.blocksByPage.set(pageID, blocks);
+    return blocks;
   }
 
   async publishPage(
@@ -315,7 +407,7 @@ export class WikiClient implements NotionAPI {
     this.ownersLoaded = true;
   }
 
-  private repositorySourceURL(sourcePath: string): string {
+  repositorySourceURL(sourcePath: string): string {
     const url = new URL(this.sourceServer);
     const folder = sourcePath.endsWith("/");
     const kind = folder ? "tree" : "blob";
